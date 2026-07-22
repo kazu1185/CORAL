@@ -61,13 +61,16 @@ import json, sys
 urls = ["https://pms.enjoyplanning.jp/"]
 urls += [f"https://pms.enjoyplanning.jp/{l.strip()}" for l in sys.stdin if l.strip()]
 print(json.dumps({"files": urls}))')
+    # パージ失敗はデプロイ失敗にはしない（最大4時間で自然反映されるため）。
+    # set -euo pipefail 下ではパイプの失敗でスクリプトごと終了してしまうため、
+    # || で握りつぶして必ずメッセージだけ残す（2026-07-22 実際に停止した）
     PURGE_RESULT=$(curl -s -X POST \
         -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" \
         --data "$PURGE_JSON" \
         "https://api.cloudflare.com/client/v4/zones/$CF_ZONE_ID/purge_cache" |
-        python3 -c 'import json,sys; r=json.load(sys.stdin); print("OK" if r["success"] else f"失敗: {r[\"errors\"]}")')
+        python3 -c 'import json,sys; r=json.load(sys.stdin); print("OK" if r["success"] else "失敗: " + str(r["errors"]))' \
+        || echo "失敗（レスポンスの解析に失敗しました）")
     echo "パージ: $PURGE_RESULT"
-    # パージ失敗はデプロイ失敗にはしない（最大4時間で自然反映されるため）
 else
     echo "!!! $CF_TOKEN_FILE がありません。Cloudflareパージをスキップします（旧アセットが最大4時間残ります）"
 fi
