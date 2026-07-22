@@ -1,0 +1,304 @@
+/* ============================================================
+   物販ページ（レジ画面）
+   色は variables.css のトークンのみ使用（規約 #21）
+   ============================================================ */
+
+.ps-page {
+  padding: 24px 32px;
+}
+
+.ps-page__loading {
+  padding: 32px;
+  color: var(--text-secondary);
+}
+
+.ps-page__header {
+  margin-bottom: 16px;
+}
+
+.ps-page__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.ps-page__icon {
+  font-size: 24px;
+  color: var(--accent-blue);
+}
+
+.ps-page__error {
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: var(--font-size-sm);
+  margin-bottom: 12px;
+}
+
+/* ============ 確定アクション（カート下部に差し込む部分） ============ */
+
+.ps-actions__label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.ps-actions__row {
+  display: flex;
+  gap: 6px;
+}
+
+.ps-select {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+}
+
+.ps-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+/* ============ ボタン ============ */
+
+.ps-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;             /* タッチ操作の最低サイズ */
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ps-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+}
+
+.ps-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ps-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.ps-btn--primary {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: var(--text-inverse);
+  font-weight: 600;
+}
+
+.ps-btn--primary:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+  border-color: var(--accent-blue-hover);
+}
+
+.ps-btn--sm {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: var(--font-size-xs);
+}
+
+/* ============ 販売履歴 ============ */
+
+.ps-history {
+  margin-top: 24px;
+}
+
+.ps-history__title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.ps-history__card {
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ps-history__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.ps-history__table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--bg-inset);
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+
+.ps-history__table td {
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.ps-history__issued {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  align-self: center;
+  white-space: nowrap;
+}
+
+.ps-history__actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.ps-history__amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 取消済みは打ち消し線で残す（物理削除しないため履歴には常に出る） */
+.ps-history__row--cancelled td {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.ps-history__empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 24px 0;
+}
+
+/* ============ 部屋付け先の選択ダイアログ ============ */
+
+.ps-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 34, 27, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.ps-modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  width: 480px;
+  max-width: calc(100vw - 32px);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.ps-modal__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.ps-modal__search {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  box-sizing: border-box;
+}
+
+.ps-modal__search:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.ps-modal__list {
+  margin-top: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ps-modal__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ps-modal__item:hover {
+  background: var(--accent-blue-soft);
+  border-color: var(--accent-blue);
+}
+
+.ps-modal__room {
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 56px;
+}
+
+.ps-modal__guest {
+  flex: 1;
+  color: var(--text-primary);
+}
+
+.ps-modal__no {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.ps-modal__empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.ps-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}

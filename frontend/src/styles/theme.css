@@ -1,0 +1,37 @@
+/**
+ * ダークテーマ上書き — 「Patina」デザイン言語
+ * ライト側と同じくウォームトーン（青みの黒ではなく茶みの黒）で統一する。
+ * ブラスアクセントは暗所ではコントラスト確保のため明るい真鍮色に振り替える。
+ */
+html[data-theme="dark"] {
+  --text-primary: #EDE9E0;
+  --text-secondary: #A79E8C;
+  --text-muted: #776F5F;
+  --bg-main: #171511;
+  --bg-card: #211E18;
+  --bg-hover: #262219;
+  --bg-inset: #1C1914;
+  --bg-sidebar: #1C1914;
+  --bg-sidebar-hover: #262219;
+  --bg-sidebar-active: #33301F;
+  --border-default: #38332A;
+  --border-light: #2B2720;
+  --border-strong: #4A4436;
+  --accent-blue: #C2A968;
+  --accent-blue-hover: #D4BC7E;
+  --accent-blue-soft: rgba(194, 169, 104, 0.14);
+  --accent-blue-ring: rgba(194, 169, 104, 0.35);
+  --status-confirmed-bg: #263140;
+  --status-confirmed-text: #9DB4CE;
+  --status-checkedin-bg: #22301F;
+  --status-checkedin-text: #94BE9D;
+  --status-checkedout-bg: #2C2838;
+  --status-checkedout-text: #B3A8D6;
+  --status-cancelled-bg: #2B2720;
+  --status-cancelled-text: #776F5F;
+  --status-noshow-bg: #3A2422;
+  --status-noshow-text: #D89A93;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4), 0 16px 48px rgba(0, 0, 0, 0.45);
+}

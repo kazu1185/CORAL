@@ -1,0 +1,714 @@
+.resv {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ツールバー */
+.resv__toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.resv__search {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong); /* Patina: 入力欄の輪郭は border-strong を使う規約 */
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  flex: 0 1 400px;
+}
+
+/* Patina: 入力欄フォーカス時はブラスの輪郭+リングで示す（内側inputはborderなしのためラッパー側で受ける） */
+.resv__search:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.resv__search-icon {
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+.resv__search-input {
+  border: none;
+  outline: none;
+  padding: 8px;
+  font-size: var(--font-size-sm);
+  background: transparent;
+  color: var(--text-primary);
+  width: 100%;
+  font-family: inherit;
+}
+
+/* 検索範囲トグル（期間内/全件） */
+.resv__search-scope {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: var(--font-size-xs); /* 可読性優先で11px→12pxに引き上げ */
+  font-weight: 600;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-main);
+  cursor: pointer;
+  color: var(--text-muted);
+  font-family: inherit;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.resv__search-scope:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.resv__search-scope--all {
+  /* 全件検索モードの注意喚起。Patinaの紙面になじむ落ち着いたオレンジに変更 */
+  border-color: #C2620E;
+  color: #C2620E;
+  background: rgba(194, 98, 14, 0.08);
+}
+
+.resv__ota-filters {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.resv__ota-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  opacity: 0.35;
+  color: #fff;
+  transition: opacity var(--transition-fast);
+}
+
+.resv__ota-chip--active {
+  opacity: 1;
+}
+
+.resv__ota-chip:hover {
+  opacity: 0.8;
+}
+
+/* 日付フィルター */
+.resv__date-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.resv__date-today {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 10px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  white-space: nowrap;
+}
+.resv__date-today .material-symbols-outlined { font-size: 16px; }
+.resv__date-today--active {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  background: var(--accent-blue-soft); /* 旧: 青の淡面 → ブラスの選択面トークン */
+}
+.resv__date-today:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.resv__date-type {
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue-soft); /* 旧: 青の淡面 → ブラスの選択面トークン */
+  cursor: pointer;
+  color: var(--accent-blue);
+  font-family: inherit;
+  white-space: nowrap;
+}
+.resv__date-type:hover { background: var(--bg-sidebar-active); } /* ホバーはsoftより一段濃いブラス淡面 */
+.resv__date-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.resv__date-input {
+  padding: 4px 6px;
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); /* Patina: 入力欄の輪郭は border-strong を使う規約 */
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+.resv__date-input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.resv__date-sep { color: var(--text-muted); font-size: var(--font-size-sm); }
+.resv__date-clear {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 50%;
+}
+.resv__date-clear:hover { background: var(--bg-hover); color: var(--text-primary); } /* --bg-elevated は未定義だったため実在トークンに修正 */
+.resv__date-clear .material-symbols-outlined { font-size: 16px; }
+
+/* 手動予約入力ボタン */
+.resv__create-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 14px;
+  background: var(--primary, var(--accent-blue)); /* --primary未定義のためフォールバックが実値。旧: 青 → ブラス */
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.resv__create-btn:hover { background: var(--accent-blue-hover); }
+.resv__create-btn .material-symbols-outlined { font-size: 18px; }
+
+/* ステータスチップ */
+.resv__status-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.resv__status-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.resv__status-chip--active {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+
+.resv__status-chip--dimmed { opacity: 0.4; }
+.resv__chip-count {
+  font-weight: 600;
+}
+
+/* キャンセル表示トグル */
+.resv__cancel-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  user-select: none;
+}
+.resv__cancel-toggle input[type="checkbox"] {
+  width: 14px; height: 14px; cursor: pointer; accent-color: var(--accent-blue);
+}
+
+/* テーブル */
+.resv__table-wrap {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.resv__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.resv__table thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  letter-spacing: 0.04em; /* Patina: ヘッダ行は小さめ・字間広めで上品に */
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+  background: var(--bg-card);
+  position: sticky;
+  top: 0;
+}
+
+.resv__sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.resv__sortable:hover {
+  color: var(--text-primary);
+}
+
+.resv__sort-icon {
+  font-size: 14px;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+.resv__table tbody td {
+  padding: 12px; /* Patina: 罫線に頼らず余白で行を区切るため縦paddingを拡大 */
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+.resv__row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.resv__row:hover {
+  background: var(--bg-hover); /* Patina: 行の区切りはホバー面で示す */
+}
+
+.resv__center { text-align: center; }
+.resv__right { text-align: right; font-variant-numeric: tabular-nums; }
+.resv__mono { font-size: var(--font-size-xs); color: var(--text-secondary); font-family: monospace; }
+
+.resv__guest {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.resv__guest-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.resv__guest-sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.resv__vip {
+  font-size: 11px; /* 9pxは禁止。バッジ類の下限11pxに引き上げ */
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  /* VIPの金色の意味は保ちつつ、彩度を落として紙面になじませる */
+  background: rgba(176, 138, 30, 0.14);
+  color: var(--accent-yellow);
+}
+
+
+.resv__ota {
+  font-size: 11px; /* バッジ下限の11pxに引き上げ */
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #fff;
+  white-space: nowrap;
+}
+.resv__ota--merged {
+  /* 結合予約の識別。旧: インディゴ系グラデ → Patinaの落ち着いた紫系に */
+  background: linear-gradient(135deg, var(--accent-purple), #8B7DB8);
+  color: #fff;
+}
+
+.resv__status {
+  font-size: 11px; /* バッジ下限の11pxに引き上げ */
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.resv__status--confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.resv__status--checked_in { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.resv__status--checked_out { background: var(--status-checkedout-bg); color: var(--status-checkedout-text); }
+.resv__status--cancelled { background: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+.resv__status--no_show { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+
+.resv__unpaid {
+  font-size: 11px; /* 9pxは禁止。バッジ類の下限11pxに引き上げ */
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--status-noshow-bg);
+  color: var(--accent-red);
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.resv__unassigned {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.resv__check-col { width: 32px; text-align: center; }
+.resv__row--selected { background: var(--accent-blue-soft); } /* 旧: 青の選択面 → ブラスの選択面トークン */
+
+/* 選択アクションバー */
+.resv__action-bar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; background: var(--accent-blue); border-radius: var(--radius-md);
+  color: #fff;
+}
+.resv__action-count { font-size: var(--font-size-sm); font-weight: 500; }
+.resv__action-merge {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 14px; font-size: var(--font-size-sm); font-weight: 600;
+  /* バーの背景がブラスになったため、旧アンバーは衝突する。白抜きのアウトラインボタンに変更 */
+  border: 2px solid rgba(255,255,255,0.75); border-radius: var(--radius-md);
+  background: rgba(255,255,255,0.12); cursor: pointer; color: #fff; font-family: inherit;
+}
+.resv__action-merge:hover { background: rgba(255,255,255,0.24); }
+.resv__action-merge .material-symbols-outlined { font-size: 16px; }
+.resv__action-clear {
+  margin-left: auto; font-size: var(--font-size-xs);
+  border: none; background: transparent; cursor: pointer; color: rgba(255,255,255,0.7); font-family: inherit;
+}
+.resv__action-clear:hover { color: #fff; }
+
+.resv__loading, .resv__empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* ページネーション */
+.resv__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.resv__page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.resv__page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.resv__page-info {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* ドロワー */
+.drawer__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 200;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg-card);
+  box-shadow: -4px 0 20px rgba(38, 34, 27, 0.12); /* 影も墨色ベースの暖色に統一 */
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.drawer__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.drawer__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.drawer__close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.drawer__close:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover); /* ホバー面は専用トークンに統一 */
+}
+
+.drawer__body {
+  padding: 20px;
+  flex: 1;
+}
+
+.drawer__section {
+  margin-bottom: 24px;
+}
+
+.drawer__section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.drawer__row {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: var(--font-size-sm);
+  align-items: baseline;
+}
+
+.drawer__label {
+  color: var(--text-muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.drawer__value {
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.drawer__footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-default);
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.drawer__detail-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--accent-blue);
+  font-family: inherit;
+}
+
+.drawer__detail-btn:hover {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-soft); /* 旧: 青の淡面 → ブラスの選択面トークン */
+}
+
+.drawer__detail-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* 名寄せボタン（一覧のゲスト名横） */
+.resv__nayose-btn {
+  border: none; background: transparent; cursor: pointer; padding: 1px;
+  color: var(--accent-yellow); display: inline-flex; vertical-align: middle; margin-left: 4px; /* 旧: アンバー → 意味（注意=黄系）を保ちトークン化 */
+}
+.resv__nayose-btn:hover { color: #8F6F16; } /* accent-yellowを一段暗くしたホバー色 */
+.resv__nayose-btn .material-symbols-outlined { font-size: 16px; }
+
+/* 名寄せダイアログ */
+.resv__overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 2000;
+}
+.resv__nayose-dialog {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 500px; max-width: 95vw; max-height: 80vh;
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  padding: 24px 28px; box-shadow: var(--shadow-lg); z-index: 2001; /* 浮遊面の影はトークンに統一 */
+  display: flex; flex-direction: column;
+}
+.resv__nayose-title {
+  font-size: var(--font-size-base); font-weight: 600; margin: 0 0 8px;
+}
+.resv__nayose-sub {
+  font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 14px; line-height: 1.6;
+}
+.resv__nayose-search {
+  display: flex; gap: 6px; margin-bottom: 12px;
+}
+.resv__nayose-input {
+  flex: 1; padding: 8px 12px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-md); /* Patina: 入力欄の輪郭は border-strong */
+  font-family: inherit; color: var(--text-primary);
+}
+.resv__nayose-input:focus { border-color: var(--accent-blue); outline: none; box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.resv__nayose-search-btn {
+  padding: 8px 14px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md); background: var(--accent-blue);
+  color: #fff; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.resv__nayose-results {
+  flex: 1; overflow-y: auto; max-height: 320px;
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px;
+}
+.resv__nayose-empty {
+  text-align: center; color: var(--text-muted); font-size: var(--font-size-sm); padding: 20px 0;
+}
+.resv__nayose-item {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px; border: 1px solid var(--border-default);
+  border-radius: var(--radius-md); background: var(--bg-inset); /* カード内のくぼみ面トークンに変更 */
+  cursor: pointer; font-family: inherit; text-align: left; width: 100%;
+  transition: border-color var(--transition-fast);
+}
+.resv__nayose-item:hover { border-color: var(--accent-blue); background: var(--accent-blue-soft); } /* 旧: 青の淡面 → ブラス選択面 */
+.resv__nayose-item-name { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: var(--font-size-sm); }
+.resv__nayose-item-code { font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400; }
+.resv__nayose-item-detail { display: flex; gap: 12px; font-size: var(--font-size-xs); color: var(--text-secondary); }
+.resv__nayose-item-meta { display: flex; gap: 10px; font-size: var(--font-size-xs); color: var(--text-muted); } /* 可読性のため11px→12px */
+.resv__nayose-actions { display: flex; justify-content: flex-end; }
+.resv__nayose-close {
+  padding: 8px 20px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  background: transparent; cursor: pointer; font-family: inherit; color: var(--text-secondary);
+}
+.resv__nayose-close:hover { background: var(--bg-hover); } /* ホバー面は専用トークンに統一 */
+
+/* === ドロワー タイムライン === */
+.drawer__timeline { position: relative; padding-left: 20px; }
+.drawer__timeline-item { position: relative; padding-bottom: 12px; display: flex; gap: 10px; }
+.drawer__timeline-item:last-child { padding-bottom: 0; }
+
+/* ドット（イベントタイプごとに色分け） */
+.drawer__timeline-dot {
+  position: absolute; left: -20px; top: 4px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent-blue);
+  z-index: 1;
+}
+.drawer__timeline-item--checkin .drawer__timeline-dot,
+.drawer__timeline-item--checkout .drawer__timeline-dot { background: var(--accent-green); }
+.drawer__timeline-item--tl_cancel .drawer__timeline-dot { background: var(--accent-red); }
+.drawer__timeline-item--merge .drawer__timeline-dot { background: var(--accent-yellow); } /* 旧: アンバー → 黄系トークン */
+.drawer__timeline-item--split .drawer__timeline-dot { background: #C2620E; } /* 旧: 鮮やかなオレンジ → 落ち着いたオレンジ */
+.drawer__timeline-item--merge_alert .drawer__timeline-dot { background: var(--accent-red); }
+
+/* 縦線 */
+.drawer__timeline-line {
+  position: absolute; left: -17px; top: 14px;
+  width: 2px; height: calc(100% - 2px);
+  background: var(--border-default);
+}
+
+/* コンテンツ */
+.drawer__timeline-content { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.drawer__timeline-summary { font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary); }
+.drawer__timeline-time { font-size: var(--font-size-xs); color: var(--text-muted); }
+
+/* 複数室予約バッジ（予約一覧テーブル） */
+.resv__room-index {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  font-size: 11px; /* バッジ下限の11pxに引き上げ */
+  font-weight: 600;
+  background: var(--accent-purple); /* 旧: 鮮やかな紫 → 彩度を落とした紫トークン（OTA色ではないため変更可） */
+  color: #fff;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+/* 複数室予約: 兄弟予約セクション（ドロワー） */
+.drawer__sibling {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.drawer__sibling:hover {
+  background: var(--bg-hover);
+}
+.drawer__sibling--current {
+  background: var(--bg-active, var(--bg-sidebar-active)); /* --bg-active未定義のためフォールバックが実値。旧: 青白 → ブラス淡面 */
+  cursor: default;
+  font-weight: 600;
+}
+.drawer__sibling-index {
+  display: inline-block;
+  min-width: 28px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--accent-purple); /* 旧: 鮮やかな紫 → 彩度を落とした紫トークン */
+  color: #fff;
+  border-radius: 3px;
+  text-align: center;
+}
+.drawer__sibling-type {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  min-width: 30px;
+}
+.drawer__sibling-room {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* ドロワー人数内訳タグ */
+.drawer__pax-breakdown { display: flex; flex-wrap: wrap; gap: 4px; }
+.drawer__pax-tag { display: inline-block; padding: 1px 5px; font-size: 11px; font-weight: 500; border-radius: 3px; } /* タグ下限の11pxに引き上げ */
+/* 男女/子供の色分け慣習（男=青系・女=赤系）は識別に必要なので保持し、彩度だけ落として紙面になじませる */
+.drawer__pax-tag--male { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.drawer__pax-tag--female { background: #F5E6EB; color: #9C5570; }
+.drawer__pax-tag--child { background: #F3ECDA; color: #8F6F16; }

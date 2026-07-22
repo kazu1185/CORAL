@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pms-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["react-scripts", "start"],
+      "cwd": "frontend",
+      "port": 3000,
+      "autoPort": false
+    }
+  ]
+}

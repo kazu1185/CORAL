@@ -1,0 +1,39 @@
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Node / Frontend ---
+node_modules/
+frontend/build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# --- PHP / Backend ---
+vendor/
+composer.phar
+
+# --- 機密設定（サーバーにのみ存在させる） ---
+# 本番DB接続情報。deploy.sh でも転送対象から除外している
+backend/config/config.local.php
+.env
+.env.local
+
+# --- IDE ---
+.vscode/
+.idea/
+
+# --- storage（機密・大容量）---
+# パスポート画像・TL受信電文・ログは Git で管理しない
+storage/passports/
+storage/logs/
+storage/tl_incoming/
+storage/tl_import/
+
+# --- DB dump ---
+*.sql.bak
+*.dump
+
+# --- Claude Code のローカル作業領域 ---
+.claude/worktrees/
+.claude/settings.local.json

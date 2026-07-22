@@ -1,0 +1,298 @@
+/* ========================================
+   部屋在庫カレンダー
+   ======================================== */
+
+/* .invの幅はビューポート - サイドバー幅に固定。テーブルのはみ出しはtable-wrap内で処理 */
+.inv {
+  padding: 16px 20px;
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: calc(100vw - var(--sidebar-width, 56px) - 40px);
+  max-width: calc(100vw - var(--sidebar-width, 56px) - 40px);
+}
+
+/* ナビゲーション */
+.inv__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+.inv__nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+.inv__nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.inv__nav-btn .material-symbols-outlined { font-size: 16px; }
+.inv__nav-date {
+  padding: 5px 8px;
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  /* Patina: 入力欄の輪郭は border-strong を使う（規約統一） */
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.inv__nav-date:hover { border-color: var(--accent-blue); }
+/* Patina: 入力欄のフォーカスはブラスのリングで示す（規約統一） */
+.inv__nav-date:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.inv__nav-period {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* テーブルコンテナ: 横スクロールの起点。flex:1で残り高さを占有 */
+.inv__table-wrap {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  min-width: 0; /* flexアイテムが親幅を超えないように */
+}
+
+/* テーブル: 30日分を横スクロールで閲覧 */
+.inv__table {
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+  /* ラッパー幅に関係なく確実にはみ出させるため、100% + αを指定 */
+  min-width: max(100%, calc(180px + 86px * 30));
+}
+
+/* 左固定列（tbody）: 横スクロールしても左に固定 */
+.inv__table td.inv__type-cell {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--bg-card);
+  border-right: 2px solid var(--border-default);
+}
+
+/* ── ヘッダー部 ──
+   注意: theadの縦固定は下のtop固定値(39px/62px/85px)が「各行の実高さ」を前提にしている。
+   Patinaのフォント拡大(11px→12px等)で行高がズレないよう、ヘッダー系セルは
+   line-heightを明示固定して行高を維持する（行1=39px、行2〜4=各23px）。 */
+.inv__table thead th {
+  padding: 0;
+  text-align: center;
+  font-weight: 500;
+  /* Patina: 可読性ルールにより11px→12px。line-height固定で行高は変えない */
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-light);
+}
+/* thead各行: 縦スクロールで上固定 */
+.inv__table thead tr:first-child th { position: sticky; top: 0;    z-index: 10; background: var(--bg-card); }
+.inv__table thead tr:nth-child(2) th { position: sticky; top: 39px; z-index: 10; background: var(--bg-card); }
+.inv__table thead tr:nth-child(3) th { position: sticky; top: 62px; z-index: 10; background: var(--bg-card); }
+.inv__table thead tr:nth-child(4) th { position: sticky; top: 85px; z-index: 10; background: var(--bg-card); }
+/* thead左端セル: 横+縦の両方で固定（left+top を明示的に1ルールで指定） */
+.inv__table thead tr:first-child th.inv__type-header { position: sticky; top: 0;    left: 0; z-index: 20; background: var(--bg-card); border-right: 2px solid var(--border-default); }
+.inv__table thead tr:nth-child(2) th.inv__type-header { position: sticky; top: 39px; left: 0; z-index: 20; background: var(--bg-card); border-right: 2px solid var(--border-default); }
+.inv__table thead tr:nth-child(3) th.inv__type-header { position: sticky; top: 62px; left: 0; z-index: 20; background: var(--bg-card); border-right: 2px solid var(--border-default); }
+.inv__table thead tr:nth-child(4) th.inv__type-header { position: sticky; top: 85px; left: 0; z-index: 20; background: var(--bg-card); border-right: 2px solid var(--border-default); }
+
+/* 左上の空セル（部屋タイプヘッダー） */
+.inv__type-header {
+  width: 180px;
+  min-width: 180px;
+  background: var(--bg-card) !important;
+  vertical-align: bottom;
+  text-align: left !important;
+  padding: 6px 10px !important;
+}
+
+/* 日付ヘッダー行
+   行高39px = padding上下12px + 日付行14px + margin1px + 曜日行12px。
+   sticky top:39px の前提なのでline-heightの合計を変えないこと */
+.inv__date-cell {
+  padding: 6px 2px !important;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--text-primary);
+  min-width: 80px;
+  width: 80px;
+}
+/* 今日カラム: 背景色ではなく左右ボーダーで強調（セルの色分けを潰さないため）
+   Patina: 強調ボーダーは青からブラス（--accent-blue）へ */
+.inv__date-cell--today {
+  border-left: 2px solid var(--accent-blue) !important;
+  border-right: 2px solid var(--accent-blue) !important;
+  background: var(--accent-blue-soft);
+}
+/* Patina: 週末は寒色の赤透過ではなく、accent-red(#B3362C)系の暖かい淡色に */
+.inv__date-cell--weekend {
+  background: rgba(179, 54, 44, 0.04);
+}
+/* Patina: 土曜=青の暦慣習は保ちつつ、彩度を落とした藍鼠色で紙面になじませる
+   （--accent-blueはブラスになったため土曜色には使えない） */
+.inv__date-cell--sat { color: #4C6C93; }
+.inv__date-cell--sun { color: var(--accent-red); }
+.inv__date-dow {
+  display: block;
+  /* Patina: 9px以下禁止ルールにより12pxへ。line-height固定で行高39pxを維持 */
+  font-size: 12px;
+  line-height: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* サマリー行（総残室数/CI/CO） */
+.inv__header-date-label {
+  text-align: right !important;
+  padding: 6px 10px !important;
+  /* Patina: 可読性ルールにより11px→12px（行1の高さは日付セル側が決めるため影響なし） */
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.inv__summary-label {
+  text-align: right !important;
+  padding: 3px 10px !important;
+  /* Patina: 可読性ルールにより10px→12px。行高23px = padding上下6px + line-height17px を維持 */
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.inv__summary-cell {
+  padding: 3px 2px !important;
+  /* Patina: 可読性ルールにより11px→12px。line-height固定で行高23pxを維持 */
+  font-size: 12px;
+  line-height: 17px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.inv__summary-cell--total {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+/* ── ボディ部（部屋タイプ行） ── */
+.inv__table tbody td {
+  text-align: center;
+  padding: 0;
+  border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  height: 42px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 部屋タイプセル（左固定） */
+.inv__type-cell {
+  text-align: left !important;
+  padding: 6px 10px !important;
+  white-space: nowrap;
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+}
+.inv__type-name {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.inv__type-code {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  /* Patina: 可読性ルールにより10px→11px（型番コードはタグ扱いで11px許容） */
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.inv__type-total {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  /* Patina: 総室数チップの面はスレートグレー#E2E8F0からブラスの淡い面へ */
+  background: var(--bg-sidebar-active);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 在庫セル — 色分け
+   Patina: 満室=赤・残少=黄の「意味色」の系統は維持しつつ、
+   彩度を落としたトークン系の色に置き換えて紙面になじませる */
+.inv__cell {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+.inv__cell:hover {
+  background: var(--accent-blue-soft);
+}
+/* オーバーブッキング（マイナス）: 濃い赤背景で警告 */
+.inv__cell--over {
+  background: var(--accent-red);
+  color: #fff;
+  font-weight: 800;
+}
+/* accent-red(#B3362C)の暗色。ホバー用の赤トークンが無いため直書き */
+.inv__cell--over:hover { background: #952D24; }
+/* 満室 */
+.inv__cell--full {
+  background: #F6E7E5; /* status-noshow-bgと同系の淡い赤面 */
+  color: var(--accent-red);
+}
+.inv__cell--full:hover { background: #EFDAD6; }
+/* 残少（1-2室 or 総数の30%以下） */
+.inv__cell--low {
+  background: #F5ECD3; /* accent-yellow系の淡いアンバー面 */
+  color: #8A6D1E;      /* accent-yellowより暗くしてコントラスト確保 */
+}
+.inv__cell--low:hover { background: #EFE2BC; }
+/* 余裕あり */
+.inv__cell--ok {
+  color: var(--text-primary);
+}
+/* 本日カラム: 左右ボーダーで縦ラインを通す（背景色と共存するため）
+   Patina: 強調ボーダーは青からブラス（--accent-blue）へ */
+.inv__col-today {
+  border-left: 2px solid var(--accent-blue) !important;
+  border-right: 2px solid var(--accent-blue) !important;
+}
+
+/* ── 合計行 ── */
+.inv__total-row td {
+  border-top: 2px solid var(--border-default);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text-primary);
+  /* Patina: 寒色の#FAFBFCからくぼみ面トークンへ */
+  background: var(--bg-inset);
+}
+.inv__total-label {
+  text-align: right !important;
+  padding: 8px 10px !important;
+  font-size: var(--font-size-sm);
+}
+
+/* ローディング */
+.inv__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+}

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMS 予約一覧</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', 'Helvetica Neue', sans-serif; background: #F8FAFC; color: #0F172A; min-height: 100vh; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* ===== LAYOUT ===== */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ===== SIDE NAV ===== */
+  .sidenav {
+    width: 220px; min-height: 100vh; background: #0F172A; color: #CBD5E1;
+    display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100;
+    transition: width 0.25s cubic-bezier(.4,0,.2,1); overflow: hidden;
+  }
+  .sidenav.collapsed { width: 56px; }
+  .sidenav-toggle { background: none; border: none; color: #94A3B8; cursor: pointer; padding: 18px 16px 12px; text-align: right; font-size: 18px; }
+  .sidenav.collapsed .sidenav-toggle { text-align: center; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+    cursor: pointer; font-size: 14px; font-weight: 400; color: #94A3B8;
+    border-right: 3px solid transparent; transition: all 0.15s; white-space: nowrap;
+  }
+  .sidenav.collapsed .nav-item { padding: 12px 0; justify-content: center; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); }
+  .nav-item.active { background: rgba(59,130,246,0.15); border-right-color: #3B82F6; color: #E2E8F0; font-weight: 600; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-label { overflow: hidden; }
+  .sidenav.collapsed .nav-label, .sidenav.collapsed .nav-lock, .sidenav.collapsed .sidenav-footer { display: none; }
+  .nav-lock { font-size: 10px; color: #64748B; margin-left: auto; }
+  .sidenav-footer { padding: 16px 20px; border-top: 1px solid #1E293B; font-size: 11px; color: #475569; margin-top: auto; }
+
+  /* ===== MAIN ===== */
+  .main { flex: 1; margin-left: 220px; display: flex; flex-direction: column; transition: margin-left 0.25s cubic-bezier(.4,0,.2,1); }
+
+  /* ===== HEADER ===== */
+  .header { background: #fff; border-bottom: 1px solid #E2E8F0; }
+  .header-top { display: flex; align-items: center; justify-content: space-between; padding: 12px 28px; }
+  .hotel-name { font-size: 18px; font-weight: 700; color: #0F172A; letter-spacing: 2px; }
+  .header-right { display: flex; align-items: center; gap: 24px; font-size: 13px; color: #64748B; }
+  .header-time { font-variant-numeric: tabular-nums; }
+  .header-staff { color: #334155; font-weight: 500; }
+  .btn-logout { background: none; border: 1px solid #CBD5E1; border-radius: 6px; padding: 5px 14px; font-size: 12px; color: #64748B; cursor: pointer; font-family: inherit; }
+  .header-stats { display: flex; align-items: center; padding: 0 28px 10px; }
+  .stat-item { display: flex; align-items: center; gap: 8px; padding: 6px 20px; cursor: pointer; transition: background 0.15s; border-radius: 6px; position: relative; }
+  .stat-item:hover { background: #F1F5F9; }
+  .stat-item + .stat-item::before { content: ''; position: absolute; left: 0; top: 20%; bottom: 20%; width: 1px; background: #E2E8F0; }
+  .stat-label { font-size: 11px; color: #94A3B8; font-weight: 500; }
+  .stat-value { font-size: 18px; font-weight: 700; color: #0F172A; line-height: 1; }
+  .stat-sub { font-size: 11px; color: #94A3B8; }
+  .stat-sub.alert-num { color: #DC2626; font-weight: 600; }
+  .stat-accent { width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ===== CONTENT ===== */
+  .content { padding: 20px 28px; flex: 1; }
+
+  /* ===== TOOLBAR ===== */
+  .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .search-box {
+    display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #E2E8F0;
+    border-radius: 8px; padding: 8px 14px; flex: 0 1 320px; min-width: 200px;
+  }
+  .search-box:focus-within { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+  .search-icon { color: #94A3B8; font-size: 14px; flex-shrink: 0; }
+  .search-input { border: none; outline: none; font-size: 13px; font-family: inherit; color: #0F172A; flex: 1; background: transparent; }
+  .search-input::placeholder { color: #CBD5E1; }
+
+  .filter-btn {
+    display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #E2E8F0;
+    border-radius: 8px; padding: 8px 14px; font-size: 13px; color: #64748B; cursor: pointer;
+    font-family: inherit; transition: all 0.15s; position: relative;
+  }
+  .filter-btn:hover { border-color: #94A3B8; }
+  .filter-btn.active { border-color: #3B82F6; color: #3B82F6; background: #EFF6FF; }
+  .filter-btn .arrow { font-size: 10px; color: #94A3B8; }
+
+  .toolbar-spacer { flex: 1; }
+  .btn-primary {
+    background: #3B82F6; color: #fff; border: none; border-radius: 8px;
+    padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #2563EB; }
+  .btn-secondary {
+    background: #fff; color: #64748B; border: 1px solid #E2E8F0; border-radius: 8px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer; font-family: inherit;
+  }
+  .btn-secondary:hover { background: #F8FAFC; }
+
+  /* ===== FILTER PANEL ===== */
+  .filter-panel {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 10px;
+    padding: 16px 20px; margin-bottom: 16px; display: none;
+  }
+  .filter-panel.open { display: block; }
+  .filter-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group-label { font-size: 11px; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-chip {
+    padding: 4px 12px; border-radius: 99px; font-size: 12px; cursor: pointer;
+    border: 1px solid #E2E8F0; background: #fff; color: #64748B; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .filter-chip:hover { border-color: #94A3B8; }
+  .filter-chip.selected { background: #EFF6FF; border-color: #3B82F6; color: #3B82F6; font-weight: 500; }
+  .date-input {
+    border: 1px solid #E2E8F0; border-radius: 6px; padding: 5px 10px;
+    font-size: 12px; font-family: inherit; color: #334155;
+  }
+  .date-input:focus { outline: none; border-color: #3B82F6; }
+
+  /* ===== STATUS CHIPS (summary) ===== */
+  .status-summary { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .status-chip {
+    display: flex; align-items: center; gap: 6px; padding: 6px 14px;
+    border-radius: 8px; font-size: 12px; cursor: pointer; border: 1px solid #E2E8F0;
+    background: #fff; color: #64748B; transition: all 0.15s; font-family: inherit;
+  }
+  .status-chip:hover { border-color: #94A3B8; }
+  .status-chip.active { font-weight: 600; }
+  .status-chip .count { font-weight: 700; }
+  .status-chip.s-all.active { border-color: #334155; color: #334155; background: #F8FAFC; }
+  .status-chip.s-confirmed.active { border-color: #3B82F6; color: #3B82F6; background: #EFF6FF; }
+  .status-chip.s-checked-in.active { border-color: #22C55E; color: #16A34A; background: #F0FDF4; }
+  .status-chip.s-checked-out.active { border-color: #8B5CF6; color: #7C3AED; background: #F5F3FF; }
+  .status-chip.s-cancelled.active { border-color: #94A3B8; color: #64748B; background: #F8FAFC; }
+  .status-chip.s-noshow.active { border-color: #DC2626; color: #DC2626; background: #FEF2F2; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sd-confirmed { background: #3B82F6; }
+  .sd-checked-in { background: #22C55E; }
+  .sd-checked-out { background: #8B5CF6; }
+  .sd-cancelled { background: #94A3B8; }
+  .sd-noshow { background: #DC2626; }
+
+  /* ===== TABLE ===== */
+  .table-wrapper { background: #fff; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 10px 14px; font-size: 11px; font-weight: 600; color: #94A3B8;
+    text-align: left; border-bottom: 1px solid #E2E8F0; cursor: pointer;
+    user-select: none; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  thead th:hover { color: #64748B; }
+  thead th .sort-arrow { margin-left: 4px; font-size: 10px; }
+  tbody tr { border-bottom: 1px solid #F8FAFC; cursor: pointer; transition: background 0.1s; }
+  tbody tr:hover { background: #F8FAFC; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr.selected { background: #EFF6FF; }
+  tbody td { padding: 10px 14px; font-size: 13px; white-space: nowrap; }
+  .td-date { color: #334155; font-variant-numeric: tabular-nums; }
+  .nights-badge {
+    display: inline-block; background: #F1F5F9; color: #64748B; font-size: 10px;
+    font-weight: 600; padding: 1px 6px; border-radius: 4px; margin-left: 4px;
+  }
+  .td-guest { min-width: 160px; max-width: 260px; white-space: normal; }
+  .guest-name-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+  .guest-name { font-weight: 500; color: #0F172A; white-space: nowrap; margin-right: 2px; }
+  .guest-romaji { font-size: 11px; color: #94A3B8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+  .link-badge {
+    display: inline-block; font-size: 10px; background: #F5F3FF; color: #7C3AED;
+    padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 600;
+  }
+  .gap-alert {
+    display: inline-block; font-size: 10px; background: #FEF2F2; color: #DC2626;
+    padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-weight: 600;
+  }
+  .repeater-badge {
+    display: inline-block; font-size: 10px; background: #FEF3C7; color: #B45309;
+    padding: 1px 6px; border-radius: 3px; margin-left: 4px; font-weight: 600;
+  }
+  .vip-badge {
+    display: inline-block; font-size: 10px; background: #FDF2F8; color: #BE185D;
+    padding: 1px 6px; border-radius: 3px; margin-left: 4px; font-weight: 700;
+  }
+  .ota-cell { display: flex; align-items: center; gap: 6px; }
+  .ota-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ota-name { font-size: 12px; color: #64748B; }
+  .td-resno { font-family: monospace; font-size: 12px; color: #94A3B8; }
+  .td-room .room-no { font-weight: 500; color: #334155; }
+  .td-room .room-type { font-size: 11px; color: #94A3B8; }
+  .unassigned { color: #EAB308; font-size: 11px; font-weight: 500; }
+  .status-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 11px; font-weight: 600;
+  }
+  .sb-confirmed { background: #DBEAFE; color: #2563EB; }
+  .sb-checked-in { background: #DCFCE7; color: #16A34A; }
+  .sb-checked-out { background: #EDE9FE; color: #7C3AED; }
+  .sb-cancelled { background: #F1F5F9; color: #94A3B8; text-decoration: line-through; }
+  .sb-noshow { background: #FEE2E2; color: #DC2626; }
+  .td-amount { font-variant-numeric: tabular-nums; font-weight: 500; text-align: right; }
+
+  /* ===== PAGINATION ===== */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; }
+  .page-info { font-size: 12px; color: #94A3B8; }
+  .page-buttons { display: flex; gap: 4px; }
+  .page-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid #E2E8F0; border-radius: 6px; font-size: 12px; cursor: pointer;
+    background: #fff; color: #64748B; font-family: inherit; transition: all 0.15s;
+  }
+  .page-btn:hover { background: #F8FAFC; }
+  .page-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ===== DRAWER ===== */
+  .drawer-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.2);
+    z-index: 200; display: none; animation: fadeIn 0.2s;
+  }
+  .drawer-overlay.open { display: block; }
+  .drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 460px; background: #fff;
+    z-index: 201; box-shadow: -4px 0 24px rgba(0,0,0,0.1); display: none;
+    flex-direction: column; overflow-y: auto; animation: slideIn 0.25s cubic-bezier(.4,0,.2,1);
+  }
+  .drawer.open { display: flex; }
+  .drawer-header {
+    padding: 20px 24px; border-bottom: 1px solid #E2E8F0;
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .drawer-title { font-size: 16px; font-weight: 700; }
+  .drawer-close { background: none; border: none; font-size: 20px; color: #94A3B8; cursor: pointer; padding: 4px; }
+  .drawer-body { padding: 20px 24px; flex: 1; overflow-y: auto; }
+  .drawer-section { margin-bottom: 20px; }
+  .drawer-section-title { font-size: 12px; font-weight: 600; color: #94A3B8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .drawer-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
+  .drawer-label { color: #94A3B8; }
+  .drawer-value { color: #0F172A; font-weight: 500; }
+  .drawer-actions { padding: 16px 24px; border-top: 1px solid #E2E8F0; display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+  .drawer-btn {
+    padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: all 0.15s; border: 1px solid #E2E8F0;
+    background: #fff; color: #334155;
+  }
+  .drawer-btn:hover { background: #F8FAFC; }
+  .drawer-btn.primary { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+  .drawer-btn.primary:hover { background: #2563EB; }
+
+  /* Timeline bar */
+  .timeline { margin: 8px 0; }
+  .timeline-bar { display: flex; height: 24px; border-radius: 6px; overflow: hidden; border: 1px solid #E2E8F0; }
+  .timeline-seg { display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; font-weight: 600; min-width: 30px; }
+  .timeline-legend { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: #94A3B8; }
+  .timeline-legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+
+  /* Charge table in drawer */
+  .charge-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .charge-table th { text-align: left; padding: 4px 8px; color: #94A3B8; font-weight: 500; border-bottom: 1px solid #F1F5F9; }
+  .charge-table td { padding: 4px 8px; color: #334155; border-bottom: 1px solid #F8FAFC; }
+  .charge-table .total-row td { font-weight: 700; border-top: 1px solid #E2E8F0; }
+
+  /* Stay history accordion */
+  .history-toggle {
+    display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+    font-size: 12px; color: #3B82F6; font-weight: 500; padding: 2px 8px;
+    border-radius: 4px; border: 1px solid #DBEAFE; background: #EFF6FF;
+    transition: all 0.15s; font-family: inherit;
+  }
+  .history-toggle:hover { background: #DBEAFE; }
+  .history-toggle .arrow { font-size: 10px; transition: transform 0.2s; }
+  .history-toggle.open .arrow { transform: rotate(180deg); }
+  .history-panel { display: none; margin-top: 8px; }
+  .history-panel.open { display: block; }
+  .history-item {
+    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+    border-left: 3px solid #E2E8F0; margin-bottom: 4px; font-size: 12px;
+    background: #FAFBFC; border-radius: 0 6px 6px 0;
+  }
+  .history-item .h-date { color: #334155; font-weight: 500; min-width: 90px; }
+  .history-item .h-room { color: #64748B; min-width: 80px; }
+  .history-item .h-ota { display: flex; align-items: center; gap: 4px; min-width: 70px; }
+  .history-item .h-amount { color: #334155; font-weight: 500; margin-left: auto; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Side Nav -->
+  <nav class="sidenav" id="sidenav">
+    <button class="sidenav-toggle" onclick="toggleNav()" id="navToggle">◂</button>
+    <div style="padding: 12px 0; flex: 1;">
+      <a class="nav-item" onclick="location.href='pms_dashboard.html'"><span class="nav-icon">◉</span><span class="nav-label">ダッシュボード</span></a>
+      <a class="nav-item active"><span class="nav-icon">☰</span><span class="nav-label">予約一覧</span></a>
+      <a class="nav-item"><span class="nav-icon">▦</span><span class="nav-label">アサインボード</span></a>
+      <a class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">ルームインジケーター</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span class="nav-label">清掃管理</span></a>
+      <a class="nav-item"><span class="nav-icon">◈</span><span class="nav-label">売上レポート</span><span class="nav-lock">🔒</span></a>
+      <a class="nav-item"><span class="nav-icon">⚙</span><span class="nav-label">設定</span><span class="nav-lock">🔒</span></a>
+    </div>
+    <div class="sidenav-footer">PMS v0.1 dev</div>
+  </nav>
+
+  <div class="main" id="mainArea">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-top">
+        <div class="hotel-name">PATINA HOTEL OKINAWA</div>
+        <div class="header-right">
+          <span class="header-time" id="clock"></span>
+          <span class="header-staff">👤 山田 花子</span>
+          <button class="btn-logout">ログアウト</button>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#3B82F6"></span>
+          <span class="stat-label">CI予定</span>
+          <span class="stat-value">5</span>
+          <span class="stat-sub alert-num">未CI: 2</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#8B5CF6"></span>
+          <span class="stat-label">CO予定</span>
+          <span class="stat-value">3</span>
+          <span class="stat-sub alert-num">未CO: 1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#22C55E"></span>
+          <span class="stat-label">稼働率</span>
+          <span class="stat-value">18<span style="font-size:13px;font-weight:400;color:#94A3B8">/24</span></span>
+          <span class="stat-sub">75%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#14B8A6"></span>
+          <span class="stat-label">清掃</span>
+          <span class="stat-sub">清掃中 <b style="color:#0F172A">4</b></span>
+          <span class="stat-sub">点検待 <b style="color:#0F172A">1</b></span>
+          <span class="stat-sub">Ready <b style="color:#22C55E">6</b></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" placeholder="ゲスト名・予約番号で検索" id="searchInput">
+        </div>
+        <button class="filter-btn" id="filterToggle" onclick="toggleFilter()">
+          <span>フィルタ</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div class="toolbar-spacer"></div>
+        <button class="btn-secondary" onclick="alert('CSV出力')">📥 CSV出力</button>
+        <button class="btn-primary" onclick="alert('手動予約入力')">＋ 手動予約入力</button>
+      </div>
+
+      <!-- Filter Panel -->
+      <div class="filter-panel" id="filterPanel">
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-group-label">OTA</span>
+            <div class="filter-chips">
+              <button class="filter-chip" data-filter="ota" data-value="jalan">🔴 じゃらん</button>
+              <button class="filter-chip" data-filter="ota" data-value="rakuten">🟤 楽天</button>
+              <button class="filter-chip" data-filter="ota" data-value="booking">🔵 Booking</button>
+              <button class="filter-chip" data-filter="ota" data-value="direct">🟢 直販</button>
+              <button class="filter-chip" data-filter="ota" data-value="phone">🟠 電話</button>
+              <button class="filter-chip" data-filter="ota" data-value="expedia">🟡 Expedia</button>
+              <button class="filter-chip" data-filter="ota" data-value="agoda">🟣 Agoda</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-group-label">室タイプ</span>
+            <div class="filter-chips">
+              <button class="filter-chip" data-filter="room">シングル</button>
+              <button class="filter-chip" data-filter="room">ダブル</button>
+              <button class="filter-chip" data-filter="room">ツイン</button>
+              <button class="filter-chip" data-filter="room">デラックス</button>
+              <button class="filter-chip" data-filter="room">スイート</button>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-group-label">CI日</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="date" class="date-input" value="2026-04-10">
+              <span style="color:#94A3B8;font-size:12px">〜</span>
+              <input type="date" class="date-input" value="2026-04-20">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Summary Chips -->
+      <div class="status-summary">
+        <button class="status-chip s-all active" onclick="filterStatus(this,'all')"><span class="count">42</span> 全件</button>
+        <button class="status-chip s-confirmed" onclick="filterStatus(this,'confirmed')"><span class="status-dot sd-confirmed"></span> 確定 <span class="count">18</span></button>
+        <button class="status-chip s-checked-in" onclick="filterStatus(this,'checked_in')"><span class="status-dot sd-checked-in"></span> CI済 <span class="count">8</span></button>
+        <button class="status-chip s-checked-out" onclick="filterStatus(this,'checked_out')"><span class="status-dot sd-checked-out"></span> CO済 <span class="count">12</span></button>
+        <button class="status-chip s-cancelled" onclick="filterStatus(this,'cancelled')"><span class="status-dot sd-cancelled"></span> キャンセル <span class="count">3</span></button>
+        <button class="status-chip s-noshow" onclick="filterStatus(this,'noshow')"><span class="status-dot sd-noshow"></span> ノーショー <span class="count">1</span></button>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>CI日 <span class="sort-arrow">▼</span></th>
+              <th>CO日</th>
+              <th>ゲスト名</th>
+              <th>OTA</th>
+              <th>予約番号</th>
+              <th>室タイプ / 部屋</th>
+              <th>ステータス</th>
+              <th style="text-align:right">金額</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span class="page-info">1–15 / 42件</span>
+          <div class="page-buttons">
+            <button class="page-btn" disabled>◀</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">▶</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Drawer Overlay -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- Detail Drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title" id="drawerTitle">予約詳細</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <!-- filled by JS -->
+  </div>
+  <div class="drawer-actions">
+    <button class="drawer-btn primary">予約詳細画面へ</button>
+    <button class="drawer-btn">アサインボード</button>
+    <button class="drawer-btn">予約と連結</button>
+    <button class="drawer-btn">領収書発行</button>
+  </div>
+</div>
+
+<script>
+// === OTA Config ===
+const OTA = {
+  jalan:   { color: '#DC2626', label: 'じゃらん' },
+  rakuten: { color: '#991B1B', label: '楽天' },
+  booking: { color: '#1E3A5F', label: 'Booking' },
+  direct:  { color: '#16A34A', label: '直販' },
+  phone:   { color: '#EA580C', label: '電話' },
+  agoda:   { color: '#7C3AED', label: 'Agoda' },
+  expedia: { color: '#CA8A04', label: 'Expedia' },
+};
+
+const STATUS = {
+  confirmed:   { label: '確定', cls: 'sb-confirmed' },
+  checked_in:  { label: 'CI済', cls: 'sb-checked-in' },
+  checked_out: { label: 'CO済', cls: 'sb-checked-out' },
+  cancelled:   { label: 'キャンセル', cls: 'sb-cancelled' },
+  noshow:      { label: 'ノーショー', cls: 'sb-noshow' },
+};
+
+// === Mock Data ===
+const reservations = [
+  { id:1, ci:'4/10', co:'4/12', nights:2, name:'渡辺 健太', romaji:'Kenta Watanabe', ota:'booking', resNo:'BK-44521', roomType:'ツイン', room:'301', status:'checked_in', amount:28000, adults:2, children:0, linked:true, gap:false, visits:4, vip:true },
+  { id:2, ci:'4/10', co:'4/11', nights:1, name:'鈴木 一郎', romaji:'Ichiro Suzuki', ota:'jalan', resNo:'JA-26301', roomType:'ツイン', room:'302', status:'checked_in', amount:15000, adults:1, children:0, visits:2, vip:false },
+  { id:3, ci:'4/10', co:'4/13', nights:3, name:'佐藤 花子', romaji:'Hanako Sato', ota:'booking', resNo:'BK-44530', roomType:'デラックス', room:'501', status:'checked_in', amount:54000, adults:2, children:1, visits:1, vip:false },
+  { id:4, ci:'4/10', co:'4/11', nights:1, name:'Tanaka Yuki', romaji:'Yuki Tanaka', ota:'booking', resNo:'BK-44535', roomType:'シングル', room:'202', status:'confirmed', amount:12000, adults:1, children:0, visits:0, vip:false },
+  { id:5, ci:'4/10', co:'4/13', nights:3, name:'山田 太郎', romaji:'Taro Yamada', ota:'phone', resNo:'TEL-0042', roomType:'ツイン', room:'303', status:'confirmed', amount:42000, adults:2, children:0, visits:7, vip:true },
+  { id:6, ci:'4/11', co:'4/14', nights:3, name:'高橋 誠', romaji:'Makoto Takahashi', ota:'rakuten', resNo:'RK-89012', roomType:'シングル', room:'201', status:'confirmed', amount:36000, adults:1, children:0, visits:3, vip:false },
+  { id:7, ci:'4/11', co:'4/12', nights:1, name:'木村 拓也', romaji:'Takuya Kimura', ota:'jalan', resNo:'JA-26320', roomType:'ダブル', room:'401', status:'confirmed', amount:18000, adults:2, children:0, visits:1, vip:false },
+  { id:8, ci:'4/11', co:'4/15', nights:4, name:'中村 愛', romaji:'Ai Nakamura', ota:'agoda', resNo:'AG-33201', roomType:'デラックス', room:'502', status:'confirmed', amount:72000, adults:2, children:2, visits:5, vip:true },
+  { id:9, ci:'4/12', co:'4/14', nights:2, name:'Michael Johnson', romaji:'Michael Johnson', ota:'booking', resNo:'BK-44550', roomType:'ツイン', room:null, status:'confirmed', amount:32000, adults:2, children:0, visits:0, vip:false },
+  { id:16, ci:'4/13', co:'4/16', nights:3, name:'Aleksandr Konstantinovich', romaji:'Aleksandr Konstantinovich Petrov-Vodkin', ota:'expedia', resNo:'EX-12399', roomType:'デラックス', room:'504', status:'confirmed', amount:58000, adults:2, children:0, visits:0, vip:false },
+  { id:10, ci:'4/09', co:'4/10', nights:1, name:'李 明華', romaji:'Minghua Li', ota:'agoda', resNo:'AG-33180', roomType:'シングル', room:'203', status:'checked_out', amount:11000, adults:1, children:0, visits:1, vip:false },
+  { id:11, ci:'4/08', co:'4/10', nights:2, name:'伊藤 美咲', romaji:'Misaki Ito', ota:'jalan', resNo:'JA-26280', roomType:'ツイン', room:'304', status:'checked_out', amount:26000, adults:2, children:0, visits:2, vip:false },
+  { id:12, ci:'4/07', co:'4/10', nights:3, name:'松本 大輝', romaji:'Daiki Matsumoto', ota:'rakuten', resNo:'RK-88990', roomType:'デラックス', room:'503', status:'checked_out', amount:48000, adults:2, children:1, visits:10, vip:true },
+  { id:13, ci:'4/09', co:'4/12', nights:3, name:'小林 直人', romaji:'Naoto Kobayashi', ota:'booking', resNo:'BK-44500', roomType:'ツイン', room:'305', status:'cancelled', amount:36000, adults:2, children:0, visits:1, vip:false },
+  { id:14, ci:'4/08', co:'4/09', nights:1, name:'加藤 裕子', romaji:'Yuko Kato', ota:'expedia', resNo:'EX-12340', roomType:'シングル', room:'204', status:'noshow', amount:13000, adults:1, children:0, visits:3, vip:false },
+  { id:15, ci:'4/12', co:'4/15', nights:3, name:'田中 翔太', romaji:'Shota Tanaka', ota:'direct', resNo:'DR-0015', roomType:'スイート', room:'601', status:'confirmed', amount:96000, adults:2, children:0, linked:true, gap:true, visits:6, vip:true },
+];
+
+// === Render Table ===
+function renderTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = reservations.map(r => {
+    const ota = OTA[r.ota] || { color:'#94A3B8', label: r.ota };
+    const st = STATUS[r.status] || { label: r.status, cls: '' };
+    const roomDisplay = r.room
+      ? `<span class="room-no">${r.room}</span> <span class="room-type">${r.roomType}</span>`
+      : `<span class="room-type">${r.roomType}</span> <span class="unassigned">未アサイン</span>`;
+    const linkBadge = r.linked ? '<span class="link-badge">🔗連結</span>' : '';
+    const gapBadge = r.gap ? '<span class="gap-alert">⚠穴</span>' : '';
+    const repeaterBadge = r.visits >= 2 ? `<span class="repeater-badge">🔁×${r.visits}</span>` : '';
+    const vipBadge = r.vip ? '<span class="vip-badge">⭐VIP</span>' : '';
+    return `<tr onclick="openDrawer(${r.id})" ${r.id===selectedId?'class="selected"':''}>
+      <td class="td-date">${r.ci}<span class="nights-badge">${r.nights}泊</span></td>
+      <td class="td-date">${r.co}</td>
+      <td class="td-guest"><div class="guest-name-row"><span class="guest-name">${r.name}</span>${vipBadge}${repeaterBadge}${linkBadge}${gapBadge}</div><div class="guest-romaji">${r.romaji}</div></td>
+      <td><div class="ota-cell"><span class="ota-dot" style="background:${ota.color}"></span><span class="ota-name">${ota.label}</span></div></td>
+      <td class="td-resno">${r.resNo}</td>
+      <td class="td-room">${roomDisplay}</td>
+      <td><span class="status-badge ${st.cls}">${st.label}</span></td>
+      <td class="td-amount">¥${r.amount.toLocaleString()}</td>
+    </tr>`;
+  }).join('');
+}
+
+let selectedId = null;
+
+// === Mock stay history (keyed by guest name for simplicity) ===
+const STAY_HISTORY = {
+  '渡辺 健太': [
+    { date: '2026/03/15-03/17', room: '301 ツイン', ota: 'jalan', amount: 28000 },
+    { date: '2025/11/15-11/16', room: '501 DX', ota: 'booking', amount: 18500 },
+    { date: '2025/06/20-06/23', room: '302 ツイン', ota: 'rakuten', amount: 52000 },
+  ],
+  '鈴木 一郎': [
+    { date: '2026/01/10-01/11', room: '204 シングル', ota: 'jalan', amount: 12000 },
+  ],
+  '山田 太郎': [
+    { date: '2026/02/20-02/22', room: '303 ツイン', ota: 'phone', amount: 30000 },
+    { date: '2025/12/24-12/26', room: '301 ツイン', ota: 'rakuten', amount: 36000 },
+    { date: '2025/10/01-10/03', room: '502 DX', ota: 'booking', amount: 42000 },
+    { date: '2025/08/14-08/16', room: '303 ツイン', ota: 'jalan', amount: 28000 },
+    { date: '2025/04/29-04/30', room: '201 シングル', ota: 'direct', amount: 15000 },
+    { date: '2024/12/30-01/02', room: '601 スイート', ota: 'phone', amount: 72000 },
+  ],
+  '高橋 誠': [
+    { date: '2025/09/10-09/12', room: '203 シングル', ota: 'rakuten', amount: 24000 },
+    { date: '2025/03/15-03/16', room: '201 シングル', ota: 'rakuten', amount: 13000 },
+  ],
+  '中村 愛': [
+    { date: '2026/01/03-01/05', room: '501 DX', ota: 'agoda', amount: 38000 },
+    { date: '2025/08/10-08/14', room: '502 DX', ota: 'booking', amount: 68000 },
+    { date: '2025/05/01-05/03', room: '401 ダブル', ota: 'jalan', amount: 32000 },
+    { date: '2024/12/20-12/22', room: '502 DX', ota: 'agoda', amount: 36000 },
+  ],
+  '伊藤 美咲': [
+    { date: '2025/06/15-06/16', room: '302 ツイン', ota: 'jalan', amount: 14000 },
+  ],
+  '松本 大輝': [
+    { date: '2026/01/20-01/22', room: '503 DX', ota: 'rakuten', amount: 32000 },
+    { date: '2025/10/10-10/13', room: '501 DX', ota: 'booking', amount: 48000 },
+    { date: '2025/07/20-07/22', room: '503 DX', ota: 'rakuten', amount: 30000 },
+    { date: '2025/04/01-04/04', room: '601 スイート', ota: 'jalan', amount: 72000 },
+    { date: '2025/01/02-01/05', room: '503 DX', ota: 'direct', amount: 54000 },
+    { date: '2024/10/10-10/12', room: '502 DX', ota: 'agoda', amount: 36000 },
+    { date: '2024/08/13-08/16', room: '601 スイート', ota: 'rakuten', amount: 78000 },
+    { date: '2024/05/01-05/03', room: '501 DX', ota: 'booking', amount: 38000 },
+    { date: '2024/01/01-01/04', room: '503 DX', ota: 'jalan', amount: 54000 },
+  ],
+  '加藤 裕子': [
+    { date: '2025/11/20-11/21', room: '202 シングル', ota: 'expedia', amount: 11000 },
+    { date: '2025/05/10-05/11', room: '204 シングル', ota: 'expedia', amount: 12000 },
+  ],
+  '田中 翔太': [
+    { date: '2026/02/14-02/16', room: '601 スイート', ota: 'direct', amount: 64000 },
+    { date: '2025/12/31-01/02', room: '601 スイート', ota: 'direct', amount: 72000 },
+    { date: '2025/08/01-08/04', room: '503 DX', ota: 'booking', amount: 54000 },
+    { date: '2025/04/28-04/30', room: '601 スイート', ota: 'direct', amount: 64000 },
+    { date: '2024/11/22-11/24', room: '502 DX', ota: 'jalan', amount: 36000 },
+  ],
+};
+
+function toggleHistory() {
+  const btn = document.getElementById('historyToggle');
+  const panel = document.getElementById('historyPanel');
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+
+
+// === Drawer ===
+function openDrawer(id) {
+  selectedId = id;
+  renderTable();
+  const r = reservations.find(x => x.id === id);
+  if (!r) return;
+  const ota = OTA[r.ota] || { color:'#94A3B8', label: r.ota };
+  const st = STATUS[r.status] || { label: r.status };
+
+  document.getElementById('drawerTitle').textContent = `${r.name}  ${r.room || '未アサイン'}`;
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">予約情報</div>
+      <div class="drawer-row"><span class="drawer-label">ステータス</span><span class="drawer-value"><span class="status-badge ${STATUS[r.status]?.cls}">${st.label}</span></span></div>
+      <div class="drawer-row"><span class="drawer-label">OTA</span><span class="drawer-value"><span class="ota-dot" style="background:${ota.color};display:inline-block;vertical-align:middle;margin-right:6px"></span>${ota.label}</span></div>
+      <div class="drawer-row"><span class="drawer-label">予約番号</span><span class="drawer-value" style="font-family:monospace">${r.resNo}</span></div>
+      <div class="drawer-row"><span class="drawer-label">CI日</span><span class="drawer-value">${r.ci}</span></div>
+      <div class="drawer-row"><span class="drawer-label">CO日</span><span class="drawer-value">${r.co}（${r.nights}泊）</span></div>
+      <div class="drawer-row"><span class="drawer-label">室タイプ</span><span class="drawer-value">${r.roomType}</span></div>
+      <div class="drawer-row"><span class="drawer-label">部屋番号</span><span class="drawer-value">${r.room || '<span class="unassigned">未アサイン</span>'}</span></div>
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">ゲスト情報</div>
+      <div class="drawer-row"><span class="drawer-label">氏名</span><span class="drawer-value">${r.name}${r.vip ? ' <span class="vip-badge">⭐VIP</span>' : ''}</span></div>
+      <div class="drawer-row"><span class="drawer-label">ローマ字</span><span class="drawer-value">${r.romaji}</span></div>
+      <div class="drawer-row"><span class="drawer-label">人数</span><span class="drawer-value">大人${r.adults}名${r.children > 0 ? ' 子供'+r.children+'名' : ''}</span></div>
+      <div class="drawer-row">
+        <span class="drawer-label">宿泊回数</span>
+        <span class="drawer-value">
+          ${r.visits > 0 ? r.visits + '回' : '初回'}
+          ${r.visits >= 2 && STAY_HISTORY[r.name] ? `<button class="history-toggle" id="historyToggle" onclick="toggleHistory()">🔁 宿泊履歴を表示 <span class="arrow">▼</span></button>` : r.visits >= 2 ? ' <span class="repeater-badge">🔁リピーター</span>' : ''}
+        </span>
+      </div>
+      ${r.visits >= 2 && STAY_HISTORY[r.name] ? `
+      <div class="history-panel" id="historyPanel">
+        ${STAY_HISTORY[r.name].map(h => {
+          const hOta = OTA[h.ota] || { color:'#94A3B8', label: h.ota };
+          return `<div class="history-item">
+            <span class="h-date">${h.date}</span>
+            <span class="h-room">${h.room}</span>
+            <span class="h-ota"><span class="ota-dot" style="background:${hOta.color}"></span>${hOta.label}</span>
+            <span class="h-amount">¥${h.amount.toLocaleString()}</span>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+    </div>
+
+    ${r.linked ? `<div class="drawer-section">
+      <div class="drawer-section-title">連結予約タイムライン</div>
+      <div class="timeline">
+        <div class="timeline-bar">
+          <div class="timeline-seg" style="flex:2;background:${OTA.jalan.color}">2泊</div>
+          <div class="timeline-seg" style="flex:2;background:${OTA.booking.color}">2泊</div>
+          ${r.gap ? '<div class="timeline-seg" style="flex:2;background:#FEE2E2;color:#DC2626;border:1px dashed #DC2626">穴2泊</div>' : ''}
+          <div class="timeline-seg" style="flex:1;background:${OTA.agoda.color}">1泊</div>
+        </div>
+        <div class="timeline-legend">
+          <span><span class="timeline-legend-dot" style="background:${OTA.jalan.color}"></span>じゃらん</span>
+          <span><span class="timeline-legend-dot" style="background:${OTA.booking.color}"></span>Booking</span>
+          ${r.gap ? '<span><span class="timeline-legend-dot" style="background:#DC2626"></span>穴（キャンセル）</span>' : ''}
+          <span><span class="timeline-legend-dot" style="background:${OTA.agoda.color}"></span>Agoda</span>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">売上情報</div>
+      <table class="charge-table">
+        <thead><tr><th>日付</th><th>摘要</th><th style="text-align:right">金額</th></tr></thead>
+        <tbody>
+          ${Array.from({length: r.nights}, (_, i) => {
+            const perNight = Math.round(r.amount / r.nights);
+            return `<tr><td>4/${10+i}</td><td>宿泊料</td><td style="text-align:right">¥${perNight.toLocaleString()}</td></tr>`;
+          }).join('')}
+          <tr class="total-row"><td></td><td>小計</td><td style="text-align:right">¥${r.amount.toLocaleString()}</td></tr>
+          <tr><td></td><td>消費税(10%)</td><td style="text-align:right">¥${Math.round(r.amount * 0.1).toLocaleString()}</td></tr>
+          <tr class="total-row"><td></td><td><b>合計</b></td><td style="text-align:right"><b>¥${Math.round(r.amount * 1.1).toLocaleString()}</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  selectedId = null;
+  renderTable();
+}
+
+// === Filter Toggle ===
+function toggleFilter() {
+  const panel = document.getElementById('filterPanel');
+  const btn = document.getElementById('filterToggle');
+  panel.classList.toggle('open');
+  btn.classList.toggle('active');
+}
+
+// === Filter Chips ===
+document.querySelectorAll('.filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => chip.classList.toggle('selected'));
+});
+
+// === Status Filter ===
+function filterStatus(el, status) {
+  document.querySelectorAll('.status-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// === Clock ===
+function updateClock() {
+  const d = new Date();
+  const days = ["日","月","火","水","木","金","土"];
+  document.getElementById("clock").textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）` +
+    `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
+}
+updateClock(); setInterval(updateClock, 1000);
+
+// === Nav Toggle ===
+function toggleNav() {
+  const nav = document.getElementById("sidenav");
+  const btn = document.getElementById("navToggle");
+  nav.classList.toggle("collapsed");
+  btn.textContent = nav.classList.contains("collapsed") ? "▸" : "◂";
+  document.getElementById("mainArea").style.marginLeft = nav.classList.contains("collapsed") ? "56px" : "220px";
+}
+
+// === Init ===
+renderTable();
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+/**
+ * ヘッダー — ライトシェル（2026-07 UI刷新）
+ * 背景を本文と同じアイボリーにして「バー感」を消し、下線だけで区切る。
+ */
+.header {
+  height: var(--header-height);
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.header__top {
+  height: var(--header-top-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.header__logo {
+  height: 30px;
+  width: auto;
+}
+
+/* ダークテーマでは紺色のホテル名が沈むため、filterで明色化する
+   （content:url()差し替えはcss-loaderのパス解決エラーになるため不可） */
+html[data-theme="dark"] .header__logo {
+  filter: invert(0.85) hue-rotate(180deg) saturate(1.4);
+}
+
+.header__right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header__clock {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.header__staff {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.header__staff-icon {
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.header__logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.header__logout:hover {
+  color: var(--accent-red);
+  background: rgba(179, 54, 44, 0.08);
+}
+
+.header__logout .material-symbols-outlined {
+  font-size: 20px;
+}

@@ -1,0 +1,37 @@
+/**
+ * ステータスバッジ共通スタイル
+ *
+ * 使い方: <span className={`status-badge status-badge--${status}`}>{RESERVATION_STATUS_LABELS[status]}</span>
+ * 各ページのプレフィクス付きクラス（resv__status, rd__status 等）は不要になる。
+ * 色は variables.css の --status-* 変数を使用。
+ * ピル型 + 先頭ドットで「状態表示」であることを形でも示す（角箱よりも柔らかい）。
+ */
+
+.status-badge {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  display: inline-block;
+  line-height: 1.5;
+}
+
+/* 先頭のステータスドット（文字色と同色） */
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 6px;
+  vertical-align: 2px;
+}
+
+.status-badge--confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.status-badge--checked_in { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.status-badge--checked_out { background: var(--status-checkedout-bg); color: var(--status-checkedout-text); }
+.status-badge--cancelled { background: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+.status-badge--no_show { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+.status-badge--merged { background: var(--bg-inset); color: var(--text-secondary); }

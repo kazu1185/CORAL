@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMS ダッシュボード</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans JP', 'Helvetica Neue', sans-serif;
+    background: #F8FAFC;
+    color: #0F172A;
+    min-height: 100vh;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ===== LAYOUT ===== */
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ===== SIDE NAV ===== */
+  .sidenav {
+    width: 220px; min-height: 100vh; background: #0F172A; color: #CBD5E1;
+    display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100;
+    transition: width 0.25s cubic-bezier(.4,0,.2,1); overflow: hidden;
+  }
+  .sidenav.collapsed { width: 56px; }
+  .sidenav-toggle {
+    background: none; border: none; color: #94A3B8; cursor: pointer;
+    padding: 18px 16px 12px; text-align: right; font-size: 18;
+  }
+  .sidenav.collapsed .sidenav-toggle { text-align: center; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 20px;
+    cursor: pointer; font-size: 14px; font-weight: 400; color: #94A3B8;
+    border-right: 3px solid transparent; transition: all 0.15s;
+    text-decoration: none; white-space: nowrap;
+  }
+  .sidenav.collapsed .nav-item { padding: 12px 0; justify-content: center; }
+  .nav-item:hover { background: rgba(255,255,255,0.05); }
+  .nav-item.active {
+    background: rgba(59,130,246,0.15); border-right-color: #3B82F6;
+    color: #E2E8F0; font-weight: 600;
+  }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-label { overflow: hidden; }
+  .sidenav.collapsed .nav-label,
+  .sidenav.collapsed .nav-lock,
+  .sidenav.collapsed .sidenav-footer { display: none; }
+  .nav-lock { font-size: 10px; color: #64748B; margin-left: auto; }
+  .sidenav-footer {
+    padding: 16px 20px; border-top: 1px solid #1E293B;
+    font-size: 11px; color: #475569; margin-top: auto;
+  }
+
+  /* ===== MAIN ===== */
+  .main {
+    flex: 1; margin-left: 220px; display: flex; flex-direction: column;
+    transition: margin-left 0.25s cubic-bezier(.4,0,.2,1);
+  }
+  .sidenav.collapsed ~ .main { margin-left: 56px; }
+
+  /* ===== HEADER ===== */
+  .header {
+    background: #fff; border-bottom: 1px solid #E2E8F0;
+  }
+  .header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 28px;
+  }
+  .hotel-name { font-size: 18px; font-weight: 700; color: #0F172A; letter-spacing: 2px; }
+  .header-right { display: flex; align-items: center; gap: 24px; font-size: 13px; color: #64748B; }
+  .header-time { font-variant-numeric: tabular-nums; }
+  .header-staff { color: #334155; font-weight: 500; }
+  .btn-logout {
+    background: none; border: 1px solid #CBD5E1; border-radius: 6px;
+    padding: 5px 14px; font-size: 12px; color: #64748B; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-logout:hover { background: #F8FAFC; }
+
+  /* Header summary bar */
+  .header-stats {
+    display: flex; align-items: center; gap: 0;
+    padding: 0 28px 10px;
+  }
+  .stat-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 20px;
+    cursor: pointer; transition: background 0.15s; border-radius: 6px;
+    position: relative;
+  }
+  .stat-item:hover { background: #F1F5F9; }
+  .stat-item + .stat-item::before {
+    content: ''; position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 1px; background: #E2E8F0;
+  }
+  .stat-label { font-size: 11px; color: #94A3B8; font-weight: 500; }
+  .stat-value { font-size: 18px; font-weight: 700; color: #0F172A; line-height: 1; }
+  .stat-sub { font-size: 11px; color: #94A3B8; }
+  .stat-sub.alert-num { color: #DC2626; font-weight: 600; }
+  .stat-accent {
+    width: 3px; height: 20px; border-radius: 2px; flex-shrink: 0;
+  }
+
+  /* ===== CONTENT ===== */
+  .content { padding: 24px 28px; flex: 1; }
+
+  /* ===== ALERTS ===== */
+  .alert-section {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .alert-header {
+    padding: 14px 22px; border-bottom: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .alert-header-icon { font-size: 16px; }
+  .alert-header-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+  .alert-badge {
+    background: #FEE2E2; color: #DC2626; font-size: 12px; font-weight: 700;
+    padding: 2px 10px; border-radius: 99px;
+  }
+  .alert-item {
+    padding: 14px 22px; display: flex; align-items: flex-start; gap: 12px;
+    border-bottom: 1px solid #F8FAFC;
+  }
+  .alert-item:last-child { border-bottom: none; }
+  .alert-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    margin-top: 5px; flex-shrink: 0;
+  }
+  .alert-dot.red { background: #DC2626; }
+  .alert-dot.yellow { background: #EAB308; }
+  .alert-content { flex: 1; min-width: 0; }
+  .alert-label {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px;
+    border-radius: 4px; margin-right: 8px;
+  }
+  .alert-label.red { color: #DC2626; background: #FEF2F2; }
+  .alert-label.yellow { color: #CA8A04; background: #FEFCE8; }
+  .alert-desc { font-size: 13px; color: #334155; display: inline; }
+  .alert-sub { font-size: 12px; color: #94A3B8; margin-top: 3px; }
+  .alert-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: flex-start; }
+  .btn-action {
+    background: #fff; border: 1px solid #E2E8F0; border-radius: 6px;
+    padding: 5px 12px; font-size: 12px; cursor: pointer; color: #334155;
+    font-weight: 500; white-space: nowrap; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-action:hover { background: #F8FAFC; }
+  .btn-action.warn { border-color: #FECACA; color: #DC2626; }
+  .btn-action.warn:hover { background: #FEF2F2; }
+
+  .alert-empty {
+    background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 12px;
+    padding: 16px 24px; display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .alert-empty span { font-size: 14px; color: #166534; font-weight: 500; }
+
+  /* ===== CI/CO LISTS ===== */
+  .cico-row { display: flex; gap: 16px; margin-bottom: 20px; }
+  .cico-list {
+    flex: 1; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+    overflow: hidden;
+  }
+  .cico-header {
+    padding: 14px 20px; border-bottom: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cico-header-icon { font-size: 16px; }
+  .cico-header-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+  .cico-count { font-size: 12px; color: #94A3B8; margin-left: auto; }
+  .cico-item {
+    padding: 10px 20px; display: flex; align-items: center; gap: 10px;
+    cursor: pointer; transition: background 0.1s; border-bottom: 1px solid #F8FAFC;
+  }
+  .cico-item:last-child { border-bottom: none; }
+  .cico-item:hover { background: #F8FAFC; }
+  .cico-check { font-size: 14px; width: 20px; text-align: center; flex-shrink: 0; }
+  .cico-check.done { color: #22C55E; }
+  .cico-check.pending { color: #CBD5E1; }
+  .ota-dot {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .cico-name {
+    font-size: 13px; font-weight: 500; color: #0F172A; flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cico-room { font-size: 12px; color: #94A3B8; flex-shrink: 0; }
+  .cico-status {
+    font-size: 11px; flex-shrink: 0; font-weight: 500; padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .cico-status.done { color: #22C55E; background: #F0FDF4; }
+  .cico-status.pending { color: #EAB308; background: #FEFCE8; }
+  .cico-more {
+    padding: 10px 20px; text-align: right; font-size: 12px; color: #3B82F6;
+    cursor: pointer; font-weight: 500;
+  }
+  .cico-more:hover { text-decoration: underline; }
+
+  /* ===== BOTTOM ROW ===== */
+  .bottom-row { display: flex; gap: 16px; }
+  .bottom-card {
+    flex: 1; background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+    overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .bottom-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .bottom-card-header {
+    padding: 14px 20px; border-bottom: 1px solid #F1F5F9;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .bottom-card-header-icon { font-size: 16px; }
+  .bottom-card-header-title { font-size: 14px; font-weight: 700; color: #0F172A; }
+
+  /* Tomorrow */
+  .tomorrow-body { padding: 20px; cursor: pointer; }
+  .tomorrow-numbers { display: flex; gap: 24px; margin-bottom: 16px; }
+  .tomorrow-label { font-size: 11px; color: #94A3B8; margin-bottom: 4px; }
+  .tomorrow-value { font-size: 24px; font-weight: 700; color: #0F172A; }
+  .tomorrow-unit { font-size: 12px; font-weight: 400; color: #94A3B8; }
+  .forecast-label { font-size: 12px; color: #64748B; margin-bottom: 6px; }
+  .forecast-row { display: flex; align-items: center; gap: 10px; }
+  .forecast-bar-track {
+    flex: 1; height: 8px; background: #F1F5F9; border-radius: 99px; overflow: hidden;
+  }
+  .forecast-bar-fill {
+    height: 100%; border-radius: 99px; transition: width 0.5s;
+  }
+  .forecast-nums { font-size: 13px; font-weight: 600; color: #0F172A; }
+  .forecast-pct { font-size: 12px; font-weight: 700; }
+
+  /* Import Log */
+  .log-item {
+    padding: 8px 20px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; border-bottom: 1px solid #F8FAFC;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item.error { background: #FEF2F2; }
+  .log-time {
+    color: #94A3B8; font-variant-numeric: tabular-nums; font-family: monospace;
+    font-size: 12px; flex-shrink: 0;
+  }
+  .log-ota { flex: 1; }
+  .log-ota.ok { color: #64748B; }
+  .log-ota.err { color: #DC2626; font-weight: 600; }
+  .log-id { font-size: 11px; color: #94A3B8; font-family: monospace; }
+  .pulse-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #22C55E;
+    margin-left: 6px; animation: pulse 2s infinite; display: inline-block;
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Side Nav -->
+  <nav class="sidenav" id="sidenav">
+    <button class="sidenav-toggle" onclick="toggleNav()" id="navToggle">◂</button>
+    <div style="padding: 12px 0; flex: 1;">
+      <a class="nav-item active"><span class="nav-icon">◉</span><span class="nav-label">ダッシュボード</span></a>
+      <a class="nav-item"><span class="nav-icon">☰</span><span class="nav-label">予約一覧</span></a>
+      <a class="nav-item"><span class="nav-icon">▦</span><span class="nav-label">アサインボード</span></a>
+      <a class="nav-item"><span class="nav-icon">⊞</span><span class="nav-label">ルームインジケーター</span></a>
+      <a class="nav-item"><span class="nav-icon">◫</span><span class="nav-label">清掃管理</span></a>
+      <a class="nav-item"><span class="nav-icon">◈</span><span class="nav-label">売上レポート</span><span class="nav-lock">🔒</span></a>
+      <a class="nav-item"><span class="nav-icon">⚙</span><span class="nav-label">設定</span><span class="nav-lock">🔒</span></a>
+    </div>
+    <div class="sidenav-footer">PMS v0.1 dev</div>
+  </nav>
+
+  <!-- Main -->
+  <div class="main" id="mainArea">
+    <!-- Header with integrated summary -->
+    <header class="header">
+      <div class="header-top">
+        <div class="hotel-name">PATINA HOTEL OKINAWA</div>
+        <div class="header-right">
+          <span class="header-time" id="clock"></span>
+          <span class="header-staff">👤 山田 花子</span>
+          <button class="btn-logout">ログアウト</button>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#3B82F6"></span>
+          <span class="stat-label">CI予定</span>
+          <span class="stat-value">5</span>
+          <span class="stat-sub alert-num">未CI: 2</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#8B5CF6"></span>
+          <span class="stat-label">CO予定</span>
+          <span class="stat-value">3</span>
+          <span class="stat-sub alert-num">未CO: 1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#22C55E"></span>
+          <span class="stat-label">稼働率</span>
+          <span class="stat-value">18<span style="font-size:13px;font-weight:400;color:#94A3B8">/24</span></span>
+          <span class="stat-sub">75%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-accent" style="background:#14B8A6"></span>
+          <span class="stat-label">清掃</span>
+          <span class="stat-sub">清掃中 <b style="color:#0F172A">4</b></span>
+          <span class="stat-sub">点検待 <b style="color:#0F172A">1</b></span>
+          <span class="stat-sub">Ready <b style="color:#22C55E">6</b></span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Alerts -->
+      <div class="alert-section">
+        <div class="alert-header">
+          <span class="alert-header-icon">⚠️</span>
+          <span class="alert-header-title">要対応</span>
+          <span class="alert-badge">3件</span>
+        </div>
+
+        <div class="alert-item">
+          <span class="alert-dot red"></span>
+          <div class="alert-content">
+            <div><span class="alert-label red">ゲスト未確定</span><span class="alert-desc">Booking予約 4/15 CI「Tanaka Yuki」</span></div>
+            <div class="alert-sub">候補: タナカ ユキ（田中 由紀）宿泊3回</div>
+          </div>
+          <div class="alert-actions"><button class="btn-action">確認する</button></div>
+        </div>
+
+        <div class="alert-item">
+          <span class="alert-dot yellow"></span>
+          <div class="alert-content">
+            <div><span class="alert-label yellow">未チェックイン</span><span class="alert-desc">山田太郎 様  CI予定: 4/14（1日経過）</span></div>
+            <div class="alert-sub">Booking.com  301ツイン  3泊</div>
+          </div>
+          <div class="alert-actions">
+            <button class="btn-action warn">ノーショー処理</button>
+            <button class="btn-action">確認済み（様子見）</button>
+          </div>
+        </div>
+
+        <div class="alert-item">
+          <span class="alert-dot yellow"></span>
+          <div class="alert-content">
+            <div><span class="alert-label yellow">定員超過</span><span class="alert-desc">佐藤一郎 様  大人3名 → 301ツイン(定員2)</span></div>
+          </div>
+          <div class="alert-actions"><button class="btn-action">確認する</button></div>
+        </div>
+      </div>
+
+      <!-- CI / CO Lists -->
+      <div class="cico-row">
+        <!-- Check-in List -->
+        <div class="cico-list">
+          <div class="cico-header">
+            <span class="cico-header-icon">📥</span>
+            <span class="cico-header-title">本日チェックイン</span>
+            <span class="cico-count">5件</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check done">✓</span>
+            <span class="ota-dot" style="background:#DC2626"></span>
+            <span class="cico-name">鈴木 一郎</span>
+            <span class="cico-room">301 ツイン</span>
+            <span class="cico-status done">14:00 CI済</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check done">✓</span>
+            <span class="ota-dot" style="background:#1E3A5F"></span>
+            <span class="cico-name">佐藤 花子</span>
+            <span class="cico-room">501 DX</span>
+            <span class="cico-status done">13:30 CI済</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check pending">○</span>
+            <span class="ota-dot" style="background:#1E3A5F"></span>
+            <span class="cico-name">Tanaka Yuki</span>
+            <span class="cico-room">202 シングル</span>
+            <span class="cico-status pending">未CI</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check pending">○</span>
+            <span class="ota-dot" style="background:#EA580C"></span>
+            <span class="cico-name">山田 太郎</span>
+            <span class="cico-room">301 ツイン</span>
+            <span class="cico-status pending">未CI</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check pending">○</span>
+            <span class="ota-dot" style="background:#7C3AED"></span>
+            <span class="cico-name">李 明華</span>
+            <span class="cico-room">405 ラージ</span>
+            <span class="cico-status pending">未CI</span>
+          </div>
+          <div class="cico-more">全件表示 →</div>
+        </div>
+
+        <!-- Check-out List -->
+        <div class="cico-list">
+          <div class="cico-header">
+            <span class="cico-header-icon">📤</span>
+            <span class="cico-header-title">本日チェックアウト</span>
+            <span class="cico-count">3件</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check done">✓</span>
+            <span class="ota-dot" style="background:#991B1B"></span>
+            <span class="cico-name">高橋 誠</span>
+            <span class="cico-room">202 シングル</span>
+            <span class="cico-status done">10:15 CO済</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check done">✓</span>
+            <span class="ota-dot" style="background:#1E3A5F"></span>
+            <span class="cico-name">木村 拓也</span>
+            <span class="cico-room">302 ツイン</span>
+            <span class="cico-status done">11:02 CO済</span>
+          </div>
+          <div class="cico-item">
+            <span class="cico-check pending">○</span>
+            <span class="ota-dot" style="background:#DC2626"></span>
+            <span class="cico-name">中村 愛</span>
+            <span class="cico-room">501 デラックス</span>
+            <span class="cico-status pending">未CO</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-row">
+        <!-- Tomorrow Preview -->
+        <div class="bottom-card">
+          <div class="bottom-card-header">
+            <span class="bottom-card-header-icon">📅</span>
+            <span class="bottom-card-header-title">明日のプレビュー</span>
+          </div>
+          <div class="tomorrow-body">
+            <div class="tomorrow-numbers">
+              <div>
+                <div class="tomorrow-label">CI</div>
+                <div class="tomorrow-value">4<span class="tomorrow-unit">件</span></div>
+              </div>
+              <div>
+                <div class="tomorrow-label">CO</div>
+                <div class="tomorrow-value">6<span class="tomorrow-unit">件</span></div>
+              </div>
+            </div>
+            <div class="forecast-label">稼働予測</div>
+            <div class="forecast-row">
+              <div class="forecast-bar-track">
+                <div class="forecast-bar-fill" style="width:83%; background:#EAB308;"></div>
+              </div>
+              <span class="forecast-nums">20/24</span>
+              <span class="forecast-pct" style="color:#CA8A04;">83%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Import Log -->
+        <div class="bottom-card">
+          <div class="bottom-card-header">
+            <span class="bottom-card-header-icon">🔄</span>
+            <span class="bottom-card-header-title">TL取込ログ</span>
+            <span class="pulse-dot"></span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">14:30</span>
+            <span class="ota-dot" style="background:#DC2626"></span>
+            <span class="log-ota ok">じゃらん</span>
+            <span class="log-id">#JA-26301</span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">14:25</span>
+            <span class="ota-dot" style="background:#991B1B"></span>
+            <span class="log-ota ok">楽天</span>
+            <span class="log-id">#RK-89012</span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">14:20</span>
+            <span class="ota-dot" style="background:#1E3A5F"></span>
+            <span class="log-ota ok">Booking</span>
+            <span class="log-id">#BK-44521</span>
+          </div>
+          <div class="log-item">
+            <span class="log-time">14:15</span>
+            <span class="ota-dot" style="background:#7C3AED"></span>
+            <span class="log-ota ok">Agoda</span>
+            <span class="log-id">#AG-33201</span>
+          </div>
+          <div class="log-item error">
+            <span class="log-time">14:10</span>
+            <span class="ota-dot" style="background:#DC2626"></span>
+            <span class="log-ota err">❌ エラー</span>
+            <span class="log-id">#XX-00123</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Clock
+function updateClock() {
+  const d = new Date();
+  const days = ["日","月","火","水","木","金","土"];
+  const s = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）` +
+    `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}:${String(d.getSeconds()).padStart(2,"0")}`;
+  document.getElementById("clock").textContent = s;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// Nav toggle
+function toggleNav() {
+  const nav = document.getElementById("sidenav");
+  const btn = document.getElementById("navToggle");
+  nav.classList.toggle("collapsed");
+  btn.textContent = nav.classList.contains("collapsed") ? "▸" : "◂";
+  // main margin is handled by CSS sibling selector
+  const main = document.getElementById("mainArea");
+  main.style.marginLeft = nav.classList.contains("collapsed") ? "56px" : "220px";
+}
+
+// Hover effects for summary cards
+document.querySelectorAll(".summary-card").forEach(card => {
+  card.addEventListener("mouseenter", () => {
+    card.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
+    card.style.transform = "translateY(-2px)";
+  });
+  card.addEventListener("mouseleave", () => {
+    card.style.boxShadow = "0 1px 3px rgba(0,0,0,0.04)";
+    card.style.transform = "none";
+  });
+});
+</script>
+</body>
+</html>

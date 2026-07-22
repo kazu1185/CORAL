@@ -1,0 +1,26 @@
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layout__main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--transition-normal);
+}
+
+.sidebar--collapsed ~ .layout__main,
+.layout:has(.sidebar--collapsed) .layout__main {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.layout__content {
+  flex: 1;
+  /* 余白は旧デザイン(20px)より広めに取り、紙面の静けさを作る */
+  padding: 24px 28px 40px;
+  background: var(--bg-main);
+  overflow-y: auto;
+}

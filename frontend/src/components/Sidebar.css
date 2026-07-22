@@ -1,0 +1,178 @@
+/**
+ * サイドバー — ライトシェル（2026-07 UI刷新）
+ * 濃紺の「管理画面らしさ」を排し、本文と地続きのアイボリー面 + 墨色テキストにする。
+ * アクティブ項目は左バーではなく「面（ピル）」で示す方が静かで上質に見える。
+ */
+.sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-normal);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 100;
+}
+
+.sidebar--collapsed {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar__logo {
+  height: var(--header-top-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.sidebar__logo-text {
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.sidebar__logo-img {
+  height: 26px;
+  width: auto;
+}
+
+.sidebar__logo-icon {
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.sidebar__logo-icon-img {
+  height: 28px;
+  width: 28px;
+}
+
+/* ダークテーマでは墨色ロゴが沈むため、filterで明色化する。
+   content:url()による画像差し替えはCRAのcss-loaderがパス解決に失敗するため不可。
+   invert+hue-rotateで墨→明色、珊瑚オレンジは概ね元の色相に戻る */
+html[data-theme="dark"] .sidebar__logo-img,
+html[data-theme="dark"] .sidebar__logo-icon-img {
+  filter: invert(0.85) hue-rotate(180deg) saturate(1.4);
+}
+
+.sidebar__nav {
+  flex: 1;
+  padding: 14px 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar--collapsed .sidebar__item {
+  justify-content: center;
+  padding: 10px 0;
+  gap: 0;
+}
+
+.sidebar__item:hover {
+  background: var(--bg-sidebar-hover);
+  color: var(--text-primary);
+}
+
+.sidebar__item--active {
+  background: var(--bg-sidebar-active);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* アクティブ項目のアイコンだけブラスにして視線を導く */
+.sidebar__item--active .sidebar__icon {
+  color: var(--accent-blue);
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}
+
+.sidebar__item--locked {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.sidebar__item--locked:hover {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.sidebar__icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.sidebar__item:hover .sidebar__icon {
+  color: var(--text-secondary);
+}
+
+.sidebar__item--active:hover .sidebar__icon {
+  color: var(--accent-blue);
+}
+
+.sidebar__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.sidebar__lock {
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+/* トグルボタン: サイドバー右端の縦中央、縦バー型 */
+.sidebar__toggle {
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 80px;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  background: var(--border-strong);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 101;
+  transition: width 0.2s, background 0.2s;
+}
+.sidebar__toggle:hover {
+  width: 20px;
+  background: var(--accent-blue);
+}
+.sidebar__toggle .material-symbols-outlined {
+  font-size: 14px;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.sidebar__toggle:hover .material-symbols-outlined {
+  opacity: 1;
+}

@@ -1,0 +1,103 @@
+.cd__overlay {
+  position: fixed; inset: 0;
+  /* 真っ黒ではなく墨色の紗をかける（紙面との調和） */
+  background: rgba(38, 34, 27, 0.45);
+  /* 顧客詳細モーダル(z-index:1000)より上に表示する必要がある */
+  z-index: 2000;
+}
+
+.cd__dialog {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px; max-width: 90vw;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px 24px;
+  box-shadow: var(--shadow-lg);
+  z-index: 2001;
+}
+
+.cd__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 10px;
+}
+
+.cd__message {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.cd__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cd__btn {
+  padding: 9px 22px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.cd__btn--cancel {
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.cd__btn--cancel:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.cd__btn--confirm {
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cd__btn--blue { background: var(--accent-blue); }
+.cd__btn--red { background: var(--accent-red); }
+.cd__btn--green { background: var(--accent-green); }
+.cd__btn--orange { background: #C2620E; }
+
+.cd__input-wrap {
+  margin-bottom: 20px;
+}
+.cd__input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: var(--font-size-base);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.cd__input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+  outline: none;
+}
+.cd__hint {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+.cd__btn--confirm:hover {
+  opacity: 0.88;
+}

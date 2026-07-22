@@ -1,0 +1,398 @@
+.settings {
+  display: flex;
+  gap: 0;
+  height: 100%;
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* 左メニュー */
+.settings__sidebar {
+  width: 220px;
+  min-width: 220px;
+  background: var(--bg-sidebar); /* Patina: メニュー面はカード白ではなくサイドバー用アイボリーで紙面に沈める */
+  border-right: 1px solid var(--border-default);
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.settings__section {
+  margin-bottom: 8px;
+}
+
+.settings__section-title {
+  padding: 8px 20px 4px;
+  font-size: 12px; /* Patina: 可読性のため11px→12pxへ引き上げ */
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+}
+
+.settings__menu-item:hover:not(.settings__menu-item--locked) {
+  background: var(--bg-sidebar-hover); /* Patina: ホバーはサイドバー専用トーンで統一 */
+  color: var(--text-primary);
+}
+
+.settings__menu-item--active {
+  background: var(--bg-sidebar-active); /* Patina: 旧#EFF6FF（青系）→ブラスの淡い面に置換 */
+  color: var(--accent-blue);
+  font-weight: 500;
+  border-right: 3px solid var(--accent-blue);
+}
+
+.settings__menu-item--locked {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.settings__menu-icon {
+  font-size: 18px;
+}
+
+.settings__menu-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings__lock-icon {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* 右側コンテンツ */
+.settings__content {
+  flex: 1;
+  padding: 24px 32px;
+  overflow-y: auto;
+  background: var(--bg-main);
+}
+
+/* 共通: 設定ページヘッダー */
+.settings-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.settings-page__title {
+  font-size: var(--font-size-xl); /* Patina: ページ見出しはトークン基準（18px→20px）で階層を明確に */
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 共通: 設定カード */
+.settings-card {
+  background: var(--bg-card);
+  border: none; /* Patina: カードは線で囲わず極薄い影で輪郭を出す */
+  border-radius: var(--radius-md);
+  padding: 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 共通: テーブル */
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.settings-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-default);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.settings-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light); /* Patina: 行区切りは薄い線で紙面を静かに保つ */
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.settings-table tr:last-child td {
+  border-bottom: none;
+}
+
+.settings-table tr.inactive-row {
+  opacity: 0.5;
+}
+
+/* 共通: ボタン */
+.settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: background 0.15s;
+}
+
+.settings-btn:hover {
+  background: var(--bg-hover);
+}
+
+.settings-btn--primary {
+  background: var(--accent-blue);
+  color: var(--text-inverse);
+  border-color: var(--accent-blue);
+}
+
+.settings-btn--primary:hover {
+  background: var(--accent-blue-hover); /* Patina: 旧#2563EB（青）→ブラス濃色に置換 */
+}
+
+.settings-btn--sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.settings-btn--danger {
+  color: var(--accent-red);
+  border-color: var(--accent-red);
+}
+
+.settings-btn--danger:hover {
+  /* Patina: 旧#FEF2F2（寒色系の淡赤）→アクセント赤ベースの暖かい淡面。意味色（危険=赤）は維持 */
+  background: rgba(179, 54, 44, 0.08);
+}
+
+/* 共通: フォーム */
+.settings-form__group {
+  margin-bottom: 16px;
+}
+
+.settings-form__label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.settings-form__input,
+.settings-form__select,
+.settings-form__textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid var(--border-strong); /* Patina: 入力欄は輪郭が必要なので強めのボーダー */
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  transition: border-color 0.15s;
+}
+
+.settings-form__input:focus,
+.settings-form__select:focus,
+.settings-form__textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring); /* Patina: 旧青リング→ブラスのフォーカスリング */
+}
+
+.settings-form__input--sm {
+  max-width: 200px;
+}
+
+.settings-form__textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* 共通: モーダル */
+.settings-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 34, 27, 0.45); /* Patina: オーバーレイも純黒ではなく墨色ベースで暖かく */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.settings-modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  min-width: 400px;
+  max-width: 560px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.settings-modal__title {
+  font-size: var(--font-size-lg); /* Patina: 見出しトークンに合わせて16px→17px */
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.settings-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* 共通: トグルスイッチ */
+.settings-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.settings-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-toggle__slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border-strong); /* Patina: OFF状態は旧#CBD5E1（寒色）→暖色グレーに。ON（ブラス）との対比は維持 */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.settings-toggle__slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 2px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.settings-toggle input:checked + .settings-toggle__slider {
+  background: var(--accent-blue);
+}
+
+.settings-toggle input:checked + .settings-toggle__slider::before {
+  transform: translateX(16px);
+}
+
+/* 共通: ステータスバッジ */
+.settings-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+/* バッジ色: 意味の系統（有効=緑、無効=グレー、権限=各識別色）は保ちつつ、
+   彩度を落とした Patina のステータスパレットに揃える */
+.settings-badge--active {
+  background: var(--status-checkedin-bg);
+  color: var(--accent-green);
+}
+
+.settings-badge--inactive {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+
+.settings-badge--admin {
+  background: var(--status-checkedout-bg);
+  color: var(--accent-purple);
+}
+
+.settings-badge--front_manager {
+  /* Patina: 旧#DBEAFE/#2563EB（青）→主要アクセント（ブラス）の淡面に置換 */
+  background: var(--accent-blue-soft);
+  color: var(--accent-blue);
+}
+
+.settings-badge--front {
+  /* Patina: 黄系の意味は維持しつつ彩度を落とした暖色に */
+  background: rgba(176, 138, 30, 0.12);
+  color: var(--accent-yellow);
+}
+
+.settings-badge--housekeeping {
+  /* Patina: 緑系の意味は維持しつつティール寄りの落ち着いた色に */
+  background: rgba(46, 125, 116, 0.12);
+  color: var(--accent-teal);
+}
+
+/* 共通: エラーメッセージ */
+.settings-error {
+  background: var(--status-noshow-bg); /* Patina: 旧#FEF2F2→彩度を落とした暖色系の淡赤。危険=赤の意味は維持 */
+  border: 1px solid rgba(179, 54, 44, 0.25);
+  color: var(--accent-red);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* 共通: 保存完了メッセージ */
+.settings-success {
+  background: var(--status-checkedin-bg); /* Patina: 旧#F0FDF4→彩度を落とした淡緑。成功=緑の意味は維持 */
+  border: 1px solid rgba(62, 124, 79, 0.3);
+  color: var(--accent-green);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+/* ローディング */
+.settings-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ドラッグ&ドロップ並び替え */
+.pm-drag-over {
+  /* Patina: フォールバック値も旧青#3B82F6→ブラス#8A7440に更新（変数未定義環境でも寒色が出ないように） */
+  border-top: 2px solid var(--accent-blue, #8A7440) !important;
+}
+.pm-drag-source {
+  opacity: 0.4;
+}
+.settings-table tr[draggable="true"] {
+  transition: background 0.1s;
+}
+.settings-table tr[draggable="true"]:hover {
+  /* Patina: ホバー面は専用トークンへ。フォールバックも暖色に更新 */
+  background: var(--bg-hover, #F8F6F1);
+}

@@ -1,0 +1,214 @@
+/* 顧客一覧ページ: ReservationListPage.cssと同じデザイントークン・パターンに準拠 */
+
+.guest {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ツールバー: 検索バー + 新規登録ボタンを横並び */
+.guest__toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 検索バー: resv__searchと同じスタイル */
+.guest__search {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong); /* Patina刷新: 入力欄は輪郭が必要なので強めのボーダーを使う */
+  border-radius: var(--radius-md);
+  padding: 0 12px;
+  flex: 0 1 400px;
+}
+
+/* Patina刷新: 入力中であることが分かるようフォーカスリングを追加（入力欄共通ルール） */
+.guest__search:focus-within {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.guest__search-icon {
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+.guest__search-input {
+  border: none;
+  outline: none;
+  padding: 8px;
+  font-size: var(--font-size-sm);
+  background: transparent;
+  color: var(--text-primary);
+  width: 100%;
+  font-family: inherit;
+}
+
+/* 新規登録ボタン: 右端に配置、アクセントカラーで目立たせる */
+.guest__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent-blue);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background var(--transition-fast);
+}
+
+.guest__add-btn:hover {
+  opacity: 0.9;
+}
+
+.guest__add-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* テーブルラッパー: カード風の見た目 */
+.guest__table-wrap {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow-x: auto;
+}
+
+.guest__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+/* テーブルヘッダー: 固定表示 + ボーダー */
+.guest__table thead th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+  background: var(--bg-card); /* stickyヘッダーの下地はカード面と揃える */
+  position: sticky;
+  top: 0;
+}
+
+/* ソート可能ヘッダー: クリック可能であることを示すカーソル */
+.guest__sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.guest__sortable:hover {
+  color: var(--text-primary);
+}
+
+.guest__sort-icon {
+  font-size: 14px;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* テーブルセル */
+.guest__table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+/* 行ホバー: 背景色を変えてクリック可能であることを示す */
+.guest__row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.guest__row:hover {
+  background: var(--bg-hover); /* Patina刷新: 行ホバーは専用トークンで統一 */
+}
+
+/* ユーティリティクラス */
+.guest__center { text-align: center; }
+.guest__right { text-align: right; font-variant-numeric: tabular-nums; }
+/* 顧客コードはモノスペースで視認性向上 */
+.guest__mono { font-size: var(--font-size-xs); color: var(--text-secondary); font-family: monospace; }
+
+/* 名前の2段表示: 漢字名（メイン）+ ローマ字（サブ） */
+.guest__name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.guest__name-main {
+  font-weight: 500;
+}
+
+.guest__name-sub {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* データなし表示: ハイフンで空欄を示す */
+.guest__no-data {
+  color: var(--text-muted);
+}
+
+/* VIPバッジ: 黄色背景 + 星アイコンで特別なゲストを強調 */
+.guest__vip-badge {
+  display: inline-block;
+  font-size: 11px; /* Patina刷新: 10pxは可読性が低いためバッジ許容下限の11pxへ */
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(176, 138, 30, 0.15); /* Patina刷新: 鮮やかなレモン色をaccent-yellowベースの淡面に。VIP=金の意味は維持 */
+  color: #8A6D1E;
+  white-space: nowrap;
+}
+
+/* ローディング・空状態 */
+.guest__loading, .guest__empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* ページネーション: ReservationListPageと同じパターン */
+.guest__pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.guest__page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.guest__page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.guest__page-info {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}

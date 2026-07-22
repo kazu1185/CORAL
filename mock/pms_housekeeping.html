@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>PMS 清掃ボード</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP','Helvetica Neue',sans-serif;background:#F8FAFC;color:#0F172A;min-height:100vh;-webkit-tap-highlight-color:transparent}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+
+/* Header */
+.header{background:#fff;border-bottom:1px solid #E2E8F0;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-title{font-size:18px;font-weight:700}
+.header-sub{font-size:12px;color:#94A3B8}
+.header-right{display:flex;align-items:center;gap:16px;font-size:12px;color:#64748B}
+
+/* Summary bar */
+.summary-bar{display:flex;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid #E2E8F0;flex-wrap:wrap;position:sticky;top:53px;z-index:49}
+.sum-pill{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:13px;border:1px solid #E2E8F0;background:#fff;cursor:pointer;transition:all .12s;-webkit-user-select:none;user-select:none}
+.sum-pill:active{transform:scale(.97)}
+.sum-pill .pill-dot{width:12px;height:12px;border-radius:50%}
+.sum-pill .pill-count{font-size:18px;font-weight:700;color:#0F172A}
+.sum-pill .pill-label{color:#64748B;font-size:12px}
+.sum-pill.active{border-color:#3B82F6;background:#EFF6FF}
+
+/* Content */
+.content{padding:16px 20px}
+
+/* Floor section */
+.floor-section{margin-bottom:20px}
+.floor-label{font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;padding-left:4px}
+
+/* Card grid - tablet optimized */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+/* Room card */
+.room-card{background:#fff;border:2px solid #E2E8F0;border-radius:12px;padding:16px;transition:all .15s;position:relative;overflow:hidden}
+.room-card:active{transform:scale(.98)}
+
+/* Status colors */
+.room-card.needs-cleaning{border-left:5px solid #EF4444;background:#fff}
+.room-card.cleaning{border-left:5px solid #F59E0B;background:#FFFBEB}
+.room-card.cleaned{border-left:5px solid #22C55E;background:#F0FDF4}
+.room-card.inspection{border-left:5px solid #3B82F6;background:#EFF6FF}
+.room-card.occupied{border-left:5px solid #94A3B8;background:#F8FAFC}
+
+/* Card layout */
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.card-room-info{display:flex;align-items:center;gap:8px}
+.room-num{font-size:22px;font-weight:700}
+.room-type{font-size:12px;color:#94A3B8;font-weight:500}
+
+/* Status badge */
+.status-badge{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700}
+.sb-needs{background:#FEE2E2;color:#DC2626}
+.sb-cleaning{background:#FEF3C7;color:#B45309}
+.sb-cleaned{background:#DCFCE7;color:#16A34A}
+.sb-inspection{background:#DBEAFE;color:#2563EB}
+.sb-occupied{background:#F1F5F9;color:#94A3B8}
+
+/* Card detail row */
+.card-detail{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#64748B;margin-bottom:8px}
+.detail-guest{font-size:13px;color:#334155;font-weight:500}
+.detail-note{font-size:11px;color:#94A3B8}
+.co-time{font-size:11px;color:#3B82F6;font-weight:600}
+
+/* Staff assignment */
+.staff-row{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid #F1F5F9}
+.staff-name{font-size:12px;color:#334155;display:flex;align-items:center;gap:4px}
+.staff-name .staff-icon{width:20px;height:20px;border-radius:50%;background:#E2E8F0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#64748B}
+.time-stamp{font-size:10px;color:#94A3B8}
+
+/* Action buttons (touch-friendly) */
+.card-actions{display:flex;gap:6px;margin-top:8px}
+.card-action-btn{flex:1;padding:10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #E2E8F0;background:#fff;color:#334155;text-align:center;transition:all .12s;-webkit-user-select:none;user-select:none}
+.card-action-btn:active{transform:scale(.96)}
+.card-action-btn.primary{background:#3B82F6;color:#fff;border-color:#3B82F6}
+.card-action-btn.success{background:#22C55E;color:#fff;border-color:#22C55E}
+.card-action-btn.warn{background:#F59E0B;color:#fff;border-color:#F59E0B}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:14px;padding:24px;max-width:380px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:#64748B;margin-bottom:16px}
+.staff-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.staff-option{padding:14px;border:2px solid #E2E8F0;border-radius:10px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;transition:all .12s;-webkit-user-select:none;user-select:none}
+.staff-option:active{transform:scale(.96)}
+.staff-option.selected{border-color:#3B82F6;background:#EFF6FF;color:#2563EB}
+.modal-footer{display:flex;gap:8px}
+.modal-btn{flex:1;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;border:none;text-align:center}
+.modal-btn.cancel{background:#F1F5F9;color:#64748B}
+.modal-btn.confirm{background:#3B82F6;color:#fff}
+.modal-btn:active{transform:scale(.97)}
+
+/* Occupied info (no actions for occupied rooms) */
+.occupied-info{font-size:12px;color:#94A3B8;padding:6px 0;display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div>
+      <div class="header-title">🧹 清掃ボード</div>
+      <div class="header-sub">PATINA HOTEL OKINAWA</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span id="clock"></span>
+  </div>
+</header>
+
+<!-- Summary bar -->
+<div class="summary-bar">
+  <div class="sum-pill"><span class="pill-dot" style="background:#EF4444"></span><span class="pill-count">4</span><span class="pill-label">未着手</span></div>
+  <div class="sum-pill"><span class="pill-dot" style="background:#F59E0B"></span><span class="pill-count">3</span><span class="pill-label">清掃中</span></div>
+  <div class="sum-pill"><span class="pill-dot" style="background:#22C55E"></span><span class="pill-count">5</span><span class="pill-label">清掃済</span></div>
+  <div class="sum-pill"><span class="pill-dot" style="background:#3B82F6"></span><span class="pill-count">1</span><span class="pill-label">点検待</span></div>
+  <div class="sum-pill"><span class="pill-dot" style="background:#94A3B8"></span><span class="pill-count">11</span><span class="pill-label">在室中</span></div>
+</div>
+
+<div class="content">
+
+  <!-- 2F -->
+  <div class="floor-section">
+    <div class="floor-label">2F ─ シングル</div>
+    <div class="card-grid">
+
+      <!-- 201: needs cleaning (CO済み) -->
+      <div class="room-card needs-cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">201</span><span class="room-type">シングル</span></div>
+          <span class="status-badge sb-needs">未着手</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 10:15</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn primary" onclick="showStaffModal('201','cleaning')">清掃開始</button>
+        </div>
+      </div>
+
+      <!-- 202: cleaning -->
+      <div class="room-card cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">202</span><span class="room-type">シングル</span></div>
+          <span class="status-badge sb-cleaning">清掃中</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 09:45</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">田</span>田中さん</span>
+          <span class="time-stamp">10:20 開始</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn success" onclick="showStaffModal('202','cleaned')">清掃完了</button>
+        </div>
+      </div>
+
+      <!-- 203: cleaned -->
+      <div class="room-card cleaned">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">203</span><span class="room-type">シングル</span></div>
+          <span class="status-badge sb-cleaned">清掃済</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 08:30</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">山</span>山本さん</span>
+          <span class="time-stamp">09:15-10:00</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn warn" onclick="showStaffModal('203','inspection')">点検依頼</button>
+        </div>
+      </div>
+
+      <!-- 204: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">204</span><span class="room-type">シングル</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 田村 健一 ・ 1/3泊 ・ CO: 4/12</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3F -->
+  <div class="floor-section">
+    <div class="floor-label">3F ─ ツイン</div>
+    <div class="card-grid">
+
+      <!-- 301: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">301</span><span class="room-type">ツイン</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 渡辺 健太 ・ 1/2泊 ・ CO: 4/11</div>
+      </div>
+
+      <!-- 302: needs cleaning -->
+      <div class="room-card needs-cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">302</span><span class="room-type">ツイン</span></div>
+          <span class="status-badge sb-needs">未着手</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 11:02</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn primary" onclick="showStaffModal('302','cleaning')">清掃開始</button>
+        </div>
+      </div>
+
+      <!-- 303: cleaning -->
+      <div class="room-card cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">303</span><span class="room-type">ツイン</span></div>
+          <span class="status-badge sb-cleaning">清掃中</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 10:30</span>
+          <span class="detail-note">連泊清掃（リネン交換なし）</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">佐</span>佐藤さん</span>
+          <span class="time-stamp">11:05 開始</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn success" onclick="showStaffModal('303','cleaned')">清掃完了</button>
+        </div>
+      </div>
+
+      <!-- 304: inspection -->
+      <div class="room-card inspection">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">304</span><span class="room-type">ツイン</span></div>
+          <span class="status-badge sb-inspection">点検待</span>
+        </div>
+        <div class="card-detail">
+          <span>清掃完了 10:45</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">田</span>田中さん</span>
+          <span class="time-stamp">09:50-10:45</span>
+        </div>
+      </div>
+
+      <!-- 305: needs cleaning -->
+      <div class="room-card needs-cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">305</span><span class="room-type">ツイン</span></div>
+          <span class="status-badge sb-needs">未着手</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 09:55</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn primary" onclick="showStaffModal('305','cleaning')">清掃開始</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4F -->
+  <div class="floor-section">
+    <div class="floor-label">4F ─ ダブル / ラージ</div>
+    <div class="card-grid">
+
+      <!-- 401: cleaned -->
+      <div class="room-card cleaned">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">401</span><span class="room-type">ダブル</span></div>
+          <span class="status-badge sb-cleaned">清掃済</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">山</span>山本さん</span>
+          <span class="time-stamp">08:30-09:15</span>
+        </div>
+      </div>
+
+      <!-- 402: cleaned -->
+      <div class="room-card cleaned">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">402</span><span class="room-type">ダブル</span></div>
+          <span class="status-badge sb-cleaned">清掃済</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">佐</span>佐藤さん</span>
+          <span class="time-stamp">08:45-09:30</span>
+        </div>
+      </div>
+
+      <!-- 403: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">403</span><span class="room-type">ラージ</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 森 大輔 ・ 2/6泊 ・ CO: 4/15</div>
+      </div>
+
+      <!-- 404: cleaned -->
+      <div class="room-card cleaned">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">404</span><span class="room-type">ラージ</span></div>
+          <span class="status-badge sb-cleaned">清掃済</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">田</span>田中さん</span>
+          <span class="time-stamp">08:00-08:50</span>
+        </div>
+      </div>
+
+      <!-- 405: cleaning -->
+      <div class="room-card cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">405</span><span class="room-type">ラージ</span></div>
+          <span class="status-badge sb-cleaning">清掃中</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 10:50</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">山</span>山本さん</span>
+          <span class="time-stamp">11:10 開始</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn success" onclick="showStaffModal('405','cleaned')">清掃完了</button>
+        </div>
+      </div>
+
+      <!-- 406: needs cleaning -->
+      <div class="room-card needs-cleaning">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">406</span><span class="room-type">ラージ</span></div>
+          <span class="status-badge sb-needs">未着手</span>
+        </div>
+        <div class="card-detail">
+          <span class="co-time">CO済 11:20</span>
+          <span class="detail-note">通常清掃</span>
+        </div>
+        <div class="card-actions">
+          <button class="card-action-btn primary" onclick="showStaffModal('406','cleaning')">清掃開始</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 5F -->
+  <div class="floor-section">
+    <div class="floor-label">5F ─ デラックス</div>
+    <div class="card-grid">
+
+      <!-- 501: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">501</span><span class="room-type">デラックス</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 佐藤 花子 ・ 1/3泊 ・ CO: 4/12</div>
+      </div>
+
+      <!-- 502: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">502</span><span class="room-type">デラックス</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 田中 花子 ・ 4泊 ・ CO: 4/13</div>
+      </div>
+
+      <!-- 503: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">503</span><span class="room-type">デラックス</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 田中 翔太 ・ 2/3泊 ・ CO: 4/12</div>
+      </div>
+
+      <!-- 504: cleaned -->
+      <div class="room-card cleaned">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">504</span><span class="room-type">デラックス</span></div>
+          <span class="status-badge sb-cleaned">清掃済</span>
+        </div>
+        <div class="staff-row">
+          <span class="staff-name"><span class="staff-icon">佐</span>佐藤さん</span>
+          <span class="time-stamp">10:00-11:00</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 6F -->
+  <div class="floor-section">
+    <div class="floor-label">6F ─ スイート</div>
+    <div class="card-grid">
+
+      <!-- 601: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">601</span><span class="room-type">スイート</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 VIP 鈴木 ・ 3/4泊 ・ CO: 4/12</div>
+      </div>
+
+      <!-- 602: occupied -->
+      <div class="room-card occupied">
+        <div class="card-top">
+          <div class="card-room-info"><span class="room-num">602</span><span class="room-type">スイート</span></div>
+          <span class="status-badge sb-occupied">在室中</span>
+        </div>
+        <div class="occupied-info">🛏 占有中 ・ CO: 4/11</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Staff selection modal -->
+<div class="modal-overlay" id="mo" onclick="hideModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-sub" id="mSub"></div>
+    <div class="staff-grid" id="staffGrid">
+      <div class="staff-option" onclick="selectStaff(this)">田中さん</div>
+      <div class="staff-option" onclick="selectStaff(this)">山本さん</div>
+      <div class="staff-option" onclick="selectStaff(this)">佐藤さん</div>
+      <div class="staff-option" onclick="selectStaff(this)">李さん</div>
+      <div class="staff-option" onclick="selectStaff(this)">高橋さん</div>
+      <div class="staff-option" onclick="selectStaff(this)">鈴木さん</div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn cancel" onclick="hideModal()">キャンセル</button>
+      <button class="modal-btn confirm" id="confirmBtn" onclick="confirmAction()">確定</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedStaff = null;
+let currentRoom = '';
+let currentAction = '';
+
+function showStaffModal(room, action) {
+  currentRoom = room;
+  currentAction = action;
+  selectedStaff = null;
+  document.querySelectorAll('.staff-option').forEach(o => o.classList.remove('selected'));
+
+  const titles = { cleaning: '清掃開始', cleaned: '清掃完了', inspection: '点検依頼' };
+  document.getElementById('mTitle').textContent = `${room}号室 — ${titles[action]}`;
+  document.getElementById('mSub').textContent = '担当者を選択してください';
+  document.getElementById('mo').classList.add('show');
+}
+
+function selectStaff(el) {
+  document.querySelectorAll('.staff-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedStaff = el.textContent;
+}
+
+function confirmAction() {
+  if (!selectedStaff) { alert('担当者を選択してください'); return; }
+  const msgs = { cleaning: '清掃開始', cleaned: '清掃完了', inspection: '点検依頼' };
+  alert(`${currentRoom}号室: ${msgs[currentAction]}（担当: ${selectedStaff}）`);
+  hideModal();
+}
+
+function hideModal() { document.getElementById('mo').classList.remove('show'); }
+
+(function ck(){const d=new Date(),w=["日","月","火","水","木","金","土"];
+document.getElementById("clock").textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${w[d.getDay()]}）${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+setTimeout(ck,30000)})();
+</script>
+</body>
+</html>

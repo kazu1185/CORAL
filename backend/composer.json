@@ -1,0 +1,14 @@
+{
+    "name": "pms/backend",
+    "description": "PMS バックエンドAPI",
+    "type": "project",
+    "require": {
+        "php": ">=8.4",
+        "tecnickcom/tcpdf": "^6.11"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

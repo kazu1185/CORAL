@@ -1,0 +1,485 @@
+.ab { display: flex; flex-direction: column; gap: 12px; height: calc(100vh - var(--header-height) - 40px); }
+.ab__loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
+/* ナビ */
+.ab__nav {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg-card); padding: 8px 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.ab__nav-btn {
+  display: flex; align-items: center; gap: 2px;
+  padding: 6px 12px; font-size: var(--font-size-xs); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); background: var(--bg-card); cursor: pointer; color: var(--text-secondary);
+  font-family: inherit;
+}
+.ab__nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.ab__nav-btn .material-symbols-outlined { font-size: 16px; }
+/* 日付指定ジャンプ */
+.ab__nav-date {
+  padding: 5px 8px; font-size: var(--font-size-xs); font-family: inherit;
+  /* Patina: 入力欄の輪郭は border-strong を使う（規約統一） */
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+}
+.ab__nav-date:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+/* Patina: 入力欄のフォーカスはブラスのリングで示す */
+.ab__nav-date:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.ab__nav-period { font-size: var(--font-size-sm); color: var(--text-muted); margin-left: auto; margin-right: 8px; }
+
+.ab__panel-toggle { margin-left: 0; }
+.ab__panel-toggle--active { border-color: var(--accent-blue); color: var(--accent-blue); background: var(--accent-blue-soft); }
+.ab__badge {
+  /* Patina: 可読性ルールにより10px→11px（バッジは11px許容） */
+  font-size: 11px; font-weight: 700; min-width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-red); color: #fff; border-radius: 9px; padding: 0 4px;
+}
+
+/* メインエリア */
+.ab__body {
+  position: relative;
+  display: flex; gap: 0; flex: 1; min-height: 0; overflow: hidden;
+}
+
+/* チャート */
+.ab__chart-wrap {
+  position: relative; flex: 1; min-width: 0;
+  background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  overflow: auto;
+}
+.ab__chart { border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 100%; }
+.ab__room-header {
+  width: 80px; min-width: 80px; max-width: 80px;
+  padding: 6px 8px; font-size: var(--font-size-xs); font-weight: 600; color: var(--text-muted);
+  text-align: left; border-bottom: 1px solid var(--border-default);
+  position: sticky; left: 0; background: var(--bg-card); z-index: 2;
+}
+.ab__date-header {
+  padding: 4px 2px; text-align: center; border-bottom: 1px solid var(--border-default);
+  /* Patina: 可読性ルールにより10px→12px（本文・ラベルは12px以上） */
+  font-weight: 400; font-size: 12px;
+}
+/* Patina: 今日の強調は青からブラスの淡い面へ */
+.ab__date-header--today { background: var(--accent-blue-soft); }
+/* Patina: 週末は寒色の赤透過ではなく、accent-red(#B3362C)系の暖かい淡色に */
+.ab__date-header--weekend { background: rgba(179, 54, 44, 0.05); }
+.ab__date-day { display: block; font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary); }
+/* Patina: 9px以下禁止ルールにより曜日ラベルを12pxへ（ヘッダー行の高さは固定値でないため拡大可） */
+.ab__date-dow { display: block; font-size: 12px; color: var(--text-muted); }
+
+.ab__room-cell {
+  width: 80px; min-width: 80px; max-width: 80px;
+  padding: 4px 8px; border-bottom: 1px solid var(--border-default);
+  position: sticky; left: 0; background: var(--bg-card); z-index: 1;
+  white-space: nowrap;
+}
+.ab__room-num { font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary); margin-right: 4px; }
+/* Patina: 9px以下禁止ルールにより11pxへ（部屋タイプ略号はタグ扱いで11px許容。
+   80px固定セル内なので12pxにするとはみ出しやすく11pxに留めた） */
+.ab__room-type { font-size: 11px; color: var(--text-muted); }
+
+.ab__cell {
+  border-bottom: 1px solid var(--border-default); border-right: 1px solid var(--border-default);
+  height: 44px; position: relative; overflow: visible; padding: 0;
+}
+/* Patina: 今日カラムはブラスの極薄面（ヘッダーの--accent-blue-softより弱め。バーの視認性を優先） */
+.ab__cell--today { background: rgba(138, 116, 64, 0.05); }
+/* Patina: 週末セルも暖色系の淡い赤に */
+.ab__cell--weekend { background: rgba(179, 54, 44, 0.03); }
+.ab__row--disabled .ab__cell { background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(0,0,0,0.03) 5px, rgba(0,0,0,0.03) 10px); }
+/* Patina: ドラッグ受け入れ中の行はブラスの選択面で示す */
+.ab__row--drag-over .ab__cell { background: var(--accent-blue-soft); }
+.ab__row--drag-over .ab__room-cell { background: var(--accent-blue-soft); }
+
+/* バー（セル内配置）
+   注意: バー幅はJSX側の calc(泊数 * 100% - 2px) 方式で決まる。
+   top/left/height/padding等のレイアウト値はコーディング規約#7により変更禁止 */
+.ab__bar {
+  position: absolute; top: 5px; left: 1px; right: auto; height: 32px; border-radius: 4px;
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 6px; color: #fff; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: none; font-family: inherit;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: opacity var(--transition-fast);
+  z-index: 3;
+}
+.ab__bar:hover { opacity: 0.85; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+.ab__bar--noshow { opacity: 0.4; text-decoration: line-through; }
+.ab__bar--checked-in { border: 2px solid rgba(255,255,255,0.5); cursor: default; }
+.ab__bar-ci-badge {
+  /* Patina: 9px以下禁止ルールにより8px→10px（バー高32px内に収めるためバー内バッジは10pxに留めた） */
+  font-size: 10px; font-weight: 700; padding: 0 3px;
+  background: rgba(255,255,255,0.4); border-radius: 2px; flex-shrink: 0;
+}
+/* released アサイン（CI後の部屋移動履歴）を薄く表示するためのスタイル。
+   現状はJSX側で status='released' を描画対象から除外しているため未適用だが、
+   将来「移動履歴をグレーアウトで残す」UIに戻す可能性があるため意図的に残す。
+   削除しても現時点の見た目には影響しないがCLAUDE.mdの設計意図（移動履歴の保持）とペア。 */
+.ab__bar--released { opacity: 0.3; }
+/* 連結バー */
+.ab__bar--linked {
+  display: flex; overflow: hidden; padding: 0; background: none;
+  cursor: pointer; border: none;
+}
+.ab__bar--linked .ab__bar-segment {
+  display: flex; align-items: center; gap: 2px;
+  padding: 0 6px; overflow: hidden;
+  height: 100%;
+  border-right: 2px solid rgba(255,255,255,0.6);
+  color: #fff; font-size: 11px; font-weight: 500;
+}
+.ab__bar--linked .ab__bar-segment:last-child {
+  border-right: none;
+}
+
+.ab__bar-name { overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0; }
+/* バッジ類（VIP=V、連結=🔗）— バー上に小さく表示する補助情報。
+   ab__bar-vip は line:597/647 で描画中。
+   ab__bar-link は現状JSX未使用だが、RoomIndicatorの has_link 🔗アイコンと
+   対をなすアサインボード側のバッジとして将来実装する想定で残す。
+   削除すると個別バー上に連結識別バッジを戻す際に再定義が必要になるため保持。 */
+.ab__bar-vip, .ab__bar-link {
+  /* Patina: 9px以下禁止ルールにより8px→10px（バー内バッジ。バー高に収まる上限） */
+  font-size: 10px; font-weight: 700; padding: 0 3px;
+  background: rgba(255,255,255,0.3); border-radius: 2px; flex-shrink: 0;
+}
+
+/* リサイズハンドル（延泊/短縮） */
+.ab__bar-resize {
+  position: absolute; top: 0; right: 0; width: 8px; height: 100%;
+  cursor: ew-resize; background: transparent; border: none;
+  border-radius: 0 4px 4px 0;
+}
+.ab__bar-resize:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* ツールチップ */
+.ab__tooltip {
+  position: fixed; z-index: 700;
+  /* Patina: 旧デザインでは--bg-sidebarが濃紺だったが、刷新後はアイボリーになったため
+     白文字が読めなくなる。ツールチップの暗背景は墨色#2E2A22を直接指定する */
+  background: #2E2A22; color: #fff;
+  padding: 10px 14px; border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  pointer-events: none; max-width: 300px;
+  font-size: var(--font-size-xs); line-height: 1.6;
+}
+.ab__tooltip-name {
+  font-size: var(--font-size-sm); font-weight: 600; margin-bottom: 4px;
+}
+.ab__tooltip-row {
+  display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+/* Patina: 9px以下禁止ルールにより11pxへ（OTAタグは11px許容） */
+.ab__tooltip .ab__ota { font-size: 11px; }
+
+/* OTA背景色 */
+.ota-bg-jalan { background: var(--ota-jalan); }
+.ota-bg-rakuten { background: var(--ota-rakuten); }
+.ota-bg-booking { background: var(--ota-booking); }
+.ota-bg-agoda { background: var(--ota-agoda); }
+.ota-bg-expedia { background: var(--ota-expedia); }
+.ota-bg-direct { background: var(--ota-direct); }
+.ota-bg-phone { background: var(--ota-phone); }
+.ota-bg-corporate { background: var(--ota-corporate); }
+
+/* 統合予約（channel=NULL）: 紫グラデーション（予約一覧・詳細と統一）
+   Patina刷新でも維持: OTAカラーと同じく「チャネル識別色」であり、
+   他画面との統一色のため単独で変更しない */
+.ab__bar--merged { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+
+/* 右サイドパネル（オーバーレイ） */
+.ab__panel {
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 280px;
+  background: var(--bg-card); border-left: 1px solid var(--border-default);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: -4px 0 16px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+.ab__panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 12px; border-bottom: 1px solid var(--border-default); flex-shrink: 0;
+}
+.ab__panel-title {
+  font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary);
+  margin: 0; display: flex; align-items: center; gap: 6px;
+}
+.ab__panel-count {
+  /* Patina: 可読性ルールにより10px→11px（バッジは11px許容） */
+  font-size: 11px; font-weight: 700; min-width: 18px; height: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--accent-red); color: #fff; border-radius: 9px; padding: 0 4px;
+}
+.ab__panel-close {
+  border: none; background: transparent; cursor: pointer; color: var(--text-muted);
+  padding: 2px; border-radius: var(--radius-sm);
+}
+.ab__panel-close:hover { color: var(--text-primary); background: var(--bg-main); }
+.ab__panel-body {
+  flex: 1; overflow-y: auto; padding: 8px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.ab__panel-empty {
+  text-align: center; padding: 20px; color: var(--text-muted); font-size: var(--font-size-sm);
+}
+
+/* 未アサインカード */
+.ab__unassigned-item {
+  padding: 8px 10px; background: var(--bg-main); border-radius: var(--radius-sm);
+  cursor: grab; transition: box-shadow var(--transition-fast);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.ab__unassigned-item:hover { box-shadow: var(--shadow-md); }
+.ab__unassigned-item:active { cursor: grabbing; }
+.ab__unassigned-name { font-size: var(--font-size-sm); font-weight: 500; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ab__unassigned-pax { font-weight: 400; font-size: var(--font-size-xs); color: var(--text-muted); margin-left: 2px; }
+.ab__unassigned-dates { font-size: var(--font-size-xs); color: var(--text-muted); }
+.ab__unassigned-meta { display: flex; align-items: center; gap: 6px; }
+.ab__unassigned-type { font-size: var(--font-size-xs); color: var(--text-secondary); }
+/* Patina: 9px以下禁止ルールにより11pxへ（OTAタグは11px許容） */
+.ab__ota { font-size: 11px; font-weight: 600; padding: 1px 4px; border-radius: 3px; color: #fff; }
+
+/* OTAボーダー色 */
+.ota-border-jalan { border-left: 3px solid var(--ota-jalan); }
+.ota-border-rakuten { border-left: 3px solid var(--ota-rakuten); }
+.ota-border-booking { border-left: 3px solid var(--ota-booking); }
+.ota-border-agoda { border-left: 3px solid var(--ota-agoda); }
+.ota-border-expedia { border-left: 3px solid var(--ota-expedia); }
+.ota-border-direct { border-left: 3px solid var(--ota-direct); }
+.ota-border-phone { border-left: 3px solid var(--ota-phone); }
+.ota-border-corporate { border-left: 3px solid var(--ota-corporate); }
+
+/* コンテキストメニュー */
+.ab__ctx-overlay { position: fixed; inset: 0; z-index: 600; }
+.ab__ctx-menu {
+  position: fixed; z-index: 601;
+  background: var(--bg-card); border: 1px solid var(--border-default);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-lg);
+  padding: 4px 0; min-width: 160px;
+}
+.ab__ctx-header {
+  padding: 8px 14px 6px; font-size: var(--font-size-xs); font-weight: 600;
+  color: var(--text-muted); border-bottom: 1px solid var(--border-light);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ab__ctx-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 8px 14px; font-size: var(--font-size-sm);
+  border: none; background: transparent; cursor: pointer;
+  color: var(--text-primary); font-family: inherit; text-align: left;
+}
+.ab__ctx-item:hover { background: var(--bg-main); }
+.ab__ctx-item .material-symbols-outlined { font-size: 18px; color: var(--text-secondary); }
+.ab__ctx-item--danger { color: var(--accent-red); }
+.ab__ctx-item--danger .material-symbols-outlined { color: var(--accent-red); }
+/* Patina: 危険操作のホバー面もaccent-red(#B3362C)系の透過に合わせる */
+.ab__ctx-item--danger:hover { background: rgba(179, 54, 44, 0.06); }
+
+/* 部屋移動ダイアログ */
+.ab__move-label {
+  display: block; font-size: var(--font-size-sm); font-weight: 500;
+  color: var(--text-secondary); margin-bottom: 4px;
+}
+.ab__move-input {
+  width: 100%; padding: 8px 10px; font-size: var(--font-size-sm);
+  /* Patina: 入力欄の輪郭は border-strong を使う（規約統一） */
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font-family: inherit; color: var(--text-primary); background: var(--bg-card);
+}
+/* Patina: フォーカスはブラスのリングで示す（規約統一） */
+.ab__move-input:focus { border-color: var(--accent-blue); outline: none; box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.ab__move-hint { font-size: var(--font-size-xs); color: var(--text-muted); margin: 4px 0 0; }
+.ab__move-cancel {
+  padding: 8px 16px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  background: transparent; cursor: pointer; font-family: inherit; color: var(--text-secondary);
+}
+.ab__move-submit {
+  padding: 8px 16px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md);
+  background: var(--accent-blue); color: #fff; cursor: pointer; font-family: inherit;
+}
+.ab__move-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 予約プレビューモーダル */
+.ab__modal-overlay {
+  /* Patina: オーバーレイも純黒でなく墨色ベースの透過にして紙面になじませる */
+  position: fixed; inset: 0; background: rgba(38, 34, 27, 0.35); z-index: 500;
+}
+.ab__modal {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 480px; max-width: 90vw; max-height: 85vh;
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); z-index: 501;
+  display: flex; flex-direction: column;
+}
+.ab__modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; border-bottom: 1px solid var(--border-default); flex-shrink: 0;
+}
+.ab__modal-title { font-size: var(--font-size-lg); font-weight: 600; margin: 0; }
+.ab__modal-close {
+  border: none; background: transparent; cursor: pointer; color: var(--text-muted);
+  padding: 4px; border-radius: var(--radius-sm);
+}
+.ab__modal-close:hover { color: var(--text-primary); background: var(--bg-main); }
+.ab__modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+.ab__modal-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 5px 0; font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+.ab__modal-row--notes { align-items: flex-start; }
+.ab__modal-label { color: var(--text-muted); min-width: 80px; flex-shrink: 0; }
+.ab__modal-value { color: var(--text-primary); word-break: break-word; display: flex; align-items: center; gap: 4px; }
+/* クリックで編集可能なフィールド */
+.ab__modal-editable { cursor: pointer; border-radius: var(--radius-sm); padding: 2px 4px; }
+/* Patina: 旧#F8FAFCフォールバックを削除し、ホバー面トークンに統一 */
+.ab__modal-editable:hover { background: var(--bg-hover); }
+.ab__modal-select {
+  font-size: var(--font-size-sm); font-family: inherit;
+  padding: 4px 8px; border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-sm); background: var(--bg-card);
+  color: var(--text-primary); outline: none;
+}
+.ab__modal-mono { font-family: monospace; font-size: var(--font-size-xs); color: var(--text-secondary); }
+.ab__modal-vip {
+  /* Patina: 9px以下禁止ルールにより11pxへ。色も彩度を落とした真鍮系アンバーに統一 */
+  font-size: 11px; font-weight: 700; padding: 1px 4px; border-radius: 3px;
+  background: #F5ECD3; color: #8A6D1E;
+}
+.ab__modal-status { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
+.ab__modal-status--confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.ab__modal-status--checked_in { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.ab__modal-notes {
+  color: var(--accent-red); white-space: pre-wrap; font-size: var(--font-size-xs);
+  /* Patina: 注意メモの面もaccent-red(#B3362C)系の透過に合わせる */
+  background: rgba(179, 54, 44, 0.05); padding: 6px 8px; border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent-red);
+}
+
+/* モーダル内セクション */
+.ab__modal-section {
+  margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-default);
+}
+.ab__modal-section-title {
+  font-size: var(--font-size-xs); font-weight: 600; color: var(--text-muted);
+  margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ab__modal-charge {
+  display: flex; gap: 8px; padding: 3px 0; font-size: var(--font-size-xs); color: var(--text-secondary);
+  align-items: baseline;
+}
+.ab__modal-charge-date { flex-shrink: 0; }
+.ab__modal-charge-desc {
+  flex: 1; min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ab__modal-amount { flex-shrink: 0; margin-left: auto; font-variant-numeric: tabular-nums; color: var(--text-primary); white-space: nowrap; }
+.ab__modal-link {
+  padding: 3px 0; font-size: var(--font-size-xs); color: var(--text-secondary);
+}
+.ab__modal-link--gap { color: var(--accent-red); font-weight: 500; }
+
+/* フッター */
+.ab__modal-footer {
+  padding: 12px 20px; border-top: 1px solid var(--border-default); flex-shrink: 0;
+  display: flex; justify-content: flex-end;
+}
+.ab__modal-detail-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 16px; font-size: var(--font-size-sm); font-weight: 500;
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  background: var(--bg-card); cursor: pointer; color: var(--accent-blue); font-family: inherit;
+}
+.ab__modal-detail-btn:hover { border-color: var(--accent-blue); background: var(--accent-blue-soft); }
+.ab__modal-detail-btn .material-symbols-outlined { font-size: 16px; }
+
+/* ============================================================
+   統合モード
+   ============================================================ */
+
+/* ヘッダーの統合トグルボタン
+   Patina: 白背景上のトグルは明るい#fbbf24だと文字が読めないため、
+   トークンのaccent-yellow(#B08A1E)に置き換えてコントラストを確保 */
+.ab__merge-toggle { gap: 4px; }
+.ab__merge-toggle .material-symbols-outlined { font-size: 16px; }
+.ab__merge-toggle--active {
+  border-color: var(--accent-yellow);
+  color: var(--accent-yellow);
+  background: rgba(176, 138, 30, 0.10);
+}
+
+/* 統合モード中のバー: カーソル変更で「選択可能」を示す */
+.ab__bar--merge-mode { cursor: crosshair; }
+
+/* 選択されたバーのハイライト（黄色アウトライン + 発光シャドウ）
+   Patina: 選択強調はOTA濃色バーの上で光って見える必要があるため、
+   彩度の高いアンバー#fbbf24を意図的に維持（accent-yellowでは暗く埋もれる） */
+.ab__bar--merge-selected {
+  outline: 3px solid #fbbf24;
+  outline-offset: -1px;
+  box-shadow: 0 0 0 5px rgba(251, 191, 36, 0.3), 0 2px 6px rgba(0, 0, 0, 0.25);
+  z-index: 4;
+}
+
+/* 統合モード中の未アサインカード */
+.ab__unassigned-item--merge-mode { cursor: crosshair; }
+.ab__unassigned-item--merge-selected {
+  outline: 3px solid #fbbf24;
+  outline-offset: -1px;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+/* 統合アクションバー（画面下部フローティング）
+   背景は--accent-blue（Patinaではブラス）。暗い面なので#fbbf24の視認性は保たれる */
+.ab__merge-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--accent-blue);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  font-family: inherit;
+}
+.ab__merge-count {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+.ab__merge-exec {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: 2px solid #fbbf24;
+  border-radius: var(--radius-md);
+  background: rgba(251, 191, 36, 0.2);
+  cursor: pointer;
+  color: #fbbf24;
+  font-family: inherit;
+}
+.ab__merge-exec:hover { background: rgba(251, 191, 36, 0.35); }
+.ab__merge-exec .material-symbols-outlined { font-size: 16px; }
+.ab__merge-cancel {
+  font-size: var(--font-size-xs);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+}
+.ab__merge-cancel:hover { color: #fff; }

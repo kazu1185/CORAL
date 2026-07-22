@@ -1,0 +1,248 @@
+/* ============================================================
+   売上レポートページ
+   ============================================================ */
+
+.report-page {
+  padding: 24px 32px;
+  max-width: 800px;
+}
+
+.report-page__header {
+  margin-bottom: 24px;
+}
+
+.report-page__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.report-page__icon {
+  font-size: 24px;
+  /* Patina刷新: 旧--primary(青)は未定義トークンだったため、ブラスの--accent-blueへ統一 */
+  color: var(--accent-blue);
+}
+
+/* レポートカード */
+.report-card {
+  background: var(--bg-card);
+  /* Patina刷新: カードは線で囲まず、極薄い影で紙面から浮かせる */
+  border: none;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.report-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.report-card__icon {
+  font-size: 28px;
+  color: var(--accent-blue);
+  margin-top: 2px;
+}
+
+.report-card__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px;
+}
+
+.report-card__desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* フォーム */
+.report-card__form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.report-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.report-card__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.report-card__input {
+  height: 36px;
+  padding: 0 10px;
+  /* Patina刷新: 入力欄のみ輪郭が必要なので強めのボーダーを使う */
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  /* Patina刷新: 可読性優先で本文サイズを14px→15px（--font-size-base）に拡大 */
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font-family: inherit;
+}
+
+.report-card__input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.report-card__hint {
+  /* Patina刷新: 9〜11pxの補足文は読みにくいため12px（--font-size-xs）へ引き上げ */
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* PDF出力ボタン */
+.report-card__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  /* Patina刷新: 主要アクションは青からブランドのブラス色へ */
+  background: var(--accent-blue);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.report-card__btn:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+}
+
+.report-card__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.report-card__btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* エラーメッセージ */
+.report-card__error {
+  margin-top: 12px;
+  padding: 8px 12px;
+  /* Patina刷新: 意味色（危険=赤）は保ちつつ、彩度を落としたステータス淡色面に置換 */
+  background: var(--status-noshow-bg);
+  border: 1px solid rgba(179, 54, 44, 0.25); /* --accent-red の25%。淡赤面の輪郭用 */
+  border-radius: var(--radius-sm);
+  color: var(--accent-red);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-card__error .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* ============================================================
+   物販レポート（ReportPage 内の物販セクション）
+   ============================================================ */
+
+.report-ps {
+  margin-top: 16px;
+}
+
+.report-ps__total {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.report-ps__total strong {
+  font-size: var(--font-size-xl);
+  margin-left: 4px;
+}
+
+.report-ps__total-tax {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+
+/* 4つの集計表を2列で並べる（狭い画面では1列） */
+.report-ps__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.report-ps__block-title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.report-ps__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.report-ps__table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  background: var(--bg-inset);
+  padding: 6px 8px;
+  white-space: nowrap;
+}
+
+.report-ps__table th:not(:first-child) {
+  text-align: right;
+}
+
+.report-ps__table td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--border-light);
+  color: var(--text-primary);
+}
+
+.report-ps__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.report-ps__empty,
+.report-ps__empty-cell {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: 16px 0;
+}
+
+/* 二重計上の注意書き。集計の読み違いを防ぐため必ず表示する */
+.report-ps__note {
+  margin-top: 16px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}

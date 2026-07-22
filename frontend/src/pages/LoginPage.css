@@ -1,0 +1,130 @@
+.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: var(--bg-main);
+}
+
+.login__card {
+  width: 400px;
+  padding: 48px 40px 40px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.login__header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.login__logo {
+  height: 100px;
+  width: auto;
+  margin-bottom: 8px;
+}
+
+.login__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  letter-spacing: 0.18em;
+  margin: 8px 0 0;
+}
+
+.login__field {
+  margin-bottom: 22px;
+}
+
+.login__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.login__select,
+.login__input {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: var(--font-size-base);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  font-family: inherit;
+}
+
+.login__select:focus,
+.login__input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.login__input {
+  letter-spacing: 8px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+}
+
+.login__dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.login__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border-default);
+  transition: background var(--transition-fast);
+}
+
+.login__dot--filled {
+  background: var(--accent-blue);
+}
+
+.login__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.login__error .material-symbols-outlined {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.login__button {
+  width: 100%;
+  padding: 13px;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: var(--accent-blue);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.login__button:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+}
+
+.login__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

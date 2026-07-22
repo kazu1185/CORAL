@@ -1,0 +1,179 @@
+/* ============================================================
+   CalendarPicker — 共通カレンダーコンポーネント
+   選択・範囲の強調はブランドのブラス（--accent-blue）を使用。
+   土日の色は「情報」なので彩度を落とした赤/青のまま維持する。
+   ============================================================ */
+
+.cp {
+  width: 320px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow-md);
+  user-select: none;
+}
+
+/* ヘッダー: 月送り */
+.cp__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.cp__month-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cp__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: background 0.12s;
+}
+.cp__nav:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.cp__nav .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* 曜日ヘッダー */
+.cp__dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 4px;
+}
+
+.cp__dow {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+.cp__dow--sun { color: #C05A52; }
+.cp__dow--sat { color: #5A7A9E; }
+
+/* 日付グリッド */
+.cp__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+/* 日付セル */
+.cp__day {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+  font-family: inherit;
+  padding: 0;
+}
+
+.cp__day:hover:not(:disabled):not(.cp__day--from):not(.cp__day--to) {
+  background: var(--bg-hover);
+}
+
+/* 当月以外 */
+.cp__day--outside {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* 無効日 */
+.cp__day--disabled {
+  color: var(--border-default);
+  cursor: not-allowed;
+}
+.cp__day--disabled:hover {
+  background: none;
+}
+
+/* 曜日色 */
+.cp__day--sun:not(.cp__day--outside):not(.cp__day--disabled):not(.cp__day--from):not(.cp__day--to) {
+  color: #C05A52;
+}
+.cp__day--sat:not(.cp__day--outside):not(.cp__day--disabled):not(.cp__day--from):not(.cp__day--to) {
+  color: #5A7A9E;
+}
+
+/* 今日 */
+.cp__day--today {
+  box-shadow: inset 0 0 0 2px var(--accent-blue);
+}
+
+/* 選択日（単日モード） */
+.cp__day--selected {
+  background: var(--accent-blue);
+  color: #fff !important;
+}
+
+/* 範囲端点（from / to） */
+.cp__day--from,
+.cp__day--to {
+  background: var(--accent-blue);
+  color: #fff !important;
+  z-index: 1;
+}
+
+/* 確定範囲内 */
+.cp__day--in-range {
+  background: var(--bg-sidebar-active);
+  border-radius: 0;
+}
+
+/* from の右側を四角く、to の左側を四角く（連続範囲の見た目） */
+.cp__day--from {
+  border-radius: 50% 0 0 50%;
+}
+.cp__day--to {
+  border-radius: 0 50% 50% 0;
+}
+/* from と to が同じ日（1泊は不可なので基本ないが、念のため） */
+.cp__day--from.cp__day--to {
+  border-radius: 50%;
+}
+
+/* ホバープレビュー範囲 */
+.cp__day--preview {
+  background: var(--accent-blue-soft);
+  border-radius: 0;
+}
+.cp__day--preview-end {
+  background: var(--bg-sidebar-active);
+  border-radius: 0 50% 50% 0;
+}
+
+/* 範囲情報テキスト */
+.cp__info {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}

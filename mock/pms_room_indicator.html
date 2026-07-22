@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMS ルームインジケーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP','Helvetica Neue',sans-serif;background:#F8FAFC;color:#0F172A;min-height:100vh}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+
+.layout{display:flex;min-height:100vh}
+.sidenav{width:56px;min-height:100vh;background:#0F172A;color:#CBD5E1;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.nav-item{display:flex;align-items:center;justify-content:center;padding:14px 0;cursor:pointer;font-size:16px;color:#94A3B8;border-right:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.05)}
+.nav-item.active{background:rgba(59,130,246,.15);border-right-color:#3B82F6;color:#E2E8F0}
+.main{flex:1;margin-left:56px;display:flex;flex-direction:column}
+
+/* Header */
+.header{background:#fff;border-bottom:1px solid #E2E8F0}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:12px 28px}
+.header-title{font-size:18px;font-weight:700;color:#0F172A}
+.header-right{display:flex;align-items:center;gap:24px;font-size:13px;color:#64748B}
+.header-stats{display:flex;align-items:center;padding:0 28px 10px}
+.stat-item{display:flex;align-items:center;gap:8px;padding:6px 20px;cursor:pointer;transition:background .15s;border-radius:6px;position:relative}
+.stat-item:hover{background:#F1F5F9}
+.stat-item+.stat-item::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:1px;background:#E2E8F0}
+.stat-label{font-size:11px;color:#94A3B8;font-weight:500}
+.stat-value{font-size:18px;font-weight:700;color:#0F172A;line-height:1}
+.stat-sub{font-size:11px;color:#94A3B8}
+.stat-sub.alert-num{color:#DC2626;font-weight:600}
+.stat-accent{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+
+/* Content */
+.content{padding:24px 28px;flex:1;overflow-y:auto}
+
+/* Floor section */
+.floor-section{margin-bottom:24px}
+.floor-label{font-size:12px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-left:4px}
+
+/* Card grid */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+
+/* Room card base */
+.room-card{border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;border:1px solid transparent}
+.room-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+
+/* State: occupied (green) */
+.room-card.occupied{background:#fff;border-color:#E2E8F0}
+.room-card.occupied .state-bar{background:#22C55E}
+
+/* State: occupied + CO today (blue accent) */
+.room-card.co-today{background:#fff;border-color:#93C5FD}
+.room-card.co-today .state-bar{background:#3B82F6}
+
+/* State: CI expected (orange) */
+.room-card.ci-expected{background:#FFFBEB;border-color:#FDE68A}
+.room-card.ci-expected .state-bar{background:#F59E0B}
+
+/* State: overdue CI (red) */
+.room-card.overdue{background:#FEF2F2;border-color:#FECACA}
+.room-card.overdue .state-bar{background:#DC2626}
+
+/* State: vacant (grey) */
+.room-card.vacant{background:#F8FAFC;border-color:#E2E8F0}
+.room-card.vacant .state-bar{background:#CBD5E1}
+
+/* State bar */
+.state-bar{position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:10px 0 0 10px}
+
+/* Card header row */
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.card-room{display:flex;align-items:center;gap:8px}
+.room-number{font-size:16px;font-weight:700;color:#0F172A}
+.room-type-label{font-size:11px;color:#94A3B8;font-weight:500}
+.state-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.sb-occupied{background:#DCFCE7;color:#16A34A}
+.sb-co{background:#DBEAFE;color:#2563EB}
+.sb-ci{background:#FEF3C7;color:#B45309}
+.sb-overdue{background:#FEE2E2;color:#DC2626}
+.sb-vacant{background:#F1F5F9;color:#94A3B8}
+
+/* OTA dot in header */
+.ota-indicator{display:flex;align-items:center;gap:4px}
+.ota-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ota-label{font-size:10px;color:#94A3B8}
+
+/* Guest info */
+.card-guest{margin-bottom:4px}
+.guest-name-main{font-size:14px;font-weight:600;color:#0F172A;display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.vacant-label{font-size:14px;color:#94A3B8;font-weight:400;text-align:center;padding:8px 0}
+
+/* Badges */
+.badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap}
+.badge-vip{background:#FDF2F8;color:#BE185D}
+.badge-repeater{background:#FEF3C7;color:#B45309}
+.badge-memo{background:#FEF2F2;color:#DC2626}
+.badge-linked{background:#F5F3FF;color:#7C3AED}
+
+/* Card detail row */
+.card-detail{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#64748B}
+.detail-left{display:flex;align-items:center;gap:8px}
+.detail-right{display:flex;align-items:center;gap:6px}
+.payment-badge{font-size:10px;color:#64748B;background:#F1F5F9;padding:1px 6px;border-radius:3px}
+.overdue-date{font-size:10px;color:#DC2626;font-weight:600}
+
+/* Cleaning status for vacant */
+.clean-status{display:flex;align-items:center;gap:4px;font-size:11px;color:#64748B;justify-content:center}
+.clean-dot{width:8px;height:8px;border-radius:50%}
+.clean-ready{background:#22C55E}
+.clean-progress{background:#F59E0B}
+.clean-inspection{background:#3B82F6}
+
+/* Summary bar at top */
+.summary-pills{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.summary-pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;font-size:12px;border:1px solid #E2E8F0;background:#fff}
+.summary-pill .pill-dot{width:10px;height:10px;border-radius:50%}
+.summary-pill .pill-count{font-weight:700;color:#0F172A}
+.summary-pill .pill-label{color:#64748B}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidenav"><div style="padding:14px 0">
+    <a class="nav-item" title="ダッシュボード">◉</a>
+    <a class="nav-item" title="予約一覧">☰</a>
+    <a class="nav-item" title="アサインボード">▦</a>
+    <a class="nav-item active" title="ルームインジケーター">⊞</a>
+    <a class="nav-item" title="清掃管理">◫</a>
+    <a class="nav-item" title="売上レポート">◈</a>
+    <a class="nav-item" title="設定">⚙</a>
+  </div></nav>
+
+  <div class="main">
+    <header class="header">
+      <div class="header-top">
+        <div class="header-title">⊞ ルームインジケーター</div>
+        <div class="header-right">
+          <span id="clock"></span>
+          <span>👤 山田 花子</span>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item"><span class="stat-accent" style="background:#3B82F6"></span><span class="stat-label">CI予定</span><span class="stat-value">5</span><span class="stat-sub alert-num">未CI: 2</span></div>
+        <div class="stat-item"><span class="stat-accent" style="background:#8B5CF6"></span><span class="stat-label">CO予定</span><span class="stat-value">3</span><span class="stat-sub alert-num">未CO: 1</span></div>
+        <div class="stat-item"><span class="stat-accent" style="background:#22C55E"></span><span class="stat-label">稼働率</span><span class="stat-value">18<span style="font-size:13px;font-weight:400;color:#94A3B8">/24</span></span><span class="stat-sub">75%</span></div>
+        <div class="stat-item"><span class="stat-accent" style="background:#14B8A6"></span><span class="stat-label">清掃</span><span class="stat-sub">清掃中 <b style="color:#0F172A">4</b></span><span class="stat-sub">点検待 <b style="color:#0F172A">1</b></span><span class="stat-sub">Ready <b style="color:#22C55E">6</b></span></div>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- Summary pills -->
+      <div class="summary-pills">
+        <div class="summary-pill"><span class="pill-dot" style="background:#22C55E"></span><span class="pill-count">10</span><span class="pill-label">在室中</span></div>
+        <div class="summary-pill"><span class="pill-dot" style="background:#3B82F6"></span><span class="pill-count">3</span><span class="pill-label">本日CO予定</span></div>
+        <div class="summary-pill"><span class="pill-dot" style="background:#F59E0B"></span><span class="pill-count">3</span><span class="pill-label">本日CI予定</span></div>
+        <div class="summary-pill"><span class="pill-dot" style="background:#DC2626"></span><span class="pill-count">1</span><span class="pill-label">未CI(要確認)</span></div>
+        <div class="summary-pill"><span class="pill-dot" style="background:#CBD5E1"></span><span class="pill-count">7</span><span class="pill-label">空室</span></div>
+      </div>
+
+      <!-- 2F -->
+      <div class="floor-section">
+        <div class="floor-label">2F ─ シングル</div>
+        <div class="card-grid">
+          <!-- 201: occupied -->
+          <div class="room-card occupied" onclick="cardClick('201')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">201</span><span class="room-type-label">シングル</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#991B1B"></span><span class="ota-label">楽天</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">高橋 誠 <span class="badge badge-repeater">🔁×3</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>2/3泊</span><span>大人1</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+
+          <!-- 202: CI expected today -->
+          <div class="room-card ci-expected" onclick="cardClick('202')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">202</span><span class="room-type-label">シングル</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#1E3A5F"></span><span class="ota-label">Booking</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">Tanaka Yuki</div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>1泊</span><span>大人1</span></div>
+              <div class="detail-right"><span class="state-badge sb-ci">CI予定</span></div>
+            </div>
+          </div>
+
+          <!-- 203: vacant, cleaned -->
+          <div class="room-card vacant" onclick="cardClick('203')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">203</span><span class="room-type-label">シングル</span></div>
+            </div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-ready"></span>清掃済み</div>
+          </div>
+
+          <!-- 204: occupied -->
+          <div class="room-card occupied" onclick="cardClick('204')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">204</span><span class="room-type-label">シングル</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#16A34A"></span><span class="ota-label">直販</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">田村 健一</div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>1/3泊</span><span>大人1</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3F -->
+      <div class="floor-section">
+        <div class="floor-label">3F ─ ツイン</div>
+        <div class="card-grid">
+          <!-- 301: occupied, VIP, repeater, memo, linked -->
+          <div class="room-card occupied" onclick="cardClick('301')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">301</span><span class="room-type-label">ツイン</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#1E3A5F"></span><span class="ota-label">Booking</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">渡辺 健太 <span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×4</span><span class="badge badge-linked">🔗</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>1/2泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="badge badge-memo">⚠メモ</span><span class="payment-badge">💳 事前</span></div>
+            </div>
+          </div>
+
+          <!-- 302: occupied, CO today -->
+          <div class="room-card co-today" onclick="cardClick('302')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">302</span><span class="room-type-label">ツイン</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#DC2626"></span><span class="ota-label">じゃらん</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">鈴木 一郎 <span class="badge badge-repeater">🔁×2</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>1/1泊</span><span>大人1</span></div>
+              <div class="detail-right"><span class="state-badge sb-co">CO予定</span><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+
+          <!-- 303: CI expected -->
+          <div class="room-card ci-expected" onclick="cardClick('303')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">303</span><span class="room-type-label">ツイン</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#EA580C"></span><span class="ota-label">電話</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">山田 太郎 <span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×7</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>3泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="state-badge sb-ci">CI予定</span><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+
+          <!-- 304: vacant, cleaning in progress -->
+          <div class="room-card vacant" onclick="cardClick('304')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">304</span><span class="room-type-label">ツイン</span></div>
+            </div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-progress"></span>清掃中</div>
+          </div>
+
+          <!-- 305: vacant, inspection -->
+          <div class="room-card vacant" onclick="cardClick('305')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">305</span><span class="room-type-label">ツイン</span></div>
+            </div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-inspection"></span>点検待</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4F -->
+      <div class="floor-section">
+        <div class="floor-label">4F ─ ダブル / ラージ</div>
+        <div class="card-grid">
+          <!-- 401: vacant -->
+          <div class="room-card vacant" onclick="cardClick('401')">
+            <div class="state-bar"></div>
+            <div class="card-top"><div class="card-room"><span class="room-number">401</span><span class="room-type-label">ダブル</span></div></div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-ready"></span>清掃済み</div>
+          </div>
+
+          <!-- 402: vacant -->
+          <div class="room-card vacant" onclick="cardClick('402')">
+            <div class="state-bar"></div>
+            <div class="card-top"><div class="card-room"><span class="room-number">402</span><span class="room-type-label">ダブル</span></div></div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-ready"></span>清掃済み</div>
+          </div>
+
+          <!-- 403: occupied long stay -->
+          <div class="room-card occupied" onclick="cardClick('403')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">403</span><span class="room-type-label">ラージ</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#16A34A"></span><span class="ota-label">直販</span></div>
+            </div>
+            <div class="card-guest"><div class="guest-name-main">森 大輔</div></div>
+            <div class="card-detail">
+              <div class="detail-left"><span>2/6泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+
+          <!-- 404: vacant -->
+          <div class="room-card vacant" onclick="cardClick('404')">
+            <div class="state-bar"></div>
+            <div class="card-top"><div class="card-room"><span class="room-number">404</span><span class="room-type-label">ラージ</span></div></div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-ready"></span>清掃済み</div>
+          </div>
+
+          <!-- 405: CI expected -->
+          <div class="room-card ci-expected" onclick="cardClick('405')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">405</span><span class="room-type-label">ラージ</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#7C3AED"></span><span class="ota-label">Agoda</span></div>
+            </div>
+            <div class="card-guest"><div class="guest-name-main">李 明華</div></div>
+            <div class="card-detail">
+              <div class="detail-left"><span>3泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="state-badge sb-ci">CI予定</span><span class="payment-badge">💳 事前</span></div>
+            </div>
+          </div>
+
+          <!-- 406: vacant -->
+          <div class="room-card vacant" onclick="cardClick('406')">
+            <div class="state-bar"></div>
+            <div class="card-top"><div class="card-room"><span class="room-number">406</span><span class="room-type-label">ラージ</span></div></div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-progress"></span>清掃中</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5F -->
+      <div class="floor-section">
+        <div class="floor-label">5F ─ デラックス</div>
+        <div class="card-grid">
+          <!-- 501: occupied -->
+          <div class="room-card occupied" onclick="cardClick('501')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">501</span><span class="room-type-label">デラックス</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#1E3A5F"></span><span class="ota-label">Booking</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">佐藤 花子 <span class="badge badge-memo">⚠メモ</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>1/3泊</span><span>大人2 子供1</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 事前</span></div>
+            </div>
+          </div>
+
+          <!-- 502: overdue (missed CI) -->
+          <div class="room-card overdue" onclick="cardClick('502')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">502</span><span class="room-type-label">デラックス</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#1E3A5F"></span><span class="ota-label">Booking</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">田中 花子</div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>4泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="overdue-date">4/9予定</span><span class="state-badge sb-overdue">未CI</span><span class="payment-badge">💳 事前</span></div>
+            </div>
+          </div>
+
+          <!-- 503: occupied, linked -->
+          <div class="room-card occupied" onclick="cardClick('503')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">503</span><span class="room-type-label">デラックス</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#16A34A"></span><span class="ota-label">直販</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">田中 翔太 <span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×6</span><span class="badge badge-linked">🔗</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>2/3泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 現地</span></div>
+            </div>
+          </div>
+
+          <!-- 504: occupied, CO today -->
+          <div class="room-card co-today" onclick="cardClick('504')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">504</span><span class="room-type-label">デラックス</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#7C3AED"></span><span class="ota-label">Agoda</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">中村 愛 <span class="badge badge-repeater">🔁×5</span><span class="badge badge-memo">⚠メモ</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>3/3泊</span><span>大人2 子供2</span></div>
+              <div class="detail-right"><span class="state-badge sb-co">CO予定</span><span class="payment-badge">💳 事前</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6F -->
+      <div class="floor-section">
+        <div class="floor-label">6F ─ スイート</div>
+        <div class="card-grid">
+          <!-- 601: vacant -->
+          <div class="room-card vacant" onclick="cardClick('601')">
+            <div class="state-bar"></div>
+            <div class="card-top"><div class="card-room"><span class="room-number">601</span><span class="room-type-label">スイート</span></div></div>
+            <div class="vacant-label">空室</div>
+            <div class="clean-status"><span class="clean-dot clean-ready"></span>清掃済み</div>
+          </div>
+
+          <!-- 602: occupied -->
+          <div class="room-card occupied" onclick="cardClick('602')">
+            <div class="state-bar"></div>
+            <div class="card-top">
+              <div class="card-room"><span class="room-number">602</span><span class="room-type-label">スイート</span></div>
+              <div class="ota-indicator"><span class="ota-dot" style="background:#EA580C"></span><span class="ota-label">電話</span></div>
+            </div>
+            <div class="card-guest">
+              <div class="guest-name-main">VIP 鈴木 <span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×12</span><span class="badge badge-memo">⚠メモ</span></div>
+            </div>
+            <div class="card-detail">
+              <div class="detail-left"><span>3/4泊</span><span>大人2</span></div>
+              <div class="detail-right"><span class="payment-badge">💳 法人</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function cardClick(room) {
+  alert('予約詳細画面へ遷移: ' + room + '号室');
+}
+
+function updateClock() {
+  const d = new Date(), days = ["日","月","火","水","木","金","土"];
+  document.getElementById("clock").textContent =
+    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+updateClock(); setInterval(updateClock, 30000);
+</script>
+</body>
+</html>

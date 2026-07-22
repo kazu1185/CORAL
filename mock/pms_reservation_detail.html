@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMS 予約詳細</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP','Helvetica Neue',sans-serif;background:#F8FAFC;color:#0F172A;min-height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+.hidden{display:none!important}
+.layout{display:flex;height:100vh}
+.sidenav{width:56px;background:#0F172A;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.nav-item{display:flex;align-items:center;justify-content:center;padding:14px 0;cursor:pointer;font-size:16px;color:#94A3B8;border-right:3px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,.05)}.nav-item.active{background:rgba(59,130,246,.15);border-right-color:#3B82F6;color:#E2E8F0}
+.main{flex:1;margin-left:56px;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.top-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:8px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
+.back-btn{background:none;border:1px solid #E2E8F0;border-radius:5px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;color:#64748B}
+.back-btn:hover{background:#F8FAFC}
+.tb-room{font-size:20px;font-weight:700}.tb-type{font-size:12px;color:#94A3B8;margin-right:8px}
+.status-pill{padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700}
+.sp-confirmed{background:#DBEAFE;color:#2563EB}.sp-checked-in{background:#DCFCE7;color:#16A34A}
+.tb-info{font-size:12px;color:#64748B;display:flex;align-items:center;gap:8px}.tb-sep{color:#CBD5E1}
+.ota-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.tb-resno{font-family:monospace;font-size:11px;color:#94A3B8}.tb-spacer{flex:1}.tb-clock{font-size:11px;color:#94A3B8}
+.action-bar{background:#fff;border-bottom:1px solid #E2E8F0;padding:6px 20px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.act-btn{padding:5px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #E2E8F0;background:#fff;color:#334155;transition:all .12s}
+.act-btn:hover:not(:disabled){background:#F8FAFC}.act-btn:disabled{opacity:.3;cursor:not-allowed}
+.act-btn.success{background:#22C55E;color:#fff;border-color:#22C55E}.act-btn.primary{background:#3B82F6;color:#fff;border-color:#3B82F6}
+.act-btn.danger{border-color:#FECACA;color:#DC2626}.action-sep{width:1px;height:22px;background:#E2E8F0}
+.alert-bar{padding:6px 20px;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.alert-bar.info{background:#EFF6FF;border-bottom:1px solid #BFDBFE;color:#1E40AF}
+.alert-bar.warn{background:#FEFCE8;border-bottom:1px solid #FDE68A;color:#92400E}
+.content-area{flex:1;display:flex;overflow:hidden}
+
+/* Left column */
+.col-left{width:260px;min-width:260px;border-right:1px solid #E2E8F0;background:#fff;overflow-y:auto;flex-shrink:0}
+.cl-section{padding:10px 16px;border-bottom:1px solid #F1F5F9}
+.cl-title{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between}
+.guest-card{cursor:pointer;border-radius:6px;padding:6px 8px;margin:-6px -8px;transition:background .12s;position:relative}
+.guest-card:hover{background:#F8FAFC}
+.guest-card-arrow{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:#CBD5E1}
+.guest-card:hover .guest-card-arrow{color:#94A3B8}
+.guest-name-big{font-size:16px;font-weight:700;line-height:1.2}.guest-name-sub{font-size:11px;color:#94A3B8;line-height:1.3}
+.guest-badges{display:flex;gap:3px;flex-wrap:wrap;margin:4px 0}
+.badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.badge-vip{background:#FDF2F8;color:#BE185D}.badge-repeater{background:#FEF3C7;color:#B45309}.badge-linked{background:#F5F3FF;color:#7C3AED}
+.badge-pending{background:#FEE2E2;color:#DC2626;font-size:10px;padding:2px 8px;border-radius:4px}
+.kv{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}.kv-l{color:#94A3B8}.kv-v{color:#0F172A;font-weight:500}
+.notes-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:6px 10px;font-size:11px;color:#991B1B}
+.notes-box-title{font-weight:700;font-size:9px;color:#DC2626;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+.res-notes{width:100%;border:1px solid #E2E8F0;border-radius:6px;padding:6px 8px;font-size:11px;font-family:inherit;color:#334155;resize:vertical;min-height:40px}
+.res-notes:focus{outline:none;border-color:#3B82F6}
+
+/* Center: charges */
+.col-center{flex:1;overflow-y:auto;min-width:0}
+.charges-header{padding:8px 16px;font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #F1F5F9;background:#FAFBFC}
+.ch-table{width:100%;border-collapse:collapse;font-size:12px}
+.ch-table th{text-align:left;padding:5px 12px;font-size:10px;font-weight:600;color:#94A3B8;border-bottom:1px solid #F1F5F9;background:#FAFBFC}
+.ch-table th:nth-child(n+3),.ch-table td:nth-child(n+3){text-align:right}
+.ch-table td{padding:5px 12px;border-bottom:1px solid #F8FAFC;color:#334155}
+.ch-table .sub td{border-top:1px solid #E2E8F0;font-weight:600;color:#0F172A}
+.ch-table .tax td{color:#64748B;font-size:11px}
+.ch-table .total td{border-top:2px solid #0F172A;font-weight:700;color:#0F172A;font-size:13px}
+.ch-table .group-hd td{background:#F8FAFC;font-size:10px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.3px;padding:4px 12px;border-bottom:1px solid #E2E8F0}
+.ch-table .group-hd .ota-tag{display:inline-flex;align-items:center;gap:4px}
+.ch-table .current td{background:#FFFBEB}
+.ch-table .grp-sub td{font-weight:500;color:#94A3B8;font-size:11px;border-top:1px solid #F1F5F9}
+.pay-divider{padding:3px 12px;background:#F0FDF4;font-size:10px;font-weight:600;color:#16A34A;text-transform:uppercase;letter-spacing:.5px}
+.ch-table .pay td{color:#16A34A}
+.pay-add-btn{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:5px;font-size:11px;font-weight:600;color:#3B82F6;background:#EFF6FF;border:1px dashed #BFDBFE;border-radius:5px;cursor:pointer;font-family:inherit;margin-top:2px}
+.pay-add-btn:hover{background:#DBEAFE}
+.balance{padding:8px 16px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;border-top:1px solid #E2E8F0;background:#FAFBFC}
+.balance .lbl{color:#64748B}.balance .val.ok{color:#22C55E}.balance .val.ng{color:#DC2626}
+
+/* Right column */
+.col-right{width:280px;min-width:280px;border-left:1px solid #E2E8F0;background:#fff;overflow-y:auto;flex-shrink:0}
+.cr-section{padding:10px 16px;border-bottom:1px solid #F1F5F9}
+.cr-title{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.tl-bar{display:flex;height:22px;border-radius:5px;overflow:hidden;border:1px solid #E2E8F0;margin-bottom:4px}
+.tl-seg{display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600}
+.tl-legend{display:flex;flex-direction:column;gap:2px;font-size:10px;color:#94A3B8}
+.tl-legend-item{display:flex;align-items:center;gap:4px}.tl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.tl-current{font-weight:600;color:#0F172A}
+.history-item{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;border-bottom:1px solid #F8FAFC}
+.history-item:last-child{border:none}.h-date{color:#334155;font-weight:500;min-width:80px}.h-room{color:#94A3B8;min-width:60px}.h-amount{margin-left:auto;color:#334155;font-weight:500}
+
+/* Guest detail overlay (matched + pending) */
+.gdp-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.25);z-index:250;display:none;align-items:center;justify-content:center}
+.gdp-overlay.show{display:flex}
+.gdp-panel{background:#fff;border-radius:12px;max-width:540px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.gdp-header{padding:14px 20px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between}
+.gdp-header-title{font-size:15px;font-weight:700}.gdp-close{background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer;padding:4px}
+.gdp-body{padding:14px 20px}
+.gdp-section{margin-bottom:12px}
+.gdp-section-title{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.gdp-row{display:flex;justify-content:space-between;padding:2px 0;font-size:12px}.gdp-row .gl{color:#94A3B8}.gdp-row .gv{color:#0F172A;font-weight:500}
+.gdp-actions{padding:10px 20px;border-top:1px solid #E2E8F0;display:flex;gap:6px;flex-wrap:wrap}
+
+/* Matching candidates in guest detail */
+.tl-original{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;padding:6px 10px;font-size:11px;color:#64748B;margin-bottom:6px}
+.tl-original b{color:#0F172A}
+.display-name-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;font-size:11px}
+.display-name-edit{border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;color:#334155;width:120px}
+.candidate{border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.candidate:hover{border-color:#3B82F6;background:#EFF6FF}
+.cand-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.cand-name{font-size:13px;font-weight:600}.cand-match{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:600}
+.cand-detail{font-size:10px;color:#94A3B8;line-height:1.4}.cand-memo{font-size:10px;color:#DC2626;margin-top:2px}
+.cand-btn{display:block;width:100%;text-align:center;padding:4px;font-size:11px;font-weight:600;color:#3B82F6;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:5px;cursor:pointer;margin-top:4px;font-family:inherit}
+.cand-btn:hover{background:#DBEAFE}
+.new-guest-btn{display:block;width:100%;text-align:center;padding:6px;font-size:11px;font-weight:600;color:#64748B;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:6px;cursor:pointer;font-family:inherit}
+.new-guest-btn:hover{border-color:#94A3B8;background:#F1F5F9}
+
+/* Candidate expandable detail */
+.cand-expand{margin-top:6px;padding-top:6px;border-top:1px solid #F1F5F9}
+.cand-expand-section{margin-bottom:6px}
+.cand-expand-title{font-size:9px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.cand-expand-row{display:flex;justify-content:space-between;padding:1px 0;font-size:11px}
+.cand-expand-row .ce-l{color:#94A3B8}
+.cand-expand-row .ce-v{color:#0F172A;font-weight:500}
+
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:10px;padding:20px 24px;max-width:400px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.15)}
+.modal-title{font-size:15px;font-weight:700;margin-bottom:12px}.modal-body{font-size:12px;color:#334155;margin-bottom:16px}
+.modal-body .cr{display:flex;justify-content:space-between;padding:3px 0}.modal-body .cr-l{color:#94A3B8}.modal-body .cr-v{font-weight:600}
+.modal-footer{display:flex;justify-content:flex-end;gap:6px}
+
+/* Demo toggle */
+.demo-toggle{position:fixed;bottom:12px;right:12px;z-index:300;display:flex;gap:4px;align-items:center}
+.demo-btn{padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;border:1px solid #E2E8F0;background:#fff;color:#64748B}
+.demo-btn.active{background:#0F172A;color:#fff;border-color:#0F172A}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidenav"><div style="padding:14px 0">
+    <a class="nav-item">◉</a><a class="nav-item">☰</a><a class="nav-item">▦</a><a class="nav-item">⊞</a><a class="nav-item">◫</a><a class="nav-item">◈</a><a class="nav-item">⚙</a>
+  </div></nav>
+
+  <div class="main">
+    <div class="top-bar">
+      <button class="back-btn" onclick="history.back()">← 戻る</button>
+      <span class="tb-room">309</span><span class="tb-type">ツイン</span>
+      <span class="status-pill sp-checked-in" id="statusPill">CI済</span>
+      <div class="tb-info">
+        <span>CI: <b>4/09(水)</b></span><span class="tb-sep">│</span>
+        <span>CO: <b>4/11(金)</b></span><span class="tb-sep">│</span>
+        <span><b>2泊</b></span><span class="tb-sep">│</span>
+        <span style="font-size:11px;background:#F5F3FF;color:#7C3AED;padding:1px 6px;border-radius:3px;font-weight:600">🔗連結5泊</span><span class="tb-sep">│</span>
+        <span class="ota-dot" style="background:#DC2626"></span><span>じゃらん</span><span class="tb-sep">│</span>
+        <span class="tb-resno">8RAX3GPY</span>
+      </div>
+      <span class="tb-spacer"></span><span class="tb-clock" id="clock"></span>
+    </div>
+    <div class="action-bar">
+      <button class="act-btn" disabled>CI</button>
+      <button class="act-btn success" onclick="showModal('co')">CO</button>
+      <button class="act-btn" onclick="showModal('extend')">延泊</button>
+      <button class="act-btn">部屋変更</button>
+      <button class="act-btn danger" disabled>キャンセル</button>
+      <div class="action-sep"></div>
+      <button class="act-btn" onclick="showModal('receipt')">領収書</button>
+      <button class="act-btn">請求書</button>
+    </div>
+    <div class="alert-bar info" id="alertMatched">ℹ️ 子供料金が未入力です（均等割りで宿泊税計算）</div>
+    <div class="alert-bar warn hidden" id="alertPending">⚠️ ゲストが未確定です。ゲストカードをクリックして候補から選択してください。</div>
+
+    <div class="content-area">
+      <!-- LEFT -->
+      <div class="col-left">
+        <div class="cl-section">
+          <div class="cl-title"><span>👤 ゲスト</span><span class="badge badge-pending hidden" id="pendingBadge">⚠ 未確定</span></div>
+          <div class="guest-card" onclick="showGuestDetail()">
+            <div class="guest-name-big" id="gNameBig">對馬 晋</div>
+            <div class="guest-name-sub" id="gNameSub">ツシマ ススム / Susumu Tsushima</div>
+            <div class="guest-badges" id="gBadges">
+              <span class="badge badge-vip">⭐VIP</span>
+              <span class="badge badge-repeater">🔁×3</span>
+              <span class="badge badge-linked">🔗連結</span>
+            </div>
+            <span class="guest-card-arrow">▶</span>
+          </div>
+        </div>
+        <div class="cl-section">
+          <div class="kv"><span class="kv-l">宿泊人数</span><span class="kv-v">大人2名 子供1名</span></div>
+          <div class="kv"><span class="kv-l">宿泊回数</span><span class="kv-v" id="gVisits">3回</span></div>
+          <div class="kv"><span class="kv-l">国籍</span><span class="kv-v">🇯🇵 日本</span></div>
+          <div class="kv"><span class="kv-l">支払方法</span><span class="kv-v">現地（現金）</span></div>
+          <div class="kv"><span class="kv-l">領収書宛名</span><span class="kv-v">對馬 晋</span></div>
+        </div>
+        <div class="cl-section" id="guestNotesSection">
+          <div class="cl-title"><span>📌 ゲストメモ（永続）</span></div>
+          <div class="notes-box"><div class="notes-box-title">⚠ 重要</div>卵アレルギー（朝食対応必要）<br>高層階希望<br>毎回フルーツ用意</div>
+        </div>
+        <div class="cl-section">
+          <div class="cl-title"><span>📝 予約メモ（今回のみ）</span></div>
+          <textarea class="res-notes" placeholder="メモを入力...">到着が遅めの予定（18:00頃）。タクシー手配不要。</textarea>
+        </div>
+      </div>
+
+      <!-- CENTER -->
+      <div class="col-center">
+        <div class="charges-header">💰 売上明細（連結5泊分）</div>
+        <table class="ch-table">
+          <thead><tr><th>日付</th><th>摘要</th><th>OTA</th><th>単価</th><th>消費税</th><th>宿泊税</th></tr></thead>
+          <tbody>
+            <tr class="group-hd"><td colspan="6"><span class="ota-tag"><span class="ota-dot" style="background:#DC2626"></span> じゃらん 8RAX3GPY（この予約）</span></td></tr>
+            <tr class="current"><td>4/09</td><td>PKG連泊プラン</td><td><span class="ota-dot" style="background:#DC2626"></span></td><td>¥11,775</td><td>¥1,070</td><td>¥200</td></tr>
+            <tr class="current"><td>4/10</td><td>PKG連泊プラン</td><td><span class="ota-dot" style="background:#DC2626"></span></td><td>¥16,575</td><td>¥1,507</td><td>¥200</td></tr>
+            <tr class="grp-sub"><td></td><td>じゃらん小計</td><td></td><td>¥28,350</td><td>¥2,577</td><td>¥400</td></tr>
+            <tr class="group-hd"><td colspan="6"><span class="ota-tag"><span class="ota-dot" style="background:#1E3A5F"></span> Booking BK-44590</span></td></tr>
+            <tr><td>4/11</td><td>スタンダード</td><td><span class="ota-dot" style="background:#1E3A5F"></span></td><td>¥14,000</td><td>¥1,272</td><td>¥200</td></tr>
+            <tr><td>4/12</td><td>スタンダード</td><td><span class="ota-dot" style="background:#1E3A5F"></span></td><td>¥14,000</td><td>¥1,272</td><td>¥200</td></tr>
+            <tr><td>4/13</td><td>スタンダード</td><td><span class="ota-dot" style="background:#1E3A5F"></span></td><td>¥16,000</td><td>¥1,454</td><td>¥200</td></tr>
+            <tr class="grp-sub"><td></td><td>Booking小計</td><td></td><td>¥44,000</td><td>¥3,998</td><td>¥600</td></tr>
+            <tr class="sub"><td></td><td colspan="2">連結合計 小計</td><td>¥72,350</td><td></td><td></td></tr>
+            <tr class="tax"><td></td><td colspan="2">消費税（10%）</td><td></td><td>¥6,575</td><td></td></tr>
+            <tr class="tax"><td></td><td colspan="2">宿泊税</td><td></td><td></td><td>¥1,000</td></tr>
+            <tr class="total"><td></td><td colspan="2">連結合計</td><td></td><td colspan="2">¥79,925</td></tr>
+          </tbody>
+        </table>
+        <div class="pay-divider">入金（連結全体）</div>
+        <table class="ch-table"><tbody>
+          <tr class="pay"><td>4/09</td><td>現金</td><td><span class="ota-dot" style="background:#DC2626"></span> じゃらん分</td><td colspan="3">¥31,327</td></tr>
+          <tr class="pay"><td>4/11</td><td>Booking事前決済</td><td><span class="ota-dot" style="background:#1E3A5F"></span> Booking分</td><td colspan="3">¥48,598</td></tr>
+        </tbody></table>
+        <div style="padding:4px 12px"><button class="pay-add-btn" onclick="showModal('payment')">＋ 入金を記録</button></div>
+        <div class="balance"><span class="lbl">入金合計 ¥79,925</span><span>残額: <span class="val ok">¥0</span></span></div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="col-right">
+        <div class="cr-section">
+          <div class="cr-title">🔗 連結予約</div>
+          <div class="tl-bar">
+            <div class="tl-seg" style="flex:2;background:#DC2626">2泊</div>
+            <div class="tl-seg" style="flex:3;background:#1E3A5F">3泊</div>
+          </div>
+          <div class="tl-legend">
+            <div class="tl-legend-item tl-current"><span class="tl-dot" style="background:#DC2626"></span>じゃらん 4/9-11（この予約）</div>
+            <div class="tl-legend-item"><span class="tl-dot" style="background:#1E3A5F"></span>Booking 4/11-14</div>
+          </div>
+        </div>
+        <div class="cr-section">
+          <div class="cr-title">🔁 宿泊履歴（3回）</div>
+          <div class="history-item"><span class="h-date">2026/03/15</span><span class="ota-dot" style="background:#DC2626"></span><span class="h-room">301 ツイン</span><span class="h-amount">¥28,000</span></div>
+          <div class="history-item"><span class="h-date">2025/11/15</span><span class="ota-dot" style="background:#1E3A5F"></span><span class="h-room">501 DX</span><span class="h-amount">¥18,500</span></div>
+          <div class="history-item"><span class="h-date">2025/06/20</span><span class="ota-dot" style="background:#991B1B"></span><span class="h-room">302 ツイン</span><span class="h-amount">¥52,000</span></div>
+        </div>
+        <div class="cr-section">
+          <div class="cr-title">📋 予約情報</div>
+          <div class="kv"><span class="kv-l">予約日</span><span class="kv-v">2026/03/28</span></div>
+          <div class="kv"><span class="kv-l">CI実績</span><span class="kv-v">4/09 15:23</span></div>
+          <div class="kv"><span class="kv-l">CO実績</span><span class="kv-v">—</span></div>
+          <div class="kv"><span class="kv-l">TL原本名</span><span class="kv-v" style="font-size:10px;color:#94A3B8">ツシマ ススム</span></div>
+        </div>
+        <div class="cr-section">
+          <div class="cr-title">📄 帳票履歴</div>
+          <div style="font-size:11px;color:#94A3B8">発行済み帳票なし</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Guest detail overlay: MATCHED -->
+<div class="gdp-overlay" id="gdpMatched" onclick="hideGuestDetail()">
+  <div class="gdp-panel" onclick="event.stopPropagation()">
+    <div class="gdp-header"><span class="gdp-header-title">👤 ゲスト詳細</span><button class="gdp-close" onclick="hideGuestDetail()">✕</button></div>
+    <div class="gdp-body">
+      <div class="gdp-section">
+        <div style="font-size:18px;font-weight:700">對馬 晋</div>
+        <div style="font-size:12px;color:#94A3B8">ツシマ ススム / Susumu Tsushima</div>
+        <div class="guest-badges" style="margin:4px 0"><span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×3</span></div>
+      </div>
+      <div class="gdp-section">
+        <div class="gdp-section-title">基本情報</div>
+        <div class="gdp-row"><span class="gl">国籍</span><span class="gv">🇯🇵 日本</span></div>
+        <div class="gdp-row"><span class="gl">メール</span><span class="gv"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dfacf1abacaaacb7b6b2be9fa7a7a7f1bcb0b2">[email&#160;protected]</a></span></div>
+        <div class="gdp-row"><span class="gl">電話</span><span class="gv">090-XXXX-XXXX</span></div>
+        <div class="gdp-row"><span class="gl">宿泊回数</span><span class="gv">3回</span></div>
+        <div class="gdp-row"><span class="gl">初回宿泊</span><span class="gv">2025/06/20</span></div>
+        <div class="gdp-row"><span class="gl">最終宿泊</span><span class="gv">2026/03/15</span></div>
+      </div>
+      <div class="gdp-section">
+        <div class="gdp-section-title">📌 永続メモ</div>
+        <div class="notes-box"><div class="notes-box-title">⚠ 重要</div>卵アレルギー（朝食対応必要）<br>高層階希望<br>毎回フルーツ用意</div>
+      </div>
+      <div class="gdp-section">
+        <div class="gdp-section-title">📜 宿泊履歴</div>
+        <div class="history-item"><span class="h-date">2026/03/15-17</span><span class="ota-dot" style="background:#DC2626"></span><span class="h-room">301 ツイン</span><span class="h-amount">¥28,000</span></div>
+        <div class="history-item"><span class="h-date">2025/11/15-16</span><span class="ota-dot" style="background:#1E3A5F"></span><span class="h-room">501 DX</span><span class="h-amount">¥18,500</span></div>
+        <div class="history-item"><span class="h-date">2025/06/20-23</span><span class="ota-dot" style="background:#991B1B"></span><span class="h-room">302 ツイン</span><span class="h-amount">¥52,000</span></div>
+      </div>
+    </div>
+    <div class="gdp-actions">
+      <button class="act-btn" onclick="hideGuestDetail()">閉じる</button>
+      <button class="act-btn">名前を修正</button>
+      <button class="act-btn">姓の変更（旧姓保存）</button>
+      <button class="act-btn">他のゲストと統合</button>
+    </div>
+  </div>
+</div>
+
+<!-- Guest detail overlay: PENDING (matching candidates) -->
+<div class="gdp-overlay" id="gdpPending" onclick="hideGuestDetail()">
+  <div class="gdp-panel" onclick="event.stopPropagation()">
+    <div class="gdp-header">
+      <span class="gdp-header-title">👤 ゲスト確認</span>
+      <button class="gdp-close" onclick="hideGuestDetail()">✕</button>
+    </div>
+    <div class="gdp-body">
+      <div class="gdp-section">
+        <div class="gdp-section-title">📨 TL原本データ</div>
+        <div class="tl-original">OTA名: <b>Watanabe Kenta</b><br>チャネル: <b>Booking.com</b></div>
+        <div class="display-name-row">表示名: <input class="display-name-edit" value="ワタナベ ケンタ"> <span style="font-size:10px;color:#94A3B8">(自動変換)</span></div>
+      </div>
+      <div class="gdp-section">
+        <div class="gdp-section-title">📋 ゲスト候補（2件）</div>
+
+        <!-- Candidate 1 -->
+        <div class="candidate" id="cand1">
+          <div class="cand-top"><span class="cand-name">ワタナベ ケンタ（渡辺 健太）</span><span class="cand-match" style="background:#DCFCE7;color:#16A34A">カナ一致</span></div>
+          <div class="cand-detail">前回: 2025/11/15 ・ 宿泊回数: 3回</div>
+          <div class="cand-memo">⚠ 卵アレルギー ・ VIP ・ 毎回フルーツ</div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button class="cand-btn" style="flex:1" onclick="toggleCandDetail('cand1detail')">詳細を見る ▼</button>
+            <button class="cand-btn" style="flex:1;background:#DCFCE7;color:#16A34A;border-color:#BBF7D0" onclick="selectCandidate()">この方です ✓</button>
+          </div>
+          <!-- Expandable detail -->
+          <div class="cand-expand hidden" id="cand1detail">
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">連絡先</div>
+              <div class="cand-expand-row"><span class="ce-l">メール</span><span class="ce-v">k.watanabe@xxx.com</span></div>
+              <div class="cand-expand-row"><span class="ce-l">電話</span><span class="ce-v">090-1234-5678</span></div>
+              <div class="cand-expand-row"><span class="ce-l">国籍</span><span class="ce-v">🇯🇵 日本</span></div>
+            </div>
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">永続メモ（全文）</div>
+              <div style="font-size:11px;color:#991B1B;background:#FEF2F2;padding:4px 8px;border-radius:4px">
+                卵アレルギー（朝食対応必要）<br>高層階希望<br>毎回フルーツ用意<br>チェックアウト時にタクシー手配を好む
+              </div>
+            </div>
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">宿泊履歴（3回）</div>
+              <div class="history-item"><span class="h-date">2025/11/15-16</span><span class="ota-dot" style="background:#1E3A5F"></span><span class="h-room">501 DX</span><span class="h-amount">¥18,500</span></div>
+              <div class="history-item"><span class="h-date">2025/06/20-23</span><span class="ota-dot" style="background:#991B1B"></span><span class="h-room">302 ツイン</span><span class="h-amount">¥52,000</span></div>
+              <div class="history-item"><span class="h-date">2024/08/12-14</span><span class="ota-dot" style="background:#DC2626"></span><span class="h-room">301 ツイン</span><span class="h-amount">¥28,000</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candidate 2 -->
+        <div class="candidate" id="cand2">
+          <div class="cand-top"><span class="cand-name">ワタナベ ケンジ（渡辺 健二）</span><span class="cand-match" style="background:#FEF3C7;color:#B45309">ローマ字類似</span></div>
+          <div class="cand-detail">前回: 2026/01/20 ・ 宿泊回数: 1回</div>
+          <div style="display:flex;gap:4px;margin-top:4px">
+            <button class="cand-btn" style="flex:1" onclick="toggleCandDetail('cand2detail')">詳細を見る ▼</button>
+            <button class="cand-btn" style="flex:1;background:#DCFCE7;color:#16A34A;border-color:#BBF7D0" onclick="selectCandidate()">この方です ✓</button>
+          </div>
+          <div class="cand-expand hidden" id="cand2detail">
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">連絡先</div>
+              <div class="cand-expand-row"><span class="ce-l">メール</span><span class="ce-v">—</span></div>
+              <div class="cand-expand-row"><span class="ce-l">電話</span><span class="ce-v">—</span></div>
+              <div class="cand-expand-row"><span class="ce-l">国籍</span><span class="ce-v">🇯🇵 日本</span></div>
+            </div>
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">永続メモ</div>
+              <div style="font-size:11px;color:#94A3B8">メモなし</div>
+            </div>
+            <div class="cand-expand-section">
+              <div class="cand-expand-title">宿泊履歴（1回）</div>
+              <div class="history-item"><span class="h-date">2026/01/20-21</span><span class="ota-dot" style="background:#7C3AED"></span><span class="h-room">203 シングル</span><span class="h-amount">¥11,000</span></div>
+            </div>
+          </div>
+        </div>
+
+        <button class="new-guest-btn">＋ 新規ゲストとして登録</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="mo" onclick="hideModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title" id="mt"></div>
+    <div class="modal-body" id="mb"></div>
+    <div class="modal-footer" id="mf"></div>
+  </div>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function showModal(t){
+  const mt=document.getElementById('mt'),mb=document.getElementById('mb'),mf=document.getElementById('mf');
+  if(t==='co'){
+    mt.textContent='チェックアウト確認';
+    mb.innerHTML=`<div class="cr"><span class="cr-l">ゲスト</span><span class="cr-v">對馬 晋 様  309号室</span></div>
+      <div class="cr"><span class="cr-l">精算済み</span><span class="cr-v">¥79,925</span></div>
+      <div style="margin-top:8px"><label style="display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" checked> 領収書を発行する</label></div>
+      <div style="margin-top:6px;padding:6px 8px;background:#FEF2F2;border-radius:4px;font-size:11px;color:#991B1B">⚠ 卵アレルギー（朝食対応必要）</div>`;
+    mf.innerHTML=`<button class="act-btn" onclick="hideModal()">キャンセル</button><button class="act-btn success" onclick="hideModal()">チェックアウト</button>`;
+  }else if(t==='extend'){
+    mt.textContent='延泊';
+    mb.innerHTML=`<div class="cr"><span class="cr-l">現在</span><span class="cr-v">4/09-4/11（2泊）</span></div>
+      <div class="cr"><span class="cr-l">延泊後</span><span class="cr-v">4/09-4/12（3泊）</span></div>
+      <div class="cr"><span class="cr-l">追加料金</span><span class="cr-v">¥15,000 + 税</span></div>`;
+    mf.innerHTML=`<button class="act-btn" onclick="hideModal()">キャンセル</button><button class="act-btn primary" onclick="hideModal()">延泊確定</button>`;
+  }else if(t==='receipt'){
+    mt.textContent='領収書発行';
+    mb.innerHTML=`<div class="cr"><span class="cr-l">合計</span><span class="cr-v">¥79,925</span></div>
+      <div style="margin-top:6px;font-size:11px">宛名: <input value="對馬 晋" style="border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;width:160px"><br>
+      但書: <input value="宿泊代として" style="border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;width:160px;margin-top:4px"></div>`;
+    mf.innerHTML=`<button class="act-btn" onclick="hideModal()">キャンセル</button><button class="act-btn" onclick="hideModal()">プレビュー</button><button class="act-btn primary" onclick="hideModal()">発行</button>`;
+  }else if(t==='payment'){
+    mt.textContent='入金を記録';
+    mb.innerHTML=`<div class="cr"><span class="cr-l">売上合計</span><span class="cr-v">¥79,925</span></div>
+      <div class="cr"><span class="cr-l">入金済み</span><span class="cr-v">¥79,925</span></div>
+      <div class="cr"><span class="cr-l">残額</span><span class="cr-v" style="color:#22C55E">¥0</span></div>
+      <div style="margin-top:8px;border-top:1px solid #E2E8F0;padding-top:8px;font-size:11px">
+        入金額: <input placeholder="金額" style="border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;width:100px"><br>
+        決済方法: <select style="border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;margin-top:4px"><option>現金</option><option>クレジットカード</option><option>電子マネー</option><option>QRコード決済</option><option>OTA事前決済</option><option>法人売掛</option></select><br>
+        入金日: <input type="date" value="2026-04-12" style="border:1px solid #E2E8F0;border-radius:4px;padding:2px 6px;font-size:11px;font-family:inherit;margin-top:4px">
+      </div>`;
+    mf.innerHTML=`<button class="act-btn" onclick="hideModal()">キャンセル</button><button class="act-btn primary" onclick="hideModal()">入金を記録</button>`;
+  }
+  document.getElementById('mo').classList.add('show');
+}
+function hideModal(){document.getElementById('mo').classList.remove('show')}
+
+// Guest detail: show matched or pending version
+function showGuestDetail(){
+  if(currentState==='matched') document.getElementById('gdpMatched').classList.add('show');
+  else document.getElementById('gdpPending').classList.add('show');
+}
+function hideGuestDetail(){
+  document.getElementById('gdpMatched').classList.remove('show');
+  document.getElementById('gdpPending').classList.remove('show');
+}
+function toggleCandDetail(id){
+  document.getElementById(id).classList.toggle('hidden');
+}
+
+// Demo toggle
+let currentState='matched';
+function setDemoState(s){
+  currentState=s;
+  document.querySelectorAll('.demo-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.demo-btn[data-state="${s}"]`).classList.add('active');
+  const pill=document.getElementById('statusPill'),aM=document.getElementById('alertMatched'),aP=document.getElementById('alertPending'),pb=document.getElementById('pendingBadge');
+  const gn=document.getElementById('gNameBig'),gs=document.getElementById('gNameSub'),gb=document.getElementById('gBadges'),gv=document.getElementById('gVisits'),gns=document.getElementById('guestNotesSection');
+  if(s==='matched'){
+    pill.className='status-pill sp-checked-in';pill.textContent='CI済';
+    aM.classList.remove('hidden');aP.classList.add('hidden');pb.classList.add('hidden');
+    gn.textContent='對馬 晋';gs.textContent='ツシマ ススム / Susumu Tsushima';
+    gb.innerHTML='<span class="badge badge-vip">⭐VIP</span><span class="badge badge-repeater">🔁×3</span><span class="badge badge-linked">🔗連結</span>';
+    gv.textContent='3回';gns.classList.remove('hidden');
+  }else{
+    pill.className='status-pill sp-confirmed';pill.textContent='確定';
+    aM.classList.add('hidden');aP.classList.remove('hidden');pb.classList.remove('hidden');
+    gn.textContent='ワタナベ ケンタ';gs.textContent='Watanabe Kenta（Booking.com）';
+    gb.innerHTML='';gv.textContent='—';gns.classList.add('hidden');
+  }
+}
+function selectCandidate(){
+  hideGuestDetail();
+  alert('ゲスト紐付け完了 → 對馬 晋として紐付けました');
+  setDemoState('matched');
+}
+
+(function ck(){const d=new Date(),w=["日","月","火","水","木","金","土"];
+document.getElementById("clock").textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${w[d.getDay()]}）${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+setTimeout(ck,30000)})();
+</script>
+
+<div class="demo-toggle">
+  <span style="font-size:10px;color:#94A3B8;margin-right:4px">デモ:</span>
+  <button class="demo-btn active" data-state="matched" onclick="setDemoState('matched')">紐付け済み</button>
+  <button class="demo-btn" data-state="pending" onclick="setDemoState('pending')">ゲスト未確定</button>
+</div>
+</body>
+</html>

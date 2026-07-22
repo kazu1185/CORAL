@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.65;
+  /* 日本語UIは字間をわずかに開けると可読性が上がる（欧文には影響が小さい値にとどめる） */
+  letter-spacing: 0.01em;
+  cursor: default;
+  /* 表示テキストをクリックしてもキャレット（点滅カーソル）を出さない */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* 入力欄は選択・編集可能にする */
+input, textarea, [contenteditable="true"] { cursor: text; -webkit-user-select: text; user-select: text; }
+a, button, [role="button"], label[for], select, summary { cursor: pointer; }
+
+button {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+}
+
+/* キーボード操作時のみフォーカスリングを出す（マウス操作では出さない） */
+:focus { outline: none; }
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* テキスト選択色もブランドトーンに合わせる */
+::selection {
+  background: rgba(138, 116, 64, 0.18);
+}
+
+/* スクロールバー: 存在感を消して内容に集中させる */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 5px;
+  /* トラックとの間に透明の余白を作る（つまみを細く見せる） */
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover { background-color: var(--text-muted); }
+
+/* 数値・日付・金額は等幅数字で桁を揃える */
+table, .tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+}

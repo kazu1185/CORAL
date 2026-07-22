@@ -1,0 +1,411 @@
+.ri {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ri__loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* ヘッダー行: サマリー + 編集ボタン */
+.ri__header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* サマリー */
+.ri__summary {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* 配置編集ボタン */
+.ri__edit-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 14px; font-size: var(--font-size-xs); font-weight: 600;
+  border: 1px solid var(--border-default); border-radius: var(--radius-md);
+  background: var(--bg-card); color: var(--text-secondary); cursor: pointer; font-family: inherit;
+  white-space: nowrap;
+}
+.ri__edit-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.ri__edit-btn--active {
+  background: var(--accent-blue); color: #fff; border-color: var(--accent-blue);
+}
+.ri__edit-btn--active:hover { background: var(--accent-blue-hover); }
+
+/* 編集ヒント */
+.ri__edit-hint {
+  font-size: var(--font-size-xs); color: var(--accent-blue);
+  background: var(--accent-blue-soft); padding: 6px 12px; border-radius: var(--radius-sm);
+  margin-top: -8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* フロア表示順切替ボタン */
+.ri__floor-order-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 10px; font-size: var(--font-size-xs); font-weight: 500;
+  border: 1px solid var(--accent-blue); border-radius: var(--radius-sm);
+  background: var(--bg-card); color: var(--accent-blue); cursor: pointer; font-family: inherit;
+}
+.ri__floor-order-btn:hover { background: var(--accent-blue); color: #fff; }
+
+/* 編集モードのカード */
+.ri__card--editable { cursor: grab; }
+.ri__card--editable:active { cursor: grabbing; }
+.ri__card--drag-over {
+  outline: 2px dashed var(--accent-blue);
+  outline-offset: -2px;
+}
+
+.ri__chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.ri__chip-count {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.ri__chip-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.ri__chip--occupied .ri__chip-count { color: var(--accent-blue); }
+.ri__chip--checkout_due .ri__chip-count { color: var(--accent-purple); }
+.ri__chip--checkin_due .ri__chip-count { color: var(--accent-green); }
+.ri__chip--overdue_checkin .ri__chip-count { color: var(--accent-red); }
+.ri__chip--vacant .ri__chip-count { color: var(--text-muted); }
+
+/* フロア */
+.ri__floor {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.ri__floor-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ri__floor-label {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* フロアヘッダー行 */
+.ri__floor-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.ri__floor-header .ri__floor-title { margin-bottom: 0; }
+
+/* グリッドサイズ設定UI */
+.ri__grid-config {
+  display: flex; align-items: center; gap: 6px; margin-left: auto;
+}
+.ri__grid-config-label { font-size: var(--font-size-xs); color: var(--text-muted); }
+.ri__grid-config-input {
+  width: 48px; padding: 3px 6px; font-size: var(--font-size-xs);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); /* 入力欄の輪郭は border-strong（Patina規約） */
+  text-align: center; font-family: inherit;
+}
+/* Patina規約のフォーカスリング（従来はブラウザ既定のまま） */
+.ri__grid-config-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+.ri__auto-place-btn {
+  padding: 3px 10px; font-size: var(--font-size-xs); font-weight: 600;
+  border: 1px solid var(--accent-blue); border-radius: var(--radius-sm);
+  background: var(--accent-blue-soft); color: var(--accent-blue); cursor: pointer; font-family: inherit;
+}
+.ri__auto-place-btn:hover { background: var(--accent-blue); color: #fff; }
+
+/* グリッド */
+.ri__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+/* 固定グリッド（grid_cols/rows 設定済みフロア） */
+.ri__grid--fixed {
+  grid-template-columns: unset; /* style属性で上書きされる */
+}
+
+/* 空セル */
+.ri__empty-cell {
+  min-height: 100px;
+  border-radius: var(--radius-md);
+}
+.ri__empty-cell--editable {
+  border: 2px dashed var(--border-default);
+  background: var(--bg-main);
+}
+.ri__empty-cell--drop-target {
+  border-color: var(--accent-blue);
+  background: var(--accent-blue-soft);
+}
+
+/* カード */
+.ri__card {
+  /* 2pxの濃いボーダーは紙面で主張しすぎるため、薄い線+影の輪郭に変更。
+     状態を示す左4pxボーダーとの対比も強まり、状態が一目で分かりやすくなる */
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 0;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.ri__card:hover:not(:disabled) {
+  box-shadow: var(--shadow-md);
+}
+
+.ri__card:disabled {
+  cursor: default;
+}
+
+/* カード状態の左ボーダー色 */
+.ri__card--occupied { border-left: 4px solid var(--accent-blue); }
+.ri__card--checkout_due { border-left: 4px solid var(--accent-purple); }
+.ri__card--checkin_due { border-left: 4px solid var(--accent-green); }
+.ri__card--overdue_checkin { border-left: 4px solid var(--accent-red); }
+.ri__card--vacant { border-left: 4px solid var(--border-default); opacity: 0.7; }
+.ri__card--out_of_order { border-left: 4px solid var(--text-muted); opacity: 0.4; }
+
+.ri__card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px 4px;
+}
+
+.ri__room-number {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* 部屋タイプコード（SW, TW等）— 部屋番号の横に小さく表示 */
+.ri__type-code {
+  font-size: 11px; /* 10px→11px: タグ類の最小サイズ */
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 2px;
+  letter-spacing: 0.5px;
+}
+
+.ri__state-badge {
+  font-size: 11px; /* 10px→11px: バッジ最小サイズ */
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.ri__card--occupied .ri__state-badge { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.ri__card--checkout_due .ri__state-badge { background: var(--status-checkedout-bg); color: var(--status-checkedout-text); }
+.ri__card--checkin_due .ri__state-badge { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.ri__card--overdue_checkin .ri__state-badge { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+.ri__card--vacant .ri__state-badge { background: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+.ri__card--out_of_order .ri__state-badge { background: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+
+.ri__card-body {
+  flex: 1;
+  padding: 4px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ri__card-body--empty {
+  justify-content: center;
+  align-items: center;
+}
+
+.ri__guest-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ri__guest-name {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ri__vip {
+  font-size: 11px; /* 9px→11px: 9px以下は禁止 */
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(176, 138, 30, 0.14); /* 寒色系の淡黄からブラス系の淡黄（--accent-yellowの薄面）へ */
+  color: var(--accent-yellow);
+  flex-shrink: 0;
+}
+
+/* ゲスト名の右側アイコン群（VIP・リピーター・連結） */
+.ri__guest-icons {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+/* リピーターバッジ（回数付き） */
+.ri__repeater {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 11px; /* 9px→11px: 9px以下は禁止 */
+  font-weight: 700;
+  color: var(--accent-green);
+  background: var(--status-checkedin-bg); /* 彩度を落とした緑面（意味色=成功系は維持） */
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.ri__repeater .material-symbols-outlined {
+  font-size: 12px;
+}
+
+.ri__meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ri__ota {
+  font-size: 11px; /* 9px→11px: 9px以下は禁止 */
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px;
+  color: #fff;
+}
+
+.ri__nights {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.ri__pax {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.ri__icons-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ri__note-icon {
+  font-size: 14px;
+  color: var(--accent-yellow);
+}
+
+.ri__link-icon {
+  font-size: 14px;
+  color: var(--accent-teal);
+}
+
+/* 特別リクエストアイコン */
+.ri__request-icon {
+  font-size: 14px;
+  color: #C2620E; /* 高彩度オレンジから紙面になじむ落ち着いたオレンジへ（意味色=注意系は維持） */
+}
+
+/* 未精算バッジ */
+.ri__unpaid {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 11px; /* 9px→11px: 9px以下は禁止 */
+  font-weight: 700;
+  color: var(--accent-red);
+  background: var(--status-noshow-bg); /* 彩度を落とした赤面（意味色=警告系は維持） */
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.ri__unpaid .material-symbols-outlined {
+  font-size: 12px;
+}
+
+/* 到着予定時刻 */
+.ri__eta {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 11px; /* 9px→11px: 9px以下は禁止 */
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-hover); /* スレート系の薄面をウォームグレー面へ */
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+.ri__eta .material-symbols-outlined {
+  font-size: 12px;
+}
+
+.ri__room-type {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+/* フッター（清掃ステータス） */
+.ri__card-footer {
+  padding: 4px 10px 6px;
+  border-top: 1px solid var(--border-light);
+}
+
+.ri__hk {
+  font-size: 12px; /* 10px→12px: 清掃状態はラベル（本文扱い）なので12px以上に */
+  font-weight: 500;
+}
+
+.ri__hk--clean { color: var(--accent-green); }
+.ri__hk--cleaning { color: var(--accent-yellow); }
+.ri__hk--inspecting { color: var(--accent-blue); }
+.ri__hk--dirty { color: var(--accent-red); }
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+  .ri__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

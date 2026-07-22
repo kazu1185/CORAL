@@ -1,0 +1,124 @@
+.pin-dialog__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(38, 34, 27, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.pin-dialog {
+  width: 380px;
+  padding: 32px 30px 26px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.pin-dialog__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+
+.pin-dialog__desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0 0 24px;
+  line-height: 1.7;
+}
+
+.pin-dialog__field {
+  margin-bottom: 18px;
+}
+
+.pin-dialog__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.pin-dialog__input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: var(--font-size-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  text-align: center;
+  letter-spacing: 6px;
+  font-family: inherit;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.pin-dialog__input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.pin-dialog__error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+  font-size: var(--font-size-sm);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.pin-dialog__error .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.pin-dialog__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.pin-dialog__cancel {
+  flex: 1;
+  padding: 10px;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.pin-dialog__cancel:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.pin-dialog__submit {
+  flex: 1;
+  padding: 10px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent-blue);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.pin-dialog__submit:hover:not(:disabled) {
+  background: var(--accent-blue-hover);
+}
+
+.pin-dialog__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

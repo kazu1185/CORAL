@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>サイドバートグルボタン デザイン候補</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: #F0F2F5; padding: 40px; }
+  h1 { font-size: 20px; color: #1E293B; margin-bottom: 32px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .option { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .option h2 { font-size: 15px; color: #1E293B; margin-bottom: 4px; }
+  .option p { font-size: 12px; color: #64748B; margin-bottom: 16px; }
+  .demo { display: flex; height: 320px; border-radius: 8px; overflow: hidden; border: 1px solid #E2E8F0; position: relative; }
+  .sidebar-demo {
+    width: 180px; background: #1E293B; display: flex; flex-direction: column;
+    position: relative; transition: width 0.3s;
+  }
+  .sidebar-demo.collapsed { width: 56px; }
+  .sidebar-demo .logo { height: 48px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: #fff; font-weight: 700; font-size: 16px; }
+  .sidebar-demo .nav { flex: 1; padding: 8px 0; }
+  .sidebar-demo .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 14px;
+    color: rgba(255,255,255,0.6); font-size: 12px; cursor: default;
+  }
+  .sidebar-demo .nav-item .material-symbols-outlined { font-size: 18px; }
+  .sidebar-demo .nav-item.active { background: rgba(59,130,246,0.15); color: #fff; border-left: 3px solid #3B82F6; }
+  .sidebar-demo.collapsed .nav-item { justify-content: center; padding: 9px 0; gap: 0; }
+  .sidebar-demo.collapsed .nav-item span.label { display: none; }
+  .sidebar-demo.collapsed .logo-text { display: none; }
+  .main-demo { flex: 1; background: #F8FAFC; padding: 16px; }
+  .main-demo .placeholder { width: 100%; height: 20px; background: #E2E8F0; border-radius: 4px; margin-bottom: 8px; }
+  .main-demo .placeholder:nth-child(2) { width: 70%; }
+  .main-demo .placeholder:nth-child(3) { width: 85%; }
+
+  /* ===== A: 半円タブ型 ===== */
+  .toggle-a {
+    position: absolute; top: 50%; right: -14px; transform: translateY(-50%);
+    width: 14px; height: 40px;
+    background: #1E293B; border: none;
+    border-radius: 0 8px 8px 0;
+    color: rgba(255,255,255,0.7); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    z-index: 10;
+  }
+  .toggle-a:hover { background: #334155; color: #fff; }
+  .toggle-a .material-symbols-outlined { font-size: 14px; }
+
+  /* ===== B: 縦バー型 ===== */
+  .toggle-b {
+    position: absolute; top: 50%; right: -6px; transform: translateY(-50%);
+    width: 6px; height: 48px;
+    background: #CBD5E1; border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background 0.2s, width 0.2s;
+    z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .toggle-b:hover { width: 20px; background: #3B82F6; }
+  .toggle-b .material-symbols-outlined { font-size: 14px; color: #fff; opacity: 0; transition: opacity 0.2s; }
+  .toggle-b:hover .material-symbols-outlined { opacity: 1; }
+
+  /* ===== C: 透明ホバー型 ===== */
+  .toggle-c-zone {
+    position: absolute; top: 0; right: -16px; width: 16px; height: 100%;
+    z-index: 10; cursor: pointer;
+  }
+  .toggle-c {
+    position: absolute; top: 50%; left: 0; transform: translateY(-50%);
+    width: 16px; height: 48px;
+    background: transparent; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background 0.2s;
+    border-radius: 0 6px 6px 0;
+  }
+  .toggle-c .material-symbols-outlined {
+    font-size: 16px; color: transparent;
+    transition: color 0.2s;
+  }
+  .toggle-c-zone:hover .toggle-c { background: rgba(59,130,246,0.1); }
+  .toggle-c-zone:hover .toggle-c .material-symbols-outlined { color: #3B82F6; }
+
+  /* ===== D: 切り欠き型 ===== */
+  .toggle-d-wrap {
+    position: absolute; top: 50%; right: 0; transform: translateY(-50%);
+    z-index: 10;
+  }
+  .toggle-d {
+    width: 20px; height: 36px;
+    background: #F8FAFC; border: 1px solid #E2E8F0; border-left: none;
+    border-radius: 0 8px 8px 0;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-d:hover { background: #E2E8F0; }
+  .toggle-d .material-symbols-outlined { font-size: 14px; color: #64748B; }
+  /* 切り欠きの上下三角 */
+  .toggle-d-wrap::before, .toggle-d-wrap::after {
+    content: ''; position: absolute; right: 0; width: 10px; height: 10px;
+    background: #1E293B;
+  }
+  .toggle-d-wrap::before {
+    top: -10px;
+    border-radius: 0 0 8px 0;
+    background: radial-gradient(circle at 0% 0%, transparent 10px, #1E293B 10px);
+  }
+  .toggle-d-wrap::after {
+    bottom: -10px;
+    border-radius: 0 8px 0 0;
+    background: radial-gradient(circle at 0% 100%, transparent 10px, #1E293B 10px);
+  }
+</style>
+</head>
+<body>
+<h1>サイドバートグルボタン — デザイン候補</h1>
+<div class="grid">
+
+  <!-- A: 半円タブ型 -->
+  <div class="option">
+    <h2>A. 半円タブ型</h2>
+    <p>サイドバー色の半円タブ。ドロワーの取っ手のイメージ。</p>
+    <div class="demo">
+      <div class="sidebar-demo" id="sideA">
+        <div class="logo"><span class="logo-text">PMS</span></div>
+        <div class="nav">
+          <div class="nav-item active"><span class="material-symbols-outlined">grid_view</span><span class="label">ダッシュボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">event_note</span><span class="label">予約一覧</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">calendar_month</span><span class="label">アサインボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">door_front</span><span class="label">ルームインジケーター</span></div>
+        </div>
+        <button class="toggle-a" id="toggleA"><span class="material-symbols-outlined">chevron_left</span></button>
+      </div>
+      <div class="main-demo"><div class="placeholder"></div><div class="placeholder"></div><div class="placeholder"></div></div>
+    </div>
+  </div>
+
+  <!-- B: 縦バー型 -->
+  <div class="option">
+    <h2>B. 縦バー型</h2>
+    <p>普段は細いグレーのバー。ホバーで幅が広がり矢印が出現。</p>
+    <div class="demo">
+      <div class="sidebar-demo" id="sideB">
+        <div class="logo"><span class="logo-text">PMS</span></div>
+        <div class="nav">
+          <div class="nav-item active"><span class="material-symbols-outlined">grid_view</span><span class="label">ダッシュボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">event_note</span><span class="label">予約一覧</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">calendar_month</span><span class="label">アサインボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">door_front</span><span class="label">ルームインジケーター</span></div>
+        </div>
+        <button class="toggle-b" id="toggleB"><span class="material-symbols-outlined">chevron_left</span></button>
+      </div>
+      <div class="main-demo"><div class="placeholder"></div><div class="placeholder"></div><div class="placeholder"></div></div>
+    </div>
+  </div>
+
+  <!-- C: 透明ホバー型 -->
+  <div class="option">
+    <h2>C. 透明ホバー型</h2>
+    <p>普段は完全に見えない。右端にマウスを近づけると矢印が浮かぶ。</p>
+    <div class="demo">
+      <div class="sidebar-demo" id="sideC">
+        <div class="logo"><span class="logo-text">PMS</span></div>
+        <div class="nav">
+          <div class="nav-item active"><span class="material-symbols-outlined">grid_view</span><span class="label">ダッシュボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">event_note</span><span class="label">予約一覧</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">calendar_month</span><span class="label">アサインボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">door_front</span><span class="label">ルームインジケーター</span></div>
+        </div>
+        <div class="toggle-c-zone" id="toggleCZone">
+          <button class="toggle-c" id="toggleC"><span class="material-symbols-outlined">chevron_left</span></button>
+        </div>
+      </div>
+      <div class="main-demo"><div class="placeholder"></div><div class="placeholder"></div><div class="placeholder"></div></div>
+    </div>
+  </div>
+
+  <!-- D: 切り欠き型 -->
+  <div class="option">
+    <h2>D. 切り欠き型</h2>
+    <p>サイドバーに切り欠き（ノッチ）があり、そこに矢印ボタンが収まる。</p>
+    <div class="demo">
+      <div class="sidebar-demo" id="sideD">
+        <div class="logo"><span class="logo-text">PMS</span></div>
+        <div class="nav">
+          <div class="nav-item active"><span class="material-symbols-outlined">grid_view</span><span class="label">ダッシュボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">event_note</span><span class="label">予約一覧</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">calendar_month</span><span class="label">アサインボード</span></div>
+          <div class="nav-item"><span class="material-symbols-outlined">door_front</span><span class="label">ルームインジケーター</span></div>
+        </div>
+        <div class="toggle-d-wrap">
+          <button class="toggle-d" id="toggleD"><span class="material-symbols-outlined">chevron_left</span></button>
+        </div>
+      </div>
+      <div class="main-demo"><div class="placeholder"></div><div class="placeholder"></div><div class="placeholder"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// クリックで折りたたみ動作のデモ
+['A','B','C','D'].forEach(id => {
+  const btn = document.getElementById('toggle' + id) || document.getElementById('toggle' + id + 'Zone');
+  const side = document.getElementById('side' + id);
+  if (!btn || !side) return;
+  btn.addEventListener('click', () => {
+    side.classList.toggle('collapsed');
+    const icon = btn.querySelector('.material-symbols-outlined') || btn.querySelector('button .material-symbols-outlined');
+    if (icon) icon.textContent = side.classList.contains('collapsed') ? 'chevron_right' : 'chevron_left';
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+/* ============================================================
+   手動予約入力ページ
+   ============================================================ */
+
+.rc-page {
+  padding: 24px 32px;
+  max-width: 860px;
+}
+
+.rc-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.rc-page__title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.rc-page__icon {
+  font-size: 24px;
+  /* Patina刷新: 旧--primary(青)は未定義トークンだったため、ブラスの--accent-blueへ統一 */
+  color: var(--accent-blue);
+}
+
+.rc-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.rc-page__back:hover { color: var(--text-primary); }
+.rc-page__back .material-symbols-outlined { font-size: 18px; }
+
+/* フォーム全体 */
+.rc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* セクション */
+.rc-section {
+  background: var(--bg-card);
+  /* Patina刷新: カードは線で囲まず、極薄い影で紙面から浮かせる */
+  border: none;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+}
+
+.rc-section__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
+}
+
+/* フィールド行 */
+.rc-field-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.rc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.rc-field--narrow {
+  flex: 0 0 80px;
+  min-width: 80px;
+}
+
+.rc-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.rc-required {
+  color: var(--accent-red);
+}
+
+.rc-input, .rc-select {
+  height: 36px;
+  padding: 0 10px;
+  /* Patina刷新: 入力欄のみ輪郭が必要なので強めのボーダーを使う */
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  /* Patina刷新: 可読性優先で本文サイズを14px→15px（--font-size-base）に拡大 */
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font-family: inherit;
+}
+.rc-input:focus, .rc-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.rc-input--num {
+  width: 100%;
+  text-align: right;
+}
+
+.rc-input--charge {
+  height: 32px;
+  font-size: 13px;
+}
+
+.rc-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.rc-textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.rc-nights {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* カレンダー + フィールドの横並びレイアウト */
+.rc-stay-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.rc-stay-layout__calendar {
+  flex-shrink: 0;
+}
+
+.rc-stay-layout__fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+}
+
+.rc-readonly {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.rc-hint {
+  /* Patina刷新: 9〜11pxの補足文は読みにくいため12px（--font-size-xs）へ引き上げ */
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+/* チャネル選択チップ */
+.rc-channel-group {
+  display: flex;
+  gap: 8px;
+}
+
+.rc-channel-chip {
+  cursor: pointer;
+}
+.rc-channel-chip input { display: none; }
+.rc-channel-chip .ota-badge {
+  padding: 6px 16px;
+  font-size: 13px;
+  border-radius: 20px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+.rc-channel-chip--active .ota-badge {
+  opacity: 1;
+  /* Patina刷新: 選択リングを青からブラスのフォーカスリング色へ変更（OTAバッジ自体の識別色は不変） */
+  box-shadow: 0 0 0 2px var(--accent-blue-ring);
+}
+
+/* ゲスト検索 */
+.rc-guest-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rc-guest-search__input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.rc-guest-search__icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--text-muted);
+}
+
+.rc-guest-search__input {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px 0 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.rc-guest-search__input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.rc-guest-dropdown {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  margin-top: 4px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.rc-guest-dropdown__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.rc-guest-dropdown__item:hover {
+  background: var(--bg-hover);
+}
+
+.rc-guest-dropdown__name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rc-guest-dropdown__meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* 選択済みゲスト表示 */
+.rc-guest-selected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  /* Patina刷新: 青の選択面(#F0F9FF)をブラスの淡い選択面へ変更 */
+  background: var(--accent-blue-soft);
+  border: 1px solid var(--accent-blue-ring);
+  border-radius: var(--radius-md);
+}
+
+.rc-guest-selected .material-symbols-outlined {
+  font-size: 20px;
+  color: var(--accent-blue);
+}
+
+.rc-guest-selected__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.rc-guest-selected__code {
+  font-size: 12px;
+  color: var(--text-secondary);
+  /* Patina刷新: タグ面はスレート(#E2E8F0)から暖色グレーへ */
+  background: var(--border-default);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.rc-guest-selected__phone {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.rc-guest-selected__clear {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px;
+  border-radius: 4px;
+}
+.rc-guest-selected__clear:hover {
+  background: var(--border-default);
+  color: var(--text-primary);
+}
+
+/* 料金テーブル */
+.rc-charges-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rc-charges-table__th {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+  border-bottom: 2px solid var(--border-default);
+}
+.rc-charges-table__th--num {
+  text-align: right;
+  width: 140px;
+}
+
+.rc-charges-table__td {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+}
+.rc-charges-table__td--num {
+  text-align: right;
+}
+
+.rc-charges-table__total {
+  background: var(--bg-inset);
+}
+.rc-charges-table__total .rc-charges-table__td {
+  font-weight: 700;
+  border-top: 2px solid var(--border-default);
+  border-bottom: none;
+}
+
+/* ボタン */
+.rc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid var(--border-default);
+  transition: all 0.15s;
+}
+
+.rc-btn .material-symbols-outlined { font-size: 18px; }
+
+.rc-btn--sm { height: 32px; font-size: 12px; padding: 0 10px; }
+
+.rc-btn--lg { height: 40px; font-size: 14px; padding: 0 20px; }
+
+.rc-btn--outline {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+}
+.rc-btn--outline:hover { background: var(--bg-hover); }
+
+.rc-btn--primary {
+  /* Patina刷新: 主要アクションは青からブランドのブラス色へ */
+  background: var(--accent-blue);
+  color: var(--text-inverse);
+  border-color: var(--accent-blue);
+}
+.rc-btn--primary:hover { background: var(--accent-blue-hover); }
+.rc-btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* アクションバー */
+.rc-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 0 0;
+}
+
+/* エラー表示 */
+.rc-error {
+  padding: 10px 14px;
+  /* Patina刷新: 意味色（危険=赤）は保ちつつ、彩度を落としたステータス淡色面に置換 */
+  background: var(--status-noshow-bg);
+  border: 1px solid rgba(179, 54, 44, 0.25); /* --accent-red の25%。淡赤面の輪郭用 */
+  border-radius: var(--radius-md);
+  color: var(--accent-red);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rc-error .material-symbols-outlined { font-size: 18px; }
+
+/* ダイアログオーバーレイ */
+.rc-overlay {
+  position: fixed;
+  inset: 0;
+  /* Patina刷新: オーバーレイも純黒ではなく墨色ベースの半透明にして紙面になじませる */
+  background: rgba(38, 34, 27, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-dialog {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  min-width: 380px;
+  max-width: 500px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rc-dialog__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}

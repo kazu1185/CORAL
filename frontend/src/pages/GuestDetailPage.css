@@ -1,0 +1,800 @@
+/* ===== 顧客詳細ページ ===== */
+/* ReservationDetailPage.cssと同様のデザイントークン・レイアウトパターンを使用 */
+
+.gd__loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+}
+
+/* --- トップバー --- */
+.gd__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+}
+
+.gd__back {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+.gd__back:hover {
+  background: var(--bg-hover); /* Patina刷新: ホバー面は専用トークンで統一 */
+  color: var(--text-primary);
+}
+
+.gd__topbar-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gd__guest-code {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+
+.gd__guest-name-top {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* VIPバッジ */
+.gd__vip {
+  display: inline-block;
+  font-size: 11px; /* Patina刷新: 10pxは可読性が低いためバッジ許容下限の11pxへ */
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-yellow); /* Patina刷新: 彩度の高いアンバーをやめ、紙面になじむ落ち着いた黄へ */
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+/* --- 左右2カラムレイアウト --- */
+/* 左380px固定・右は残り領域（1fr）で分割 */
+.gd__columns {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.gd__col--left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gd__col--right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- カード共通 --- */
+.gd__card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.gd__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.gd__card-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+/* card-header内のtitleはmargin-bottom不要（headerがスペース管理） */
+.gd__card-header .gd__card-title {
+  margin-bottom: 0;
+}
+
+/* --- 編集ボタン群 --- */
+.gd__edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+.gd__edit-btn:hover {
+  background: var(--bg-hover); /* Patina刷新: ホバー面は専用トークンで統一 */
+  color: var(--text-primary);
+}
+.gd__edit-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.gd__edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.gd__save-btn {
+  padding: 6px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity var(--transition-fast);
+}
+.gd__save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gd__cancel-btn {
+  padding: 6px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+.gd__cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- 顧客コード表示（大きめ・読み取り専用） --- */
+.gd__code-display {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--accent-blue);
+  font-family: monospace;
+  margin-bottom: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+/* --- 名前ブロック --- */
+.gd__name-block {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.gd__name-main {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.gd__name-sub {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* --- 名前編集ブロック --- */
+.gd__name-edit {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.gd__field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.gd__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gd__field-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* 名前フィールド（統合: 1行入力） */
+.gd__field-full {
+  margin-bottom: 8px;
+}
+
+/* ラベル行（ラベル + 変換ボタン横並び） */
+.gd__field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* ローマ字→カナ変換ボタン */
+.gd__convert-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  font-size: 12px; /* Patina刷新: ボタンラベルは最小12pxのルールに合わせて引き上げ */
+  font-weight: 500;
+  color: var(--accent-blue);
+  background: var(--accent-blue-soft); /* Patina刷新: 青系の淡面をブラスの淡面トークンへ */
+  border: 1px solid var(--accent-blue-ring);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.gd__convert-btn:hover {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+.gd__convert-btn .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* --- 属性行 --- */
+.gd__attrs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gd__attr-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.gd__attr-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.gd__attr-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+/* --- 入力フィールド --- */
+.gd__input {
+  padding: 6px 10px;
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); /* Patina刷新: 入力欄は輪郭が必要なので強めのボーダーを使う */
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  flex: 1;
+  min-width: 0;
+}
+
+.gd__input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring); /* Patina刷新: フォーカスリングをブラスのトークンへ */
+}
+
+.gd__input--select {
+  cursor: pointer;
+}
+
+/* チェックボックスラベル */
+.gd__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+/* --- 空テキスト --- */
+.gd__empty {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* --- 宿泊履歴テーブル --- */
+.gd__table-wrap {
+  overflow-x: auto;
+}
+
+.gd__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.gd__table th {
+  text-align: left;
+  padding: 8px 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid var(--border-default);
+  white-space: nowrap;
+  font-size: var(--font-size-xs);
+}
+
+.gd__table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border-default);
+  white-space: nowrap;
+  color: var(--text-primary);
+}
+
+/* 行クリック可能なことを示すカーソル・ホバー */
+.gd__table-row {
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.gd__table-row:hover {
+  background: var(--bg-hover); /* Patina刷新: 行ホバーは専用トークンで統一 */
+}
+
+.gd__td-mono {
+  font-family: monospace;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+}
+
+.gd__td-amount {
+  text-align: right;
+  font-family: monospace;
+}
+
+/* 展開アイコン */
+.gd__td-expand { width: 24px; padding: 0 2px !important; }
+.gd__expand-icon {
+  font-size: 18px; color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.gd__expand-icon--open { transform: rotate(90deg); }
+.gd__table-row--expanded { background: var(--bg-inset); } /* Patina刷新: 展開中の行はカード内のくぼみ面トークンへ */
+
+/* メモアイコン + ツールチップ */
+.gd__td-memo { width: 28px; padding: 0 2px !important; }
+.gd__memo-icon-wrap {
+  position: relative; display: inline-flex; cursor: default;
+}
+.gd__memo-icon {
+  font-size: 16px; color: var(--accent-blue); opacity: 0.6;
+}
+.gd__memo-icon-wrap:hover .gd__memo-icon { opacity: 1; }
+.gd__memo-tooltip {
+  display: none; position: absolute; right: 0; top: 100%;
+  z-index: 10; width: 240px; padding: 8px 10px;
+  background: var(--bg-card); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+  font-size: var(--font-size-xs); color: var(--text-primary);
+  white-space: pre-wrap; line-height: 1.5;
+}
+.gd__memo-icon-wrap:hover .gd__memo-tooltip { display: block; }
+
+/* 折りたたみ明細行 */
+.gd__detail-row td { padding: 0 !important; background: var(--bg-inset); } /* Patina刷新: 明細エリアはくぼみ面トークンへ */
+.gd__detail-content {
+  padding: 8px 12px 12px 36px;
+}
+.gd__detail-loading, .gd__detail-empty {
+  font-size: var(--font-size-xs); color: var(--text-muted);
+}
+
+/* 明細テーブル */
+.gd__detail-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--font-size-xs);
+}
+.gd__detail-table th {
+  font-weight: 500; color: var(--text-muted);
+  padding: 3px 8px; border-bottom: 1px solid var(--border-default);
+  text-align: left;
+}
+.gd__detail-table td {
+  padding: 4px 8px; border-bottom: 1px solid rgba(38, 34, 27, 0.06); /* Patina刷新: 純黒ベースの罫線を墨色ベースの暖色罫線へ */
+}
+.gd__detail-table .gd__right { text-align: right; }
+.gd__detail-payment { background: rgba(62, 124, 79, 0.08); } /* Patina刷新: 入金行の緑もaccent-greenベースの淡面へ */
+.gd__detail-desc {
+  max-width: 200px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.gd__detail-type {
+  font-size: 11px; /* Patina刷新: 10pxはタグ許容下限の11pxへ */
+  font-weight: 500; padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+/* Patina刷新: 明細タイプの淡色タグは意味色（黄=宿泊料/緑=入金/赤=キャンセル料等）を保ちつつ、
+   彩度を落としてPatinaの紙面になじませる。ブラス(--accent-blue)は追加販売用 */
+.gd__detail-type--room { background: rgba(176, 138, 30, 0.14); color: #8A6D1E; }
+.gd__detail-type--payment { background: rgba(62, 124, 79, 0.12); color: var(--accent-green); }
+.gd__detail-type--addon { background: var(--accent-blue-soft); color: var(--accent-blue); }
+.gd__detail-type--discount { background: rgba(154, 59, 94, 0.10); color: #9A3B5E; }
+.gd__detail-type--cancel_fee { background: rgba(179, 54, 44, 0.10); color: var(--accent-red); }
+.gd__detail-type--refund { background: rgba(109, 95, 158, 0.12); color: var(--accent-purple); }
+
+/* 予約詳細リンク */
+.gd__detail-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 8px; padding: 3px 8px;
+  font-size: var(--font-size-xs); color: var(--accent-blue);
+  background: none; border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: background 0.15s;
+}
+.gd__detail-link:hover { background: var(--accent-blue-soft); } /* Patina刷新: 青の淡面をブラスの淡面トークンへ */
+
+/* ステータスバッジ（宿泊履歴内） */
+.gd__status {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.gd__status--confirmed {
+  background: var(--status-confirmed-bg);
+  color: var(--status-confirmed-text);
+}
+.gd__status--checked_in {
+  background: var(--status-checkedin-bg);
+  color: var(--status-checkedin-text);
+}
+.gd__status--checked_out {
+  background: var(--status-checkedout-bg);
+  color: var(--status-checkedout-text);
+}
+.gd__status--cancelled {
+  background: var(--status-cancelled-bg);
+  color: var(--status-cancelled-text);
+}
+.gd__status--no_show {
+  background: var(--status-noshow-bg);
+  color: var(--status-noshow-text);
+}
+
+/* OTAチャネルバッジ（宿泊履歴内） */
+/* 背景色はJSX側でOTAチャネル識別色（--ota-*）を指定するため、ここでは変更しない */
+.gd__ota {
+  font-size: 11px; /* Patina刷新: 10pxはバッジ許容下限の11pxへ */
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* --- パスポート画像セクション --- */
+.gd__passport-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.gd__passport-upload .gd__input--select {
+  flex: 1;
+  min-width: 0;
+}
+
+.gd__upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  border: 1px solid var(--accent-blue);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--accent-blue);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+.gd__upload-btn:hover:not(:disabled) {
+  background: var(--accent-blue);
+  color: #fff;
+}
+.gd__upload-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.gd__upload-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* サムネイルグリッド（4列、120x80px程度） */
+.gd__passport-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.gd__passport-item {
+  position: relative;
+}
+
+.gd__passport-thumb {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid var(--border-default);
+  position: relative;
+  background: var(--bg-inset); /* Patina刷新: 画像読込前の下地はくぼみ面トークンへ */
+}
+
+.gd__passport-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gd__passport-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+.gd__passport-placeholder .material-symbols-outlined {
+  font-size: 32px;
+}
+
+/* 代表者バッジ */
+.gd__passport-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 11px; /* Patina刷新: 9pxは禁止サイズのためバッジ許容下限の11pxへ */
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+/* パスポート削除ボタン */
+.gd__passport-delete {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  border: none;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.gd__passport-item:hover .gd__passport-delete {
+  opacity: 1;
+}
+.gd__passport-delete .material-symbols-outlined {
+  font-size: 14px;
+}
+
+/* --- パスポート拡大モーダル --- */
+/* 背景オーバーレイ: 画面全体を覆い、クリックで閉じる */
+.gd__modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.gd__modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.gd__modal-image {
+  max-width: 100%;
+  max-height: 85vh;
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.gd__modal-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  border: none;
+  background: #fff;
+  color: var(--text-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+.gd__modal-close .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* --- 顧客メモ --- */
+.gd__notes-status {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.gd__notes-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-inset); /* Patina刷新: 入力面はカード内のくぼみ面トークンへ */
+  border: 1px solid var(--border-strong); /* Patina刷新: 入力欄は輪郭が必要なので強めのボーダーを使う */
+  border-radius: var(--radius-sm);
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.gd__notes-textarea:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring); /* Patina刷新: フォーカスリングをブラスのトークンへ */
+}
+
+/* ===== 顧客詳細モーダル（予約詳細から呼び出し） ===== */
+/* 画面遷移させずにフルサイズでゲスト情報を確認・編集するためのオーバーレイ */
+.gd-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.gd-modal-container {
+  background: var(--bg-main, #F4F2ED); /* Patina刷新: フォールバック値もウォームアイボリーへ */
+  border-radius: var(--radius-lg);
+  width: 95vw;
+  max-width: 1400px;
+  height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+/* モーダル内のトップバーを角丸に合わせる（コンテナのvar(--radius-lg)と揃える） */
+.gd-modal-container .gd__topbar {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* --- レスポンシブ対応 --- */
+/* タブレット以下ではカラムを縦積みに切り替え */
+@media (max-width: 900px) {
+  .gd__columns {
+    grid-template-columns: 1fr;
+  }
+
+  .gd__passport-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* --- ゲストマージ（名寄せ） --- */
+.gd__merge-expand {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  padding: 10px; font-size: var(--font-size-sm); font-weight: 500;
+  border: 1px dashed var(--border-default); border-radius: var(--radius-md);
+  background: transparent; cursor: pointer; color: var(--text-secondary);
+  font-family: inherit; justify-content: center;
+}
+.gd__merge-expand:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.gd__merge-expand .material-symbols-outlined { font-size: 18px; }
+.gd__merge-desc {
+  font-size: var(--font-size-xs); color: var(--text-muted);
+  margin: 0 0 10px; line-height: 1.5;
+}
+.gd__merge-search {
+  display: flex; gap: 6px; margin-bottom: 10px;
+}
+.gd__merge-search-btn {
+  padding: 6px 12px; font-size: var(--font-size-xs); font-weight: 600;
+  border: none; border-radius: var(--radius-sm); background: var(--accent-blue);
+  color: #fff; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.gd__merge-results {
+  max-height: 250px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px;
+}
+.gd__merge-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px; border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.gd__merge-item:hover { border-color: var(--accent-blue); }
+.gd__merge-item--selected { border-color: var(--accent-blue); background: var(--accent-blue-soft); } /* Patina刷新: 選択面はブラスの淡面トークンへ */
+.gd__merge-item input[type="checkbox"] { margin-top: 3px; flex-shrink: 0; }
+.gd__merge-item-info { flex: 1; min-width: 0; }
+.gd__merge-item-name { display: flex; align-items: center; gap: 6px; font-size: var(--font-size-sm); font-weight: 600; }
+.gd__merge-item-code { font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400; }
+/* Patina刷新: 本文的な補足情報のため11px→12pxへ引き上げ */
+.gd__merge-item-detail { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.gd__merge-item-meta { display: flex; gap: 10px; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.gd__match-hl { font-weight: 700; color: #C2620E; } /* Patina刷新: 一致箇所の強調オレンジも彩度を落とした暖色へ */
+.gd__merge-btn {
+  display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%;
+  padding: 8px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md); background: var(--accent-red);
+  color: #fff; cursor: pointer; font-family: inherit; margin-bottom: 6px;
+}
+.gd__merge-btn:hover { opacity: 0.9; }
+.gd__merge-btn .material-symbols-outlined { font-size: 16px; }
+.gd__merge-close {
+  display: block; width: 100%; padding: 6px; font-size: var(--font-size-xs);
+  border: none; background: transparent; cursor: pointer; color: var(--text-muted);
+  font-family: inherit; text-align: center;
+}
+.gd__merge-close:hover { color: var(--text-primary); }

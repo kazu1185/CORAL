@@ -1,0 +1,288 @@
+/* ========================================
+   グループ予約管理画面
+   ======================================== */
+
+.grp {
+  padding: 20px 24px;
+  max-width: 1200px;
+}
+
+/* ヘッダー */
+.grp__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.grp__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 18px;
+}
+.grp__back:hover {
+  background: var(--bg-hover); /* ホバー面は専用トークンに統一 */
+  color: var(--text-primary);
+}
+.grp__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.grp__meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+.grp__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.grp__meta-item .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* 子予約テーブル */
+.grp__card {
+  background: var(--bg-card);
+  /* Patina: カードは輪郭線ではなく極薄い影で面を立たせる */
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.grp__card-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.grp__card-title .material-symbols-outlined {
+  font-size: 16px;
+  color: var(--text-secondary);
+}
+
+.grp__child-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+.grp__child-table th {
+  text-align: left;
+  padding: 6px 10px;
+  /* Patina: テーブルヘッダは小さめ・太め・字間広めで上品に統一 */
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  font-size: var(--font-size-xs);
+  border-bottom: 1px solid var(--border-default);
+}
+.grp__child-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-light); /* 旧: 固定グレー → 暖色の極薄ボーダートークン */
+  vertical-align: middle;
+}
+.grp__child-table tr:last-child td {
+  border-bottom: none;
+}
+.grp__child-table th:first-child,
+.grp__child-table td:first-child {
+  width: 36px;
+  text-align: center;
+}
+.grp__child-table .grp__right {
+  text-align: right;
+}
+
+.grp__room-index {
+  display: inline-block;
+  min-width: 32px;
+  padding: 2px 6px;
+  background: var(--accent-purple); /* 旧: 鮮やかな紫 → 彩度を落とした紫トークン（OTA色ではないため変更可） */
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 3px;
+  text-align: center;
+}
+.grp__guest-name {
+  font-weight: 500;
+}
+.grp__guest-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  padding: 2px 6px;
+  font-size: var(--font-size-xs); /* 可読性のため11px→12pxに引き上げ */
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+}
+.grp__guest-btn:hover {
+  background: var(--bg-hover); /* ホバー面は専用トークンに統一 */
+  color: var(--text-primary);
+}
+.grp__guest-btn .material-symbols-outlined {
+  font-size: 13px;
+}
+.grp__detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px;
+  font-size: var(--font-size-xs); /* 可読性のため11px→12pxに引き上げ */
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  text-decoration: none;
+}
+.grp__detail-link:hover {
+  background: var(--bg-hover); /* ホバー面は専用トークンに統一 */
+  color: var(--text-primary);
+}
+.grp__amount {
+  font-variant-numeric: tabular-nums;
+}
+
+/* アクションバー */
+.grp__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.grp__action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: #fff;
+  transition: opacity 0.15s;
+}
+.grp__action-btn:hover:not(:disabled) { opacity: 0.85; }
+.grp__action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.grp__action-btn .material-symbols-outlined { font-size: 18px; }
+/* アクションボタンの意味色は保ちつつPatinaのトークンに置換（CI=主要=ブラス、CO=成功=緑、領収書=黄） */
+.grp__action-btn--ci { background: var(--accent-blue); }
+.grp__action-btn--co { background: var(--accent-green); }
+.grp__action-btn--receipt { background: var(--accent-yellow); }
+.grp__select-all {
+  font-size: var(--font-size-xs);
+  color: var(--accent-blue);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 4px 8px;
+}
+.grp__select-all:hover { text-decoration: underline; }
+
+/* グループ売上明細テーブル */
+.grp__charges-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-xs);
+}
+.grp__charges-table th {
+  text-align: left;
+  padding: 6px 8px;
+  /* Patina: テーブルヘッダは小さめ・太め・字間広めで上品に統一（11px→12px引き上げ） */
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border-default);
+  font-size: var(--font-size-xs);
+}
+.grp__charges-table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border-light); /* 旧: 固定グレー → 暖色の極薄ボーダートークン */
+  font-variant-numeric: tabular-nums; /* 金額列の桁揃えのため */
+}
+.grp__charges-table tr:last-child td { border-bottom: none; }
+.grp__charges-table tr.grp__charge-cancelled td {
+  color: var(--text-muted); /* 旧フォールバックのスレート色を除去 */
+  text-decoration: line-through;
+}
+
+/* 精算サマリー */
+.grp__summary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-default);
+}
+.grp__summary-item {
+  text-align: right;
+}
+.grp__summary-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+.grp__summary-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.grp__summary-value--unpaid {
+  color: var(--accent-red); /* 意味色（未収=赤）を保ってトークン化 */
+}
+.grp__summary-value--paid {
+  color: var(--accent-green); /* 意味色（入金済=緑）を保ってトークン化 */
+}
+
+/* 2カラムレイアウト */
+.grp__columns {
+  display: flex;
+  gap: 16px;
+}
+.grp__col--left {
+  flex: 1;
+  min-width: 0;
+}
+.grp__col--right {
+  width: 320px;
+  flex-shrink: 0;
+}
+@media (max-width: 900px) {
+  .grp__columns {
+    flex-direction: column;
+  }
+  .grp__col--right {
+    width: 100%;
+  }
+}

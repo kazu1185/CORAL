@@ -1,0 +1,31 @@
+/**
+ * OTAバッジ共通スタイル
+ *
+ * 使い方: <span className={`ota-badge ota-${channel}`}>{OTA_LABELS[channel]}</span>
+ * 各ページのプレフィクス付きクラス（resv__ota, rd__ota 等）は不要になる。
+ * 色は variables.css の --ota-* 変数を使用。
+ * チャネル識別が目的なのでベタ塗りを維持する（淡色化すると一覧での判別性が落ちる）。
+ */
+
+.ota-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 3px 8px;
+  border-radius: 5px;
+  color: #fff;
+  white-space: nowrap;
+  display: inline-block;
+  line-height: 1.4;
+}
+
+/* OTAカラー（背景色） */
+.ota-jalan { background: var(--ota-jalan); }
+.ota-rakuten { background: var(--ota-rakuten); }
+.ota-booking { background: var(--ota-booking); }
+.ota-agoda { background: var(--ota-agoda); }
+.ota-expedia { background: var(--ota-expedia); }
+.ota-direct { background: var(--ota-direct); }
+.ota-phone { background: var(--ota-phone); }
+.ota-walkin { background: var(--ota-walkin); }
+.ota-corporate { background: var(--ota-corporate); }

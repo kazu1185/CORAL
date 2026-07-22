@@ -1,0 +1,1329 @@
+.rd__loading { text-align: center; padding: 40px; color: var(--text-muted); }
+
+/* トップバー */
+.rd__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 12px;
+}
+
+.rd__back {
+  border: none; background: transparent; cursor: pointer; color: var(--text-secondary);
+  padding: 4px; border-radius: var(--radius-sm);
+}
+.rd__back:hover { background: var(--bg-main); color: var(--text-primary); }
+
+.rd__topbar-info {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+
+.rd__room-number { font-size: var(--font-size-2xl); font-weight: 700; color: var(--text-primary); }
+.rd__room-type {
+  font-size: var(--font-size-sm); color: var(--text-secondary);
+  border: none; background: transparent; font-family: inherit; cursor: default;
+}
+.rd__room-type--editable {
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  padding: 2px 6px; border-radius: var(--radius-sm);
+}
+.rd__room-type--editable:hover { background: var(--bg-main); }
+.rd__room-type--editable:hover .rd__dates-edit-icon { opacity: 1; color: var(--accent-blue); }
+.rd__dates {
+  font-size: var(--font-size-sm); color: var(--text-secondary);
+  border: none; background: transparent; font-family: inherit; cursor: default;
+}
+.rd__dates--editable {
+  cursor: pointer; display: flex; align-items: center; gap: 4px;
+  padding: 2px 6px; border-radius: var(--radius-sm);
+}
+.rd__dates--editable:hover { background: var(--bg-main); }
+.rd__dates-edit-icon { font-size: 14px; opacity: 0.3; }
+.rd__dates--editable:hover .rd__dates-edit-icon { opacity: 1; color: var(--accent-blue); }
+.rd__dialog-field { margin-top: 10px; }
+.rd__dialog-input {
+  width: 100%; padding: 8px 10px; margin-top: 4px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); /* 入力欄の輪郭は --border-strong */
+  font-family: inherit; color: var(--text-primary); background: var(--bg-card);
+}
+.rd__resv-no { font-size: var(--font-size-xs); color: var(--text-muted); font-family: monospace; }
+
+.rd__status { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
+.rd__status--confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.rd__status--checked_in { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.rd__status--checked_out { background: var(--status-checkedout-bg); color: var(--status-checkedout-text); }
+.rd__status--cancelled { background: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
+.rd__status--no_show { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+
+.rd__ota { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 3px; color: #fff; } /* 可読性のため11pxへ拡大（バッジは11px許容） */
+.rd__ota--merged { background: linear-gradient(135deg, var(--accent-purple), #8577B5); } /* 寒色インディゴをやめPatinaの落ち着いた紫グラデへ */
+
+/* アクション */
+.rd__actions {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+
+.rd__action-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 16px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md); cursor: pointer;
+  color: #fff; font-family: inherit;
+  transition: opacity var(--transition-fast);
+}
+.rd__action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.rd__action-btn .material-symbols-outlined { font-size: 18px; }
+.rd__action-btn--ci { background: var(--accent-blue); }
+.rd__action-btn--co { background: var(--accent-green); }
+.rd__action-btn--move { background: var(--accent-purple); }
+.rd__action-btn--cancel { background: var(--text-muted); }
+.rd__action-btn--restore { background: var(--accent-teal); }
+
+/* アラート */
+.rd__alert {
+  padding: 10px 16px; border-radius: var(--radius-md); font-size: var(--font-size-sm);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+/* 意味色（注意=黄/情報=ブラス/危険=赤）は保ちつつ彩度を落として紙面になじませる */
+.rd__alert--yellow { background: #F6EFDC; color: #8A6D1B; }
+.rd__alert--blue { background: var(--accent-blue-soft); color: var(--accent-blue-hover); }
+.rd__alert--red { background: #F6E7E5; color: var(--accent-red); }
+
+/* merge_alert アラートバー */
+.rd__alert-merge { display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+.rd__alert-merge-body { flex: 1; }
+.rd__alert-merge-body strong { display: block; margin-bottom: 4px; }
+.rd__alert-merge-item { font-size: var(--font-size-xs); margin-left: 4px; }
+.rd__alert-btn--red {
+  background: var(--accent-red); color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 6px 14px; font-size: var(--font-size-xs); font-weight: 600;
+  cursor: pointer; white-space: nowrap; font-family: inherit;
+}
+.rd__alert-btn--red:hover { background: #962D24; } /* --accent-red の一段暗い色（ホバー用） */
+
+/* merge_alert 分解ダイアログ */
+.rd__merge-resolve-section { margin: 12px 0; padding: 10px 12px; background: var(--bg-inset); border-radius: var(--radius-sm); } /* --bg-body は未定義トークンだったため --bg-inset へ修正 */
+.rd__merge-resolve-heading { font-size: var(--font-size-sm); font-weight: 700; margin: 0 0 8px; color: var(--text-primary); }
+.rd__merge-resolve-change { font-size: var(--font-size-xs); margin-bottom: 6px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rd__merge-resolve-channel { font-weight: 600; }
+.rd__merge-resolve-type { color: var(--accent-red); font-weight: 600; }
+.rd__merge-resolve-dates { width: 100%; padding-left: 4px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.rd__merge-resolve-source { font-size: var(--font-size-xs); padding: 4px 0; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-default); }
+.rd__merge-resolve-source:last-child { border-bottom: none; }
+.rd__merge-resolve-source--changed { background: rgba(176, 138, 30, 0.12); border-radius: var(--radius-sm); padding: 4px 6px; } /* 注意面は --accent-yellow の淡色に統一 */
+.rd__merge-resolve-badge { font-size: 11px; background: var(--accent-yellow); color: #fff; border-radius: 3px; padding: 1px 6px; font-weight: 600; }
+.rd__merge-resolve-note { font-size: var(--font-size-xs); color: var(--text-muted); margin: 8px 0; }
+.rd__dialog-confirm--red { background: var(--accent-red) !important; }
+.rd__dialog-confirm--red:hover { background: #962D24 !important; } /* --accent-red の一段暗い色（ホバー用） */
+
+/* 3カラム */
+/* 2カラムレイアウト: 左=ゲスト+予約情報+メモ、右=売上明細 */
+.rd__columns { display: flex; gap: 16px; }
+.rd__col--left { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+.rd__col--right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 900px) {
+  .rd__columns { flex-direction: column; }
+  .rd__col--left { width: 100%; }
+}
+
+/* ゲストメタ行（人数・国籍・来館回数をインライン表示） */
+.rd__guest-meta {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 6px; margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid var(--border-default);
+  font-size: var(--font-size-xs); color: var(--text-secondary);
+}
+.rd__guest-meta-sep { color: var(--border-default); }
+.rd__guest-meta-item { white-space: nowrap; }
+
+/* カード */
+.rd__card {
+  background: var(--bg-card); border-radius: var(--radius-md);
+  padding: 16px; box-shadow: var(--shadow-sm);
+}
+.rd__card--notes { border-left: 3px solid var(--accent-red); }
+.rd__card-title {
+  font-size: var(--font-size-sm); font-weight: 600; color: var(--text-secondary);
+  margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border-light);
+}
+
+/* ゲスト */
+.rd__guest-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.rd__guest-name { font-size: var(--font-size-lg); font-weight: 600; color: var(--text-primary); }
+.rd__guest-sub { font-size: var(--font-size-xs); color: var(--text-muted); }
+.rd__vip { font-size: 11px; font-weight: 700; padding: 2px 5px; border-radius: 3px; background: var(--accent-blue-soft); color: var(--accent-blue); } /* 9pxは禁止のため11pxへ拡大。VIPはブランドのブラス（金）色で表現 */
+
+/* 顧客詳細モーダルを開くボタン（ゲスト名の横に表示） */
+.rd__guest-detail-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--accent-blue);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 2px;
+}
+.rd__guest-detail-btn:hover {
+  background: var(--accent-blue);
+  color: #fff;
+  border-color: var(--accent-blue);
+}
+.rd__guest-detail-btn .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* 属性行 */
+.rd__attrs { margin-top: 12px; }
+.rd__attr { display: flex; justify-content: space-between; padding: 4px 0; font-size: var(--font-size-sm); }
+.rd__attr-label { color: var(--text-muted); }
+.rd__attr-value { color: var(--text-primary); font-weight: 500; }
+.rd__attr--clickable { cursor: pointer; border-radius: var(--radius-sm); margin: 0 -4px; padding: 4px; }
+.rd__attr--clickable:hover { background: var(--bg-hover); }
+.rd__visit-link { display: inline-flex; align-items: center; gap: 4px; color: var(--accent-blue); }
+
+/* メモ */
+.rd__notes-text { font-size: var(--font-size-sm); color: var(--accent-red); margin: 0; white-space: pre-wrap; }
+.rd__notes-input {
+  width: 100%; padding: 8px; font-size: var(--font-size-sm); border: 1px solid var(--border-strong); /* 入力欄の輪郭は --border-strong */
+  border-radius: var(--radius-sm); resize: vertical; font-family: inherit; color: var(--text-primary);
+  background: var(--bg-card);
+}
+.rd__notes-input:focus { border-color: var(--accent-blue); outline: none; box-shadow: 0 0 0 3px var(--accent-blue-ring); } /* フォーカスリングは共通トークンに統一 */
+
+/* === タイムライン === */
+.rd__timeline { position: relative; padding-left: 20px; }
+.rd__timeline-item { position: relative; padding-bottom: 16px; display: flex; gap: 10px; }
+.rd__timeline-item:last-child { padding-bottom: 0; }
+
+/* ドット（イベントタイプごとに色分け） */
+.rd__timeline-dot {
+  position: absolute; left: -20px; top: 4px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent-blue); /* デフォルト: 青 */
+  z-index: 1;
+}
+.rd__timeline-item--checkin .rd__timeline-dot,
+.rd__timeline-item--checkout .rd__timeline-dot { background: var(--accent-green); }
+.rd__timeline-item--tl_cancel .rd__timeline-dot { background: var(--accent-red); }
+.rd__timeline-item--guest_link .rd__timeline-dot { background: var(--accent-purple); }
+.rd__timeline-item--room_move .rd__timeline-dot { background: var(--accent-yellow); }
+.rd__timeline-item--merge .rd__timeline-dot { background: var(--accent-yellow); }
+.rd__timeline-item--split .rd__timeline-dot { background: #C2620E; } /* オレンジ系は彩度を落とした #C2620E に統一 */
+.rd__timeline-item--merge_alert .rd__timeline-dot { background: var(--accent-red); }
+
+/* 統合元予約セクション */
+.rd__split-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; font-size: 12px; font-weight: 600;
+  border: 1px solid #C2620E; border-radius: var(--radius-sm);
+  background: rgba(194, 98, 14, 0.08); color: #C2620E; /* オレンジ系は彩度を落とした #C2620E に統一 */
+  cursor: pointer; font-family: inherit; margin-left: auto;
+}
+.rd__split-btn:hover { background: rgba(194, 98, 14, 0.16); }
+.rd__sources-list { display: flex; flex-direction: column; gap: 6px; }
+.rd__source-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--bg-inset); /* --bg-elevated は未定義トークンだったため --bg-inset へ修正 */
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.rd__source-row:hover { background: var(--bg-hover); } /* トークンは定義済みのためフォールバック（純黒系）を削除 */
+.rd__source-row--cancelled { opacity: 0.5; text-decoration: line-through; pointer-events: none; }
+.rd__source-no { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.rd__source-bottom { display: flex; align-items: center; gap: 8px; }
+.rd__source-dates { font-size: 12px; color: var(--text-secondary); }
+.rd__source-amount { margin-left: auto; font-weight: 600; }
+.rd__source-cancelled { font-size: 11px; color: var(--accent-red); font-weight: 600; }
+
+/* 縦線 */
+.rd__timeline-line {
+  position: absolute; left: -16px; top: 16px;
+  width: 2px; height: calc(100% - 4px);
+  background: var(--border-default);
+}
+
+/* コンテンツ */
+.rd__timeline-content { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rd__timeline-summary { font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary); }
+.rd__timeline-time { font-size: var(--font-size-xs); color: var(--text-muted); }
+.rd__timeline-staff { font-size: var(--font-size-xs); color: var(--text-secondary); }
+
+/* 詳細ポップオーバー（クリックで表示、画面内に自動調整） */
+.rd__timeline-detail-wrap { position: relative; display: inline-flex; align-items: center; }
+.rd__timeline-info { font-size: 16px; color: var(--text-muted); cursor: pointer; }
+.rd__timeline-info:hover { color: var(--accent-blue); }
+.rd__timeline-detail-card--popover {
+  position: absolute; left: 24px; top: -8px;
+  background: var(--bg-card); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  font-size: var(--font-size-xs); color: var(--text-primary); line-height: 1.6;
+  box-shadow: var(--shadow-md); /* 影は共通トークンに統一（暖色系の柔らかい影） */
+  white-space: pre-wrap; min-width: 220px; max-width: 360px; z-index: 100;
+}
+.rd__save-btn {
+  margin-top: 6px; padding: 4px 12px; font-size: var(--font-size-xs); font-weight: 500;
+  border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  background: var(--bg-card); cursor: pointer; color: var(--text-secondary); font-family: inherit;
+}
+.rd__save-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+/* 売上明細テーブル */
+.rd__charges-table { width: 100%; border-collapse: collapse; font-size: var(--font-size-xs); table-layout: fixed; }
+.rd__charges-table th {
+  padding: 6px 8px; text-align: left; font-weight: 600; color: var(--text-muted);
+  border-bottom: 1px solid var(--border-default); white-space: nowrap;
+}
+.rd__charges-table td { padding: 6px 8px; border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+/* 摘要列: 長いプラン名を省略表示 */
+.rd__charges-table td.rd__charge-desc {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rd__right { text-align: right; font-variant-numeric: tabular-nums; }
+.rd__charge--inactive { opacity: 0.5; text-decoration: line-through; }
+.rd__charge--pending { background: rgba(176, 138, 30, 0.08); } /* 注意面は --accent-yellow の淡色に統一 */
+.rd__charges-total { font-weight: 400; font-size: var(--font-size-xs); color: var(--text-muted); margin-left: auto; }
+
+/* 連結予約のOTA表示 */
+.rd__charge-ota {
+  font-size: 11px; font-weight: 600; padding: 1px 4px; border-radius: 3px; /* 9pxは禁止のため11pxへ拡大 */
+  color: #fff; white-space: nowrap;
+}
+
+/* 明細ステータスバッジ */
+.rd__charge-status--cancelled { color: var(--accent-red); font-size: var(--font-size-xs); }
+.rd__charge-status--waived { color: var(--text-muted); font-size: var(--font-size-xs); }
+
+/* 明細編集カード: テーブル行の直下に展開されるフォーム */
+.rd__charge--editing {
+  background: var(--accent-blue-soft); /* 編集中の強調面はブラスの選択面トークンへ */
+}
+.rd__edit-card {
+  background: rgba(138, 116, 64, 0.06); /* --accent-blue-soft より一段淡いブラス面（行との差を付ける） */
+  border: 1px solid rgba(138, 116, 64, 0.30);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 12px 14px;
+  margin: 0;
+}
+.rd__edit-card-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+.rd__edit-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.rd__edit-card-field--wide {
+  flex: 1;
+  min-width: 120px;
+}
+.rd__edit-card-label {
+  font-size: 12px; /* 可読性のため12pxへ拡大 */
+  font-weight: 600;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+}
+.rd__edit-card-input {
+  padding: 6px 8px;
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: border-color 0.15s;
+}
+.rd__edit-card-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring); /* フォーカスリングは共通トークンに統一 */
+}
+.rd__edit-card-amount {
+  width: 100px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+.rd__edit-card-amount::-webkit-inner-spin-button,
+.rd__edit-card-amount::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.rd__edit-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: flex-end;
+}
+.rd__edit-card-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent-blue);
+  color: #fff;
+  cursor: pointer;
+}
+.rd__edit-card-save:hover { opacity: 0.85; }
+.rd__edit-card-save:disabled { opacity: 0.5; cursor: not-allowed; }
+.rd__edit-card-save .material-symbols-outlined { font-size: 15px; }
+.rd__edit-card-cancel {
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+  font-family: inherit;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.rd__edit-card-cancel:hover { background: var(--bg-hover); }
+
+/* 編集/削除ボタン（行右端の小ボタン） */
+.rd__edit-actions { display: flex; gap: 2px; }
+.rd__edit-btn {
+  border: none; background: transparent; cursor: pointer; padding: 2px;
+  border-radius: var(--radius-sm); display: flex; align-items: center;
+  opacity: 0.3;
+}
+.rd__edit-btn:hover { opacity: 1; background: var(--bg-main); }
+.rd__edit-btn .material-symbols-outlined { font-size: 14px; color: var(--text-secondary); }
+
+/* 入金行（テーブル内の既存入金） */
+.rd__charge--payment { background: rgba(62, 124, 79, 0.08); } /* 緑面は --accent-green の淡色に統一 */
+.rd__charge--new { background: rgba(138, 116, 64, 0.05); } /* 新規行はブラスの極淡面 */
+
+/* 明細行追加フォーム（カード型） */
+.rd__add-form {
+  margin: 12px 0 4px;
+  border: 1px solid rgba(138, 116, 64, 0.30); /* 青系をやめ主要アクション色（ブラス）へ */
+  border-radius: var(--radius-md);
+  background: rgba(138, 116, 64, 0.05);
+  overflow: hidden;
+}
+.rd__add-form-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px;
+  font-size: var(--font-size-sm); font-weight: 600; color: var(--accent-blue-hover);
+  border-bottom: 1px solid rgba(138, 116, 64, 0.15);
+}
+.rd__add-form-header .material-symbols-outlined { font-size: 18px; }
+.rd__add-form-body {
+  display: flex; gap: 16px; padding: 14px 16px;
+  align-items: flex-end; flex-wrap: wrap;
+}
+.rd__add-submit {
+  padding: 6px 20px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-sm);
+  background: var(--accent-blue); color: #fff; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.rd__add-submit:hover { background: var(--accent-blue-hover); }
+.rd__add-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.rd__add-form .rd__pay-input:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring); /* フォーカスリングは共通トークンに統一 */
+}
+
+/* 入金フォーム（カード型） */
+.rd__pay-form {
+  margin: 12px 0 4px;
+  border: 1px solid rgba(62, 124, 79, 0.30); /* 緑は彩度を落とした --accent-green 系へ */
+  border-radius: var(--radius-md);
+  background: rgba(62, 124, 79, 0.05);
+  overflow: hidden;
+}
+.rd__pay-form-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px;
+  font-size: var(--font-size-sm); font-weight: 600; color: var(--accent-green);
+  border-bottom: 1px solid rgba(62, 124, 79, 0.15);
+}
+.rd__pay-form-header .material-symbols-outlined { font-size: 18px; }
+.rd__pay-form-body {
+  display: flex; gap: 16px; padding: 14px 16px;
+  align-items: flex-end; flex-wrap: wrap;
+}
+.rd__pay-field { display: flex; flex-direction: column; gap: 4px; }
+.rd__pay-label {
+  font-size: 12px; font-weight: 500; color: var(--text-secondary); /* 可読性のため12pxへ拡大 */
+  letter-spacing: 0.02em;
+}
+.rd__pay-input {
+  padding: 6px 10px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); /* 入力欄の輪郭は --border-strong */
+  font-family: inherit; color: var(--text-primary); background: var(--bg-card);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.rd__pay-input:focus {
+  outline: none; border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(62, 124, 79, 0.22); /* 入金フォームは緑の意味色を保ったリング */
+}
+.rd__pay-select { min-width: 160px; }
+.rd__pay-amount-wrap {
+  display: flex; align-items: center; gap: 4px;
+}
+.rd__pay-amount {
+  width: 120px; text-align: right; font-weight: 600;
+  -moz-appearance: textfield;
+}
+.rd__pay-amount::-webkit-inner-spin-button,
+.rd__pay-amount::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.rd__pay-yen { font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: 500; }
+.rd__pay-form-actions {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 10px 16px; border-top: 1px solid rgba(62, 124, 79, 0.12);
+}
+.rd__pay-cancel {
+  padding: 6px 16px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+  background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+  font-family: inherit;
+}
+.rd__pay-cancel:hover { background: var(--bg-hover); }
+.rd__pay-submit {
+  padding: 6px 20px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-sm);
+  background: var(--accent-green); color: #fff; cursor: pointer;
+  font-family: inherit; transition: background 0.15s;
+}
+.rd__pay-submit:hover { background: #326740; } /* --accent-green の一段暗い色（ホバー用） */
+.rd__pay-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* 残高表示 */
+.rd__balance { margin-left: 8px; font-weight: 600; }
+.rd__balance--unpaid { color: var(--accent-red); }
+.rd__balance--over { color: var(--accent-yellow); }
+.rd__balance--paid { color: var(--accent-green); }
+
+/* 明細アクションボタン */
+.rd__charges-actions {
+  display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+  border-top: 1px dashed var(--border-default);
+}
+/* 明細サマリー */
+.rd__charges-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-default);
+  font-size: var(--font-size-xs);
+}
+.rd__summary-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+.rd__summary-label {
+  color: var(--text-muted);
+  min-width: 72px;
+  text-align: right;
+}
+.rd__summary-value {
+  min-width: 80px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rd__summary-row--discount .rd__summary-value { color: var(--accent-red); }
+.rd__summary-row--total {
+  border-top: 1px solid var(--border-default);
+  padding-top: 6px;
+  margin-top: 2px;
+  font-weight: 600;
+}
+.rd__summary-row--total .rd__summary-value { font-size: var(--font-size-sm); }
+.rd__summary-row--payment .rd__summary-value { color: var(--accent-green); }
+.rd__summary-row--unpaid .rd__summary-label,
+.rd__summary-row--unpaid .rd__summary-value { color: var(--accent-red); font-weight: 600; }
+.rd__summary-row--over .rd__summary-label,
+.rd__summary-row--over .rd__summary-value { color: #C2620E; font-weight: 600; }
+.rd__summary-row--paid .rd__summary-label,
+.rd__summary-row--paid .rd__summary-value { color: var(--accent-green); font-weight: 600; }
+
+.rd__charges-add, .rd__charges-pay {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; font-size: var(--font-size-xs); font-weight: 500;
+  border: 1px dashed var(--border-default); border-radius: var(--radius-sm);
+  background: transparent; cursor: pointer; color: var(--text-secondary); font-family: inherit;
+}
+.rd__charges-add:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.rd__charges-pay:hover { border-color: var(--accent-green); color: var(--accent-green); }
+.rd__charges-add .material-symbols-outlined,
+.rd__charges-pay .material-symbols-outlined { font-size: 16px; }
+.rd__charge-type { font-size: 11px; font-weight: 500; padding: 1px 5px; border-radius: 3px; } /* 可読性のため11pxへ拡大（バッジは11px許容） */
+.rd__charge-type--room { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+.rd__charge-type--cancel_fee { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+.rd__charge-type--no_show_fee { background: var(--status-noshow-bg); color: var(--status-noshow-text); }
+/* 意味色の淡色面は彩度を落として紙面になじませる */
+.rd__charge-type--discount { background: #F6E7E5; color: var(--accent-red); }
+.rd__charge-type--addon { background: #F5EBDF; color: #C2620E; }
+.rd__charge-type--payment { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.rd__charge-type--refund { background: #E4EFE6; color: var(--accent-green); }
+/* 物販は「追加」と近い性格だが、取消導線が別（物販ページ）なので色で区別する */
+.rd__charge-type--goods { background: var(--accent-blue-soft); color: var(--accent-blue); }
+
+/* 物販行は明細側から編集・削除できないことを示す鍵アイコン */
+.rd__charge-locked {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ============ 物販追加ダイアログ ============ */
+.rd__goods-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(38, 34, 27, 0.35);
+  display: flex; align-items: center; justify-content: center;
+}
+.rd__goods-modal {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 20px;
+  width: 900px;
+  max-width: calc(100vw - 32px);
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.rd__goods-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.rd__goods-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+.rd__goods-loading {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* アサイン */
+.rd__assign-row {
+  display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+.rd__assign-room { font-weight: 600; color: var(--text-primary); }
+.rd__assign-dates { color: var(--text-secondary); }
+.rd__assign-status { font-size: 12px; } /* 可読性のため12pxへ拡大 */
+.rd__assign-status--active { color: var(--accent-green); }
+.rd__assign-status--released { color: var(--text-muted); }
+
+.rd__empty { text-align: center; color: var(--text-muted); font-size: var(--font-size-sm); }
+
+/* ダイアログ */
+.rd__overlay { position: fixed; inset: 0; background: rgba(38, 34, 27, 0.4); z-index: 300; } /* オーバーレイも純黒でなく墨色ベースに */
+.rd__dialog {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: var(--bg-card); border-radius: var(--radius-lg); padding: 28px 32px;
+  width: 420px; max-width: 90vw; z-index: 301; box-shadow: var(--shadow-md);
+}
+.rd__dialog-title { font-size: var(--font-size-lg); font-weight: 600; margin: 0 0 16px; }
+.rd__dialog p { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 4px 0; }
+.rd__dialog-label { display: block; font-size: var(--font-size-sm); font-weight: 500; color: var(--text-secondary); margin-top: 12px; }
+.rd__dialog-select, .rd__dialog-input {
+  width: 100%; padding: 8px 10px; margin-top: 4px; font-size: var(--font-size-sm);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); /* 入力欄の輪郭は --border-strong */
+  font-family: inherit; color: var(--text-primary); background: var(--bg-card);
+}
+/* フォーカス時は共通のブラスリング（Patina共通ルール） */
+.rd__dialog-select:focus, .rd__dialog-input:focus {
+  outline: none; border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+.rd__dialog-checkbox {
+  display: flex; align-items: center; gap: 6px; margin-top: 16px;
+  font-size: var(--font-size-sm); cursor: pointer; color: var(--text-primary);
+}
+.rd__dialog-field { margin-top: 8px; }
+.rd__dialog-alert {
+  display: flex; align-items: flex-start; gap: 6px; padding: 10px 12px;
+  margin-top: 12px; border-radius: var(--radius-sm); font-size: var(--font-size-sm);
+  background: #F6EFDC; color: #8A6D1B; /* 注意面は彩度を落とした黄系へ */
+}
+.rd__dialog-alert .material-symbols-outlined { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.rd__dialog-actions { display: flex; gap: 8px; margin-top: 20px; }
+.rd__dialog-cancel {
+  flex: 1; padding: 10px; font-size: var(--font-size-sm); border: 1px solid var(--border-default);
+  border-radius: var(--radius-md); background: transparent; cursor: pointer; font-family: inherit;
+  color: var(--text-secondary);
+}
+.rd__dialog-confirm {
+  flex: 1; padding: 10px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md); cursor: pointer; color: #fff;
+  background: var(--accent-blue); font-family: inherit;
+}
+.rd__dialog-confirm--co { background: var(--accent-green); }
+.rd__dialog-confirm--warn { background: var(--accent-red); }
+
+/* ワイドダイアログ（名寄せ等） */
+.rd__dialog--wide { width: 500px; max-width: 95vw; }
+.rd__dialog-sub { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 12px; }
+
+/* アラートバー内のボタン */
+.rd__alert-btn {
+  margin-left: auto; padding: 3px 10px; font-size: 12px; font-weight: 600;
+  border: 1px solid currentColor; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.5); cursor: pointer; font-family: inherit;
+  color: inherit; display: inline-flex; align-items: center; gap: 3px;
+}
+.rd__alert-btn:hover { background: rgba(255,255,255,0.8); }
+
+/* ゲスト変更ボタン */
+.rd__guest-change-btn {
+  border: 1px solid var(--border-default); background: var(--bg-card); cursor: pointer;
+  padding: 3px 6px; border-radius: var(--radius-sm);
+  color: var(--text-secondary); display: flex; align-items: center; gap: 2px;
+  position: relative; font-size: 12px; font-family: inherit; /* 可読性のため12pxへ拡大 */
+}
+.rd__guest-change-btn:hover { background: var(--bg-hover); color: var(--accent-blue); border-color: var(--accent-blue); }
+.rd__guest-change-btn .material-symbols-outlined { font-size: 18px; }
+/* 名寄せ候補ありの場合: オレンジドット + 常時表示 */
+.rd__guest-change-btn--has-candidates { opacity: 1; color: #C2620E; }
+.rd__match-dot {
+  position: absolute; top: -2px; right: -2px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #C2620E; border: 1.5px solid #fff;
+  animation: rd__dot-pulse 2s infinite;
+}
+@keyframes rd__dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 名寄せダイアログ */
+.rd__link-guest-search {
+  display: flex; gap: 6px; margin-bottom: 12px;
+}
+.rd__dialog-search-btn {
+  padding: 8px 14px; font-size: var(--font-size-sm); font-weight: 600;
+  border: none; border-radius: var(--radius-md); background: var(--accent-blue);
+  color: #fff; cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.rd__link-guest-results {
+  max-height: 320px; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;
+}
+.rd__link-guest-item {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 10px 12px; border: 1px solid var(--border-default);
+  border-radius: var(--radius-md); background: var(--bg-main);
+  cursor: pointer; font-family: inherit; text-align: left; width: 100%;
+  transition: border-color var(--transition-fast);
+}
+.rd__link-guest-item:hover { border-color: var(--accent-blue); background: var(--accent-blue-soft); }
+.rd__link-guest-name { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: var(--font-size-sm); }
+.rd__link-guest-code { font-size: var(--font-size-xs); color: var(--text-muted); font-weight: 400; }
+.rd__link-guest-detail { display: flex; gap: 12px; font-size: var(--font-size-xs); color: var(--text-secondary); }
+.rd__link-guest-meta { display: flex; gap: 10px; font-size: 12px; color: var(--text-muted); } /* 可読性のため12pxへ拡大 */
+/* マッチしたフィールドのハイライト */
+.rd__match-highlight { font-weight: 700; color: #C2620E; }
+
+.rd__dialog-warning {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 12px 14px; margin: 12px 0; border-radius: var(--radius-md);
+  background: #F6E7E5; border: 1px solid #EAD0CC; /* 警告面も彩度を落とした赤系へ */
+}
+.rd__dialog-warning .material-symbols-outlined { font-size: 22px; color: var(--accent-red); flex-shrink: 0; margin-top: 1px; }
+.rd__dialog-warning-title { font-size: var(--font-size-sm); font-weight: 600; color: var(--accent-red); }
+.rd__dialog-warning-detail { font-size: var(--font-size-xs); color: var(--accent-red); margin-top: 2px; }
+
+/* TL電文表示ボタン */
+.rd__telegram-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 10px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  justify-content: center;
+}
+.rd__telegram-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.rd__telegram-btn .material-symbols-outlined { font-size: 16px; }
+
+/* TL電文サイドパネル: 右から固定表示。明細と並べて突合確認できる */
+.rd__telegram-panel {
+  position: fixed;
+  top: var(--header-height);
+  right: 0;
+  width: 420px;
+  height: calc(100vh - var(--header-height));
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-default);
+  box-shadow: -4px 0 16px rgba(38, 34, 27, 0.10); /* 影も墨色ベースの暖色系に */
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+.rd__telegram-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+.rd__telegram-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0;
+}
+.rd__telegram-close {
+  display: flex; align-items: center;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--text-muted); border-radius: 50%; padding: 4px;
+}
+.rd__telegram-close:hover { background: var(--bg-hover); color: var(--text-primary); } /* --bg-elevated は未定義トークンだったため --bg-hover へ修正 */
+.rd__telegram-body {
+  padding: 16px;
+  margin: 0;
+  overflow: auto;
+  flex: 1;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 12px; /* 電文本文の可読性のため12pxへ拡大 */
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-primary);
+}
+
+/* 人数インライン表示 */
+.rd__pax-inline {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.rd__pax-summary {
+  font-size: var(--font-size-xs); font-weight: 500;
+  color: var(--text-primary); white-space: nowrap;
+}
+
+/* 人数内訳タグ（編集可能） */
+.rd__pax-breakdown {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.rd__pax-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 4px;
+  font-size: 11px; /* 可読性のため11pxへ拡大（タグは11px許容） */
+  font-weight: 500;
+  border-radius: 3px;
+}
+.rd__pax-tag--editable {
+  cursor: default;
+}
+/* 男女・子供の識別色は色相を保ちつつ彩度を落として紙面になじませる */
+.rd__pax-tag--male {
+  background: #E8EDF4;
+  color: #3D5A80;
+}
+.rd__pax-tag--female {
+  background: #F4E4EB;
+  color: #9C4A6E;
+}
+.rd__pax-tag--child {
+  background: #F4EDDC;
+  color: #8A6D1B;
+}
+.rd__pax-input--tag {
+  width: 24px; /* フォント拡大に合わせて数字2桁が収まる幅へ微調整 */
+  padding: 0 1px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  font-size: 11px; /* 可読性のため11pxへ拡大（タグは11px許容） */
+  text-align: center;
+  background: rgba(255,255,255,0.6);
+  -moz-appearance: textfield;
+}
+.rd__pax-input--tag::-webkit-inner-spin-button,
+.rd__pax-input--tag::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.rd__pax-input--tag:focus {
+  outline: none;
+  border-color: currentColor;
+  background: #fff;
+}
+
+/* ゲストメモ（顧客管理同期） */
+.rd__card--guest-notes {
+  border-left: 3px solid var(--accent-purple);
+}
+.rd__card-subtitle {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+/* 国籍ピッカー */
+.rd__country-wrap { position: relative; display: inline-flex; }
+.rd__country-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+  font-size: var(--font-size-sm);
+}
+.rd__country-display:hover {
+  background: var(--bg-hover);
+}
+.rd__country-code {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+.rd__country-arrow {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+.rd__country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50px;
+  z-index: 100;
+  width: 280px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.rd__country-search {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-bottom: 1px solid var(--border-default);
+  font-size: var(--font-size-sm);
+  outline: none;
+  background: var(--bg-card);
+}
+.rd__country-search:focus {
+  background: var(--bg-inset);
+}
+.rd__country-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+.rd__country-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background 0.1s;
+}
+.rd__country-option:hover {
+  background: var(--bg-hover);
+}
+.rd__country-option--selected {
+  background: var(--accent-blue-soft); /* 選択面はブラスの淡色トークンへ */
+  font-weight: 600;
+}
+.rd__country-flag {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+}
+.rd__country-name {
+  flex: 1;
+  color: var(--text-primary);
+}
+.rd__country-en {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', Consolas, monospace;
+}
+.rd__country-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* 複数室グループ予約セクション */
+.rd__group-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rd__group-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: var(--font-size-sm);
+}
+.rd__group-row:hover {
+  background: var(--bg-hover);
+}
+.rd__group-row--current {
+  background: var(--accent-blue-soft); /* 選択面はブラスの淡色トークンへ */
+  cursor: default;
+  font-weight: 600;
+  border-left: 3px solid var(--accent-purple);
+}
+.rd__group-row--cancelled {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.rd__group-index {
+  display: inline-block;
+  min-width: 28px;
+  padding: 1px 5px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--accent-purple);
+  color: #fff;
+  border-radius: 3px;
+  text-align: center;
+}
+.rd__group-type {
+  color: var(--text-secondary);
+  min-width: 30px;
+}
+.rd__group-room {
+  color: var(--text-primary);
+  flex: 1;
+}
+.rd__group-amount {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+/* グループ一括アクションボタン */
+.rd__group-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rd__group-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.rd__group-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rd__group-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+.rd__group-btn--ci {
+  background: var(--accent-green);
+  color: #fff;
+}
+.rd__group-btn--ci:hover:not(:disabled) { opacity: 0.85; }
+.rd__group-btn--co {
+  background: #C2620E;
+  color: #fff;
+}
+.rd__group-btn--co:hover:not(:disabled) { opacity: 0.85; }
+
+/* グループ精算サマリー */
+.rd__group-summary {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rd__group-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+.rd__group-summary-amount {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.rd__mono {
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: var(--font-size-xs);
+}
+
+/* ========================================
+   領収書関連スタイル
+   ======================================== */
+
+/* 領収書ボタン（アクションバー） */
+.rd__action-btn--receipt {
+  background: var(--accent-yellow);
+  color: #fff;
+}
+.rd__action-btn--receipt:hover:not(:disabled) { opacity: 0.85; }
+
+/* 領収書ダイアログ: 明細リストがあるため標準420pxより広め */
+.rd__dialog--receipt {
+  width: 560px;
+  max-width: 95vw;
+}
+
+/* 宛名ラジオ選択（ReceiptIssueDialog + CheckoutDialog共通） */
+.rd__receipt-addressee {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.rd__receipt-radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+.rd__receipt-radio input[type="radio"] {
+  margin: 0;
+  cursor: pointer;
+}
+/* 直接入力の補助UI */
+.rd__receipt-custom-wrap {
+  margin-left: 22px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rd__receipt-save-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+/* 明細チェックボックスリスト */
+.rd__receipt-charges-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+.rd__receipt-charges-header h4 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0;
+}
+.rd__receipt-select-all {
+  font-size: var(--font-size-xs);
+  color: var(--accent-blue);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 0;
+}
+.rd__receipt-select-all:hover { text-decoration: underline; }
+
+.rd__receipt-charges {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  margin-top: 6px;
+}
+.rd__receipt-charge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-light);
+}
+.rd__receipt-charge-row:last-child { border-bottom: none; }
+.rd__receipt-charge-row:hover { background: var(--bg-hover); }
+.rd__receipt-charge-row input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+.rd__receipt-charge-date {
+  color: var(--text-secondary);
+  min-width: 48px;
+}
+.rd__receipt-charge-desc {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rd__receipt-charge-amount {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.rd__receipt-total {
+  text-align: right;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-top: 8px;
+  color: var(--text-primary);
+}
+.rd__receipt-group-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #F5EBDF; /* 注意喚起のオレンジ面も彩度を落として紙面になじませる */
+  border: 1px solid #E3C9A4;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+.rd__receipt-no-charges {
+  padding: 16px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* 発行済み帳票一覧 */
+.rd__doc-section {
+  margin-top: 16px;
+}
+.rd__doc-section h3 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.rd__doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-xs);
+}
+.rd__doc-table th {
+  text-align: left;
+  padding: 6px 8px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-default);
+}
+.rd__doc-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+.rd__doc-table .rd__right { text-align: right; }
+.rd__doc-actions {
+  display: flex;
+  gap: 4px;
+}
+.rd__doc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 8px;
+  font-size: 12px; /* 可読性のため12pxへ拡大 */
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.rd__doc-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.rd__doc-reissue-count {
+  color: var(--accent-red);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+/* 領収書発行確定ボタン */
+/* タブ切り替え（LinkGuestDialog: 既存検索 / 新規登録） */
+.rd__link-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 2px solid var(--border-default);
+}
+.rd__link-tab {
+  padding: 8px 16px;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.rd__link-tab:hover { color: var(--text-primary); }
+.rd__link-tab--active {
+  color: var(--accent-blue);
+  border-bottom-color: var(--accent-blue);
+  font-weight: 600;
+}
+
+/* 新規ゲスト登録フォーム */
+.rd__new-guest-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rd__dialog-confirm--receipt {
+  background: var(--accent-yellow);
+}
+.rd__dialog-confirm--receipt:hover { opacity: 0.85; }

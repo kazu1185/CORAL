@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMS アサインボード</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cw:120px}
+body{font-family:'Noto Sans JP','Helvetica Neue',sans-serif;background:#F8FAFC;color:#0F172A;min-height:100vh;overflow:hidden}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+@keyframes blink{0%,100%{box-shadow:0 0 0 2px #DC2626}50%{box-shadow:0 0 0 2px transparent}}
+
+.layout{display:flex;min-height:100vh}
+.sidenav{width:56px;min-height:100vh;background:#0F172A;color:#CBD5E1;display:flex;flex-direction:column;position:fixed;left:0;top:0;z-index:100}
+.nav-item{display:flex;align-items:center;justify-content:center;padding:14px 0;cursor:pointer;font-size:16px;color:#94A3B8;border-right:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:rgba(255,255,255,.05)}
+.nav-item.active{background:rgba(59,130,246,.15);border-right-color:#3B82F6;color:#E2E8F0}
+.main{flex:1;margin-left:56px;display:flex;flex-direction:column;height:100vh}
+
+.header{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-title{font-size:16px;font-weight:700}
+.date-nav{display:flex;align-items:center;gap:6px}
+.date-nav button{background:#fff;border:1px solid #E2E8F0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;color:#64748B}
+.date-nav button:hover{background:#F8FAFC}
+.date-nav .current{font-size:13px;font-weight:600;color:#0F172A;min-width:110px;text-align:center}
+.header-right{display:flex;align-items:center;gap:12px;font-size:12px;color:#64748B}
+
+.board-area{display:flex;flex:1;overflow:hidden;position:relative}
+.gantt-wrapper{flex:1;overflow:auto;min-width:0}
+
+.room-col{position:sticky;left:0;z-index:10;background:#F8FAFC;border-right:1px solid #E2E8F0}
+.floor-header{padding:6px 12px;font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;background:#F1F5F9;border-bottom:1px solid #E2E8F0}
+.room-cell{padding:0 12px;height:44px;display:flex;align-items:center;gap:6px;border-bottom:1px solid #F1F5F9;font-size:12px;white-space:nowrap;min-width:110px}
+.room-num{font-weight:600;color:#334155}
+.room-type{color:#94A3B8;font-size:11px}
+
+.date-header-row{display:flex;position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #E2E8F0}
+.date-header{width:var(--cw);min-width:var(--cw);text-align:center;padding:8px 0;font-size:12px;color:#64748B;border-right:1px solid #F1F5F9;flex-shrink:0}
+.date-header.today{background:#EFF6FF;color:#2563EB;font-weight:700}
+.date-header.weekend{color:#DC2626}
+.date-header .dow{font-size:10px;display:block;color:#94A3B8}
+.date-header.today .dow{color:#60A5FA}
+.date-header.weekend .dow{color:#FCA5A5}
+
+.grid-row{display:flex;position:relative;height:44px;border-bottom:1px solid #F8FAFC}
+.grid-cell{width:var(--cw);min-width:var(--cw);border-right:1px solid #F8FAFC;flex-shrink:0}
+.grid-cell.today{background:rgba(59,130,246,.03)}
+
+.bar{position:absolute;top:6px;height:32px;border-radius:6px;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:500;color:#fff;cursor:pointer;z-index:2;overflow:hidden;white-space:nowrap;transition:filter .15s;min-width:20px}
+.bar:hover{filter:brightness(1.15);z-index:3}
+.bar .bar-name{overflow:hidden;text-overflow:ellipsis;flex:1}
+.bar .bar-nights{font-size:10px;opacity:.8;margin-left:4px;flex-shrink:0}
+.bar.noshow{opacity:.5;background-image:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,.3) 4px,rgba(255,255,255,.3) 8px)!important}
+.bar.early-out{border-style:dashed!important;border-width:2px!important}
+.bar.linked{border-top:3px solid #8B5CF6!important}
+.bar.gap{animation:blink 1s infinite;background:repeating-linear-gradient(45deg,#FEE2E2,#FEE2E2 4px,#FECACA 4px,#FECACA 8px)!important;color:#DC2626!important}
+.bar.move-from::after{content:'→';position:absolute;right:6px;font-size:12px;opacity:.7}
+.bar.move-to::before{content:'←';position:absolute;left:6px;font-size:12px;opacity:.7}
+
+.tooltip{position:fixed;z-index:999;background:#0F172A;color:#E2E8F0;padding:10px 14px;border-radius:8px;font-size:12px;pointer-events:none;display:none;max-width:280px;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+.tooltip.show{display:block}
+.tooltip .tt-name{font-weight:700;font-size:13px;margin-bottom:4px}
+.tooltip .tt-row{display:flex;justify-content:space-between;gap:16px;padding:1px 0}
+.tooltip .tt-label{color:#94A3B8}
+
+/* Right panel - collapsible */
+.right-panel{width:280px;min-width:280px;background:#fff;border-left:1px solid #E2E8F0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column;transition:width .3s ease,min-width .3s ease,opacity .2s ease}
+.right-panel.collapsed{width:0;min-width:0;border-left:none;overflow:hidden;opacity:0}
+.rp-toggle{position:absolute;right:280px;top:8px;z-index:20;width:28px;height:28px;background:#fff;border:1px solid #E2E8F0;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#94A3B8;transition:right .3s ease;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.rp-toggle:hover{background:#F8FAFC;color:#334155}
+.rp-toggle.shifted{right:8px}
+.rp-section{padding:14px 16px;border-bottom:1px solid #F1F5F9}
+.rp-title{font-size:11px;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.rp-stat{display:flex;justify-content:space-between;padding:3px 0;font-size:13px}
+.rp-stat .label{color:#64748B}
+.rp-stat .val{font-weight:600;color:#0F172A}
+.unassigned-item{padding:8px 12px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:6px;cursor:grab;font-size:12px;background:#FEFCE8;transition:all .15s}
+.unassigned-item:hover{border-color:#EAB308;background:#FEF9C3}
+.ua-name{font-weight:600;color:#0F172A;margin-bottom:2px}
+.ua-detail{color:#94A3B8;font-size:11px;display:flex;align-items:center;gap:6px}
+.ua-ota{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend{padding:14px 16px;display:flex;flex-wrap:wrap;gap:8px;border-top:1px solid #F1F5F9;margin-top:auto}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:10px;color:#64748B}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidenav"><div style="padding:14px 0">
+    <a class="nav-item" title="ダッシュボード">◉</a>
+    <a class="nav-item" title="予約一覧">☰</a>
+    <a class="nav-item active" title="アサインボード">▦</a>
+    <a class="nav-item" title="ルームインジケーター">⊞</a>
+    <a class="nav-item" title="清掃管理">◫</a>
+    <a class="nav-item" title="売上レポート">◈</a>
+    <a class="nav-item" title="設定">⚙</a>
+  </div></nav>
+
+  <div class="main">
+    <div class="header">
+      <div class="header-left">
+        <span class="header-title">▦ アサインボード</span>
+        <div class="date-nav">
+          <button onclick="shiftDays(-7)">◀ 1週</button>
+          <button onclick="shiftDays(-1)">◀</button>
+          <span class="current" id="dateRange"></span>
+          <button onclick="shiftDays(1)">▶</button>
+          <button onclick="shiftDays(7)">1週 ▶</button>
+          <button onclick="goToday()">今日</button>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="clock"></span>
+        <span>👤 山田 花子</span>
+      </div>
+    </div>
+
+    <div class="board-area">
+      <div class="gantt-wrapper" id="ganttWrapper"><div id="gantt"></div></div>
+      <button class="rp-toggle" id="rpToggle" onclick="togglePanel()">▶</button>
+      <div class="right-panel" id="rightPanel">
+        <div class="rp-section">
+          <div class="rp-title">本日のサマリー</div>
+          <div class="rp-stat"><span class="label">CI予定</span><span class="val">5件</span></div>
+          <div class="rp-stat"><span class="label">CO予定</span><span class="val">3件</span></div>
+          <div class="rp-stat"><span class="label">稼働率</span><span class="val">75% (18/24)</span></div>
+          <div class="rp-stat"><span class="label">ADR</span><span class="val">¥14,200</span></div>
+        </div>
+        <div class="rp-section">
+          <div class="rp-title">⚠ 未アサイン（2件）</div>
+          <div class="unassigned-item" draggable="true">
+            <div class="ua-name">Michael Johnson</div>
+            <div class="ua-detail"><span class="ua-ota" style="background:#1E3A5F"></span>Booking 4/12-14 ツイン 2泊</div>
+          </div>
+          <div class="unassigned-item" draggable="true">
+            <div class="ua-name">鈴木 美咲</div>
+            <div class="ua-detail"><span class="ua-ota" style="background:#DC2626"></span>じゃらん 4/14-16 シングル 2泊</div>
+          </div>
+        </div>
+        <div class="rp-section">
+          <div class="rp-title">要対応アラート</div>
+          <div style="font-size:12px;color:#64748B;padding:4px 0">
+            <div style="margin-bottom:6px"><span style="color:#DC2626;font-weight:600">●</span> ゲスト未確定 1件</div>
+            <div style="margin-bottom:6px"><span style="color:#EAB308;font-weight:600">●</span> 定員超過 1件</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-dot" style="background:#DC2626"></span>じゃらん</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#991B1B"></span>楽天</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#1E3A5F"></span>Booking</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#16A34A"></span>直販</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#EA580C"></span>電話</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#7C3AED"></span>Agoda</div>
+          <div class="legend-item"><span class="legend-dot" style="background:#CA8A04"></span>Expedia</div>
+          <div style="width:100%;margin-top:4px;border-top:1px solid #F1F5F9;padding-top:6px;display:flex;flex-wrap:wrap;gap:8px">
+            <div class="legend-item"><span class="legend-dot" style="background:repeating-linear-gradient(45deg,#94A3B8,#94A3B8 2px,#CBD5E1 2px,#CBD5E1 4px);opacity:.6"></span>ノーショー</div>
+            <div class="legend-item"><span class="legend-dot" style="border:2px dashed #94A3B8;background:transparent"></span>途中退室</div>
+            <div class="legend-item"><span class="legend-dot" style="border-top:3px solid #8B5CF6;background:#E2E8F0"></span>分割予約</div>
+            <div class="legend-item"><span class="legend-dot" style="background:#FEE2E2;border:2px solid #DC2626"></span>穴</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const OTA={jalan:{color:'#DC2626',label:'じゃらん'},rakuten:{color:'#991B1B',label:'楽天'},booking:{color:'#1E3A5F',label:'Booking'},direct:{color:'#16A34A',label:'直販'},phone:{color:'#EA580C',label:'電話'},agoda:{color:'#7C3AED',label:'Agoda'},expedia:{color:'#CA8A04',label:'Expedia'}};
+const ROOMS=[
+  {floor:'2F',rooms:[{id:'201',type:'シングル'},{id:'202',type:'シングル'},{id:'203',type:'シングル'},{id:'204',type:'シングル'}]},
+  {floor:'3F',rooms:[{id:'301',type:'ツイン'},{id:'302',type:'ツイン'},{id:'303',type:'ツイン'},{id:'304',type:'ツイン'},{id:'305',type:'ツイン'}]},
+  {floor:'4F',rooms:[{id:'401',type:'ダブル'},{id:'402',type:'ダブル'},{id:'403',type:'ラージ'},{id:'404',type:'ラージ'},{id:'405',type:'ラージ'},{id:'406',type:'ラージ'}]},
+  {floor:'5F',rooms:[{id:'501',type:'デラックス'},{id:'502',type:'デラックス'},{id:'503',type:'デラックス'},{id:'504',type:'デラックス'}]},
+  {floor:'6F',rooms:[{id:'601',type:'スイート'},{id:'602',type:'スイート'}]},
+];
+
+let startDate=new Date(2026,3,9); // 1 day before today
+const DAYS=10;
+const today=new Date(2026,3,10);
+const CW=120;
+function d(y,m,d){return new Date(y,m-1,d)}
+function fmt(dt){return `${dt.getMonth()+1}/${dt.getDate()}`}
+function daysBetween(a,b){return Math.round((b-a)/864e5)}
+function isSameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+function isWeekend(dt){return dt.getDay()===0||dt.getDay()===6}
+const DOW=['日','月','火','水','木','金','土'];
+
+const ASSIGNS=[
+  {room:'201',ci:d(2026,4,8),co:d(2026,4,11),name:'高橋 誠',ota:'rakuten',status:'checked_in',nights:3},
+  {room:'201',ci:d(2026,4,12),co:d(2026,4,15),name:'佐藤 次郎',ota:'jalan',status:'confirmed',nights:3},
+  {room:'202',ci:d(2026,4,10),co:d(2026,4,11),name:'Tanaka Yuki',ota:'booking',status:'confirmed',nights:1},
+  {room:'202',ci:d(2026,4,13),co:d(2026,4,16),name:'加藤 裕子',ota:'expedia',status:'confirmed',nights:3},
+  {room:'203',ci:d(2026,4,7),co:d(2026,4,10),name:'李 明華',ota:'agoda',status:'checked_out',nights:3},
+  {room:'203',ci:d(2026,4,11),co:d(2026,4,14),name:'Wilson Smith',ota:'booking',status:'confirmed',nights:3},
+  {room:'204',ci:d(2026,4,8),co:d(2026,4,9),name:'加藤 裕子',ota:'expedia',status:'noshow',nights:1,special:'noshow'},
+  {room:'204',ci:d(2026,4,10),co:d(2026,4,13),name:'田村 健一',ota:'direct',status:'confirmed',nights:3},
+  {room:'301',ci:d(2026,4,10),co:d(2026,4,12),name:'渡辺 健太',ota:'booking',status:'checked_in',nights:2,linked:true},
+  {room:'302',ci:d(2026,4,10),co:d(2026,4,11),name:'鈴木 一郎',ota:'jalan',status:'checked_in',nights:1},
+  {room:'302',ci:d(2026,4,12),co:d(2026,4,16),name:'山口 太一',ota:'rakuten',status:'confirmed',nights:4},
+  {room:'303',ci:d(2026,4,10),co:d(2026,4,13),name:'山田 太郎',ota:'phone',status:'confirmed',nights:3,special:'move-from',moveLabel:'→304へ'},
+  {room:'303',ci:d(2026,4,14),co:d(2026,4,17),name:'小川 優',ota:'jalan',status:'confirmed',nights:3},
+  {room:'304',ci:d(2026,4,7),co:d(2026,4,10),name:'伊藤 美咲',ota:'jalan',status:'checked_out',nights:3},
+  {room:'304',ci:d(2026,4,12),co:d(2026,4,13),name:'山田 太郎',ota:'phone',status:'confirmed',nights:1,special:'move-to',moveLabel:'303より→'},
+  {room:'305',ci:d(2026,4,9),co:d(2026,4,12),name:'小林 直人',ota:'booking',status:'cancelled',nights:3,special:'noshow'},
+  {room:'305',ci:d(2026,4,13),co:d(2026,4,17),name:'近藤 真',ota:'agoda',status:'confirmed',nights:4},
+  {room:'401',ci:d(2026,4,11),co:d(2026,4,12),name:'木村 拓也',ota:'jalan',status:'confirmed',nights:1},
+  {room:'401',ci:d(2026,4,14),co:d(2026,4,17),name:'橋本 環奈',ota:'rakuten',status:'confirmed',nights:3},
+  {room:'403',ci:d(2026,4,9),co:d(2026,4,15),name:'森 大輔',ota:'direct',status:'checked_in',nights:6},
+  {room:'405',ci:d(2026,4,10),co:d(2026,4,13),name:'李 明華',ota:'agoda',status:'confirmed',nights:3},
+  {room:'501',ci:d(2026,4,10),co:d(2026,4,13),name:'佐藤 花子',ota:'booking',status:'checked_in',nights:3},
+  {room:'502',ci:d(2026,4,11),co:d(2026,4,15),name:'中村 愛',ota:'agoda',status:'confirmed',nights:4},
+  {room:'503',ci:d(2026,4,7),co:d(2026,4,10),name:'松本 大輝',ota:'rakuten',status:'checked_out',nights:3},
+  {room:'503',ci:d(2026,4,11),co:d(2026,4,13),name:'佐々木 翼',ota:'booking',status:'confirmed',nights:2,linked:true},
+  {room:'503',ci:d(2026,4,13),co:d(2026,4,15),name:'佐々木 翼',ota:'jalan',status:'confirmed',nights:2,linked:true},
+  {room:'503',ci:d(2026,4,15),co:d(2026,4,17),name:'',ota:'',status:'gap',nights:2,special:'gap'},
+  {room:'504',ci:d(2026,4,9),co:d(2026,4,12),name:'田中 翔太',ota:'direct',status:'checked_in',nights:3,linked:true},
+  {room:'504',ci:d(2026,4,12),co:d(2026,4,15),name:'田中 翔太',ota:'booking',status:'confirmed',nights:3,linked:true},
+  {room:'504',ci:d(2026,4,16),co:d(2026,4,19),name:'吉田 恵',ota:'rakuten',status:'confirmed',nights:3,special:'early-out'},
+  {room:'601',ci:d(2026,4,12),co:d(2026,4,15),name:'田中 翔太',ota:'direct',status:'confirmed',nights:3},
+  {room:'602',ci:d(2026,4,8),co:d(2026,4,12),name:'VIP 鈴木',ota:'phone',status:'checked_in',nights:4},
+];
+
+function render(){
+  const g=document.getElementById('gantt');
+  const dates=[];
+  for(let i=0;i<DAYS;i++){const dt=new Date(startDate);dt.setDate(dt.getDate()+i);dates.push(dt)}
+  document.getElementById('dateRange').textContent=`${fmt(dates[0])} 〜 ${fmt(dates[DAYS-1])}`;
+
+  let html='<div style="display:flex">';
+  html+='<div class="room-col">';
+  html+='<div style="height:40px;border-bottom:1px solid #E2E8F0"></div>';
+  ROOMS.forEach(f=>{
+    html+=`<div class="floor-header">${f.floor}</div>`;
+    f.rooms.forEach(r=>html+=`<div class="room-cell"><span class="room-num">${r.id}</span><span class="room-type">${r.type}</span></div>`);
+  });
+  html+='</div>';
+
+  html+='<div style="flex:1;overflow-x:auto" id="gridScroll">';
+  html+='<div class="date-header-row">';
+  dates.forEach(dt=>{
+    const isT=isSameDay(dt,today),isW=isWeekend(dt);
+    html+=`<div class="date-header${isT?' today':''}${isW?' weekend':''}">${dt.getMonth()+1}/${dt.getDate()}<span class="dow">${DOW[dt.getDay()]}</span></div>`;
+  });
+  html+='</div>';
+
+  ROOMS.forEach(f=>{
+    html+=`<div style="height:24px;background:#F1F5F9;border-bottom:1px solid #E2E8F0;display:flex">`;
+    dates.forEach(()=>html+=`<div style="width:var(--cw);min-width:var(--cw);flex-shrink:0"></div>`);
+    html+='</div>';
+    f.rooms.forEach(r=>{
+      html+='<div class="grid-row">';
+      dates.forEach(dt=>html+=`<div class="grid-cell${isSameDay(dt,today)?' today':''}"></div>`);
+      ASSIGNS.filter(a=>a.room===r.id).forEach(a=>{
+        const offset=daysBetween(startDate,a.ci),len=daysBetween(a.ci,a.co);
+        if(offset+len<=0||offset>=DAYS)return;
+        const left=Math.max(offset,0)*CW+2,width=Math.min(len,DAYS-Math.max(offset,0))*CW-4;
+        if(width<=0)return;
+        const ota=OTA[a.ota]||{color:'#94A3B8',label:a.ota};
+        let cls='bar';
+        if(a.special==='noshow')cls+=' noshow';
+        if(a.special==='early-out')cls+=' early-out';
+        if(a.special==='gap')cls+=' gap';
+        if(a.special==='move-to')cls+=' move-to';
+        if(a.special==='move-from')cls+=' move-from';
+        if(a.linked&&a.special!=='gap')cls+=' linked';
+        const hc=ota.color||'#94A3B8';
+        const bg=a.special==='gap'?'':`background:${hc};`;
+        const border=a.special==='early-out'?`border:2px dashed ${hc};color:${hc};background:rgba(${parseInt(hc.slice(1,3),16)},${parseInt(hc.slice(3,5),16)},${parseInt(hc.slice(5,7),16)},0.15);`:'';
+        const isNarrow=len<=1;
+        let content='';
+        if(a.special==='gap'){content=isNarrow?'穴':`穴 ${a.nights}泊`}
+        else if(isNarrow){content=`<span class="bar-name" style="text-align:center;font-size:10px">${a.name.split(' ')[0]||a.nights+'泊'}</span>`}
+        else{content=`<span class="bar-name">${a.name}</span><span class="bar-nights">${a.nights}泊</span>`}
+        const mv=a.moveLabel||'';
+        const dm=mv?`data-move="${mv}"`:'';
+        const da=`data-name="${a.name}" data-ota="${ota.label}" data-ci="${fmt(a.ci)}" data-co="${fmt(a.co)}" data-nights="${a.nights}" data-status="${a.status}" data-room="${r.id}" data-type="${r.type}" ${dm}`;
+        html+=`<div class="${cls}" style="${bg}${border}left:${left}px;width:${width}px;${isNarrow?'padding:0 4px;justify-content:center;':''}" ${da} onmouseenter="showTip(event,this)" onmouseleave="hideTip()">${content}</div>`;
+      });
+      html+='</div>';
+    });
+  });
+  html+='</div></div>';
+  g.innerHTML=html;
+}
+
+function showTip(e,el){
+  if(el.dataset.status==='gap')return;
+  const tip=document.getElementById('tooltip');
+  const mv=el.dataset.move?`<div class="tt-row"><span class="tt-label">移動</span><span>${el.dataset.move}</span></div>`:'';
+  tip.innerHTML=`<div class="tt-name">${el.dataset.name}</div>
+    <div class="tt-row"><span class="tt-label">OTA</span><span>${el.dataset.ota}</span></div>
+    <div class="tt-row"><span class="tt-label">CI</span><span>${el.dataset.ci}</span></div>
+    <div class="tt-row"><span class="tt-label">CO</span><span>${el.dataset.co}（${el.dataset.nights}泊）</span></div>
+    <div class="tt-row"><span class="tt-label">部屋</span><span>${el.dataset.room} ${el.dataset.type}</span></div>
+    <div class="tt-row"><span class="tt-label">ステータス</span><span>${el.dataset.status}</span></div>${mv}`;
+  tip.classList.add('show');
+  const rect=el.getBoundingClientRect();
+  tip.style.left=Math.min(rect.left,window.innerWidth-290)+'px';
+  tip.style.top=(rect.bottom+8)+'px';
+}
+function hideTip(){document.getElementById('tooltip').classList.remove('show')}
+
+let panelOpen=true;
+function togglePanel(){
+  panelOpen=!panelOpen;
+  const p=document.getElementById('rightPanel'),b=document.getElementById('rpToggle');
+  p.classList.toggle('collapsed',!panelOpen);
+  b.classList.toggle('shifted',!panelOpen);
+  b.textContent=panelOpen?'▶':'◀';
+}
+
+function shiftDays(n){startDate.setDate(startDate.getDate()+n);render()}
+function goToday(){startDate=new Date(today);startDate.setDate(startDate.getDate()-1);render()}
+
+function updateClock(){
+  const d=new Date(),days=["日","月","火","水","木","金","土"];
+  document.getElementById("clock").textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${days[d.getDay()]}）${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+updateClock();setInterval(updateClock,30000);
+render();
+</script>
+</body>
+</html>

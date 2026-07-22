@@ -1,0 +1,96 @@
+/**
+ * デザイントークン — 「Patina」デザイン言語（2026-07 UI刷新）
+ *
+ * 方針:
+ *   - 管理システム的な寒色（濃紺+青）をやめ、ホテルのロゴ（真鍮色の珊瑚）に合わせた
+ *     ウォームアイボリー基調 + 墨色テキスト + ブラス（真鍮）アクセントに統一する
+ *   - 変数名は旧デザインから維持する（1,200箇所以上の var() 参照を壊さないため）。
+ *     そのため --accent-blue は歴史的な名前だが、値はブランドのブラス色である点に注意
+ *   - フォントサイズは可読性優先で一段階拡大（base 14px → 15px）
+ *   - ダークテーマの上書きは theme.css 側にある
+ */
+:root {
+  /* テキスト（墨色系: 純黒ではなく暖かい黒を使う） */
+  --text-primary: #26221B;
+  --text-secondary: #6F6858;
+  --text-muted: #A79E8C;
+  --text-inverse: #FFFFFF;
+
+  /* 背景（ウォームアイボリー） */
+  --bg-main: #F4F2ED;
+  --bg-card: #FFFFFF;
+  --bg-hover: #F8F6F1;          /* 行ホバー・押せる面のホバー */
+  --bg-inset: #FAF8F4;          /* カード内のくぼみ面（サマリー行等） */
+  --bg-sidebar: #FBFAF7;
+  --bg-sidebar-hover: #F1EEE6;
+  --bg-sidebar-active: #EDE7D8; /* アクティブ項目の面（ブラスの淡い色） */
+
+  /* ボーダー（暖色グレー。線は薄く、面と余白で区切る） */
+  --border-default: #E6E1D6;
+  --border-light: #F0ECE3;
+  --border-strong: #D4CDBD;     /* 入力欄など輪郭が必要な場所のみ */
+
+  /* アクセント
+     --accent-blue は旧名のまま値をブラスに変更（主要アクション色として全画面に伝播させる） */
+  --accent-blue: #8A7440;
+  --accent-blue-hover: #6F5C31;
+  --accent-blue-soft: rgba(138, 116, 64, 0.10);   /* 選択面・アクティブ面 */
+  --accent-blue-ring: rgba(138, 116, 64, 0.28);   /* フォーカスリング */
+  --accent-green: #3E7C4F;
+  --accent-yellow: #B08A1E;
+  --accent-red: #B3362C;
+  --accent-purple: #6D5F9E;
+  --accent-teal: #2E7D74;
+
+  /* OTAカラー（CLAUDE.md指定。チャネル識別色なので変更しない） */
+  --ota-jalan: #DC2626;
+  --ota-rakuten: #991B1B;
+  --ota-booking: #1E3A5F;
+  --ota-direct: #16A34A;
+  --ota-phone: #EA580C;
+  --ota-walkin: #0891B2;
+  --ota-agoda: #7C3AED;
+  --ota-expedia: #CA8A04;
+  --ota-corporate: #0369A1;
+
+  /* ステータス（意味色は保ちつつ、彩度を落として紙面になじませる） */
+  --status-confirmed-bg: #E8EDF4;
+  --status-confirmed-text: #3D5A80;
+  --status-checkedin-bg: #E4EFE6;
+  --status-checkedin-text: #3E7C4F;
+  --status-checkedout-bg: #EBE8F3;
+  --status-checkedout-text: #6D5F9E;
+  --status-cancelled-bg: #EFECE5;
+  --status-cancelled-text: #A79E8C;
+  --status-noshow-bg: #F6E7E5;
+  --status-noshow-text: #B3362C;
+
+  /* フォント（可読性優先で一段階拡大） */
+  --font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Helvetica Neue', sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 15px;
+  --font-size-lg: 17px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 25px;
+
+  /* スペーシング */
+  --sidebar-width: 232px;
+  --sidebar-collapsed-width: 60px;
+  --header-height: 52px;
+  --header-top-height: 52px;
+
+  /* 影（輪郭線代わりの極薄い影 + 浮遊面用の柔らかい影） */
+  --shadow-sm: 0 1px 2px rgba(38, 34, 27, 0.04), 0 0 0 1px rgba(38, 34, 27, 0.03);
+  --shadow-md: 0 2px 8px rgba(38, 34, 27, 0.06), 0 8px 24px rgba(38, 34, 27, 0.06);
+  --shadow-lg: 0 4px 16px rgba(38, 34, 27, 0.10), 0 16px 48px rgba(38, 34, 27, 0.12);
+
+  /* 角丸 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* トランジション */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+}
