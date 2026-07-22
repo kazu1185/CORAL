@@ -39,12 +39,12 @@ class ReportController
      *
      * 集計元は product_sales（active のみ）。売上がどの経路で計上されるかの整理:
      *   部屋付け … reservation_charges に charge_type='goods' の行があり、
-     *              予約の請求額（reservations.amount）と領収書にはそちら経由で乗る。
-     *              このレポートは product_sales 側を数えるので、
-     *              予約側の集計と足し合わせると二重計上になる点に注意
+     *              予約の請求額（reservations.amount）と領収書にはそちら経由で乗る
      *   即売     … reservation_charges には行が無く、product_sales にしか存在しない
-     * そのため、このレポートは「物販の内訳を見るためのもの」であり、
-     * 宿泊売上のレポートに合算する用途では使わないこと
+     *
+     * 収入実績・予測表（IncomeReportService）は両方を「売上金額」に含めており、
+     * その内数を「物販」列に出している。つまりこのレポートの合計 = 同表の物販列の合計。
+     * このレポートは物販の内訳を見るためのものなので、収入実績表に足し合わせないこと
      */
     public function products(Request $request): void
     {

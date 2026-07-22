@@ -60,6 +60,8 @@ class IncomeReportPdfService
         ['key' => 'room_total',     'w' => 23, 'label' => '室料合計',  'align' => 'R'],
         ['key' => 'accom_tax',      'w' => 16, 'label' => '宿泊税',   'align' => 'R'],
         ['key' => 'room_revenue',   'w' => 23, 'label' => '客室売上',  'align' => 'R'],
+        // 物販（部屋付け＋即売）。売上金額に含まれている物販の内訳を示す列
+        ['key' => 'goods_sales',    'w' => 18, 'label' => '物販',      'align' => 'R'],
     ];
 
     /**
@@ -69,7 +71,7 @@ class IncomeReportPdfService
         ['label' => '',           'start' => 0,  'span' => 5],   // 日〜売上金額は個別
         ['label' => '入数',       'start' => 5,  'span' => 3],   // 大人・小人・合計
         ['label' => '前年',       'start' => 8,  'span' => 4],   // 販売室数〜入数
-        ['label' => '',           'start' => 12, 'span' => 3],   // 室料合計〜客室売上
+        ['label' => '',           'start' => 12, 'span' => 4],   // 室料合計〜客室売上・物販
     ];
 
     /**
@@ -291,6 +293,7 @@ class IncomeReportPdfService
                 number_format($day['room_sales']),                        // 室料合計
                 number_format($day['accom_tax']),                         // 宿泊税
                 number_format($roomRevenue),                              // 客室売上
+                number_format($day['goods_sales'] ?? 0),                  // 物販（売上金額の内数）
             ];
 
             $x = $ml;
@@ -371,6 +374,7 @@ class IncomeReportPdfService
             number_format($totals['room_sales']),
             number_format($totals['accom_tax']),
             number_format($roomRevenue),
+            number_format($totals['goods_sales'] ?? 0),
         ];
 
         $x = $ml;

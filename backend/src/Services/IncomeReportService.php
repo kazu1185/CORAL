@@ -80,20 +80,22 @@ class IncomeReportService
      */
     private function aggregateDailyData(string $startDate, string $endDate): array
     {
-        // --- 売上集計 ---
-        // charge_type: room, addon, discount を売上対象とする
+        // --- 売上集計（予約明細）---
+        // charge_type: room, addon, discount, goods を売上対象とする
         // payment, refund, cancel_fee, no_show_fee は売上金額には含めない
+        // goods = 物販の部屋付け。CO精算で宿泊料と一緒に受け取るため収入に含める
         $salesStmt = $this->db->prepare("
             SELECT
                 rc.date,
                 SUM(rc.amount) AS total_sales,
                 SUM(CASE WHEN rc.charge_type = 'room' THEN rc.amount ELSE 0 END) AS room_sales,
+                SUM(CASE WHEN rc.charge_type = 'goods' THEN rc.amount ELSE 0 END) AS goods_sales,
                 SUM(rc.accommodation_tax) AS accom_tax
             FROM reservation_charges rc
             JOIN reservations r ON rc.reservation_id = r.id
             WHERE rc.date BETWEEN :start_date AND :end_date
               AND rc.status = 'active'
-              AND rc.charge_type IN ('room', 'addon', 'discount')
+              AND rc.charge_type IN ('room', 'addon', 'discount', 'goods')
               AND r.status NOT IN ('cancelled', 'no_show', 'merged', 'group_parent')
             GROUP BY rc.date
             ORDER BY rc.date
@@ -102,6 +104,25 @@ class IncomeReportService
         $salesByDate = [];
         foreach ($salesStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $salesByDate[$row['date']] = $row;
+        }
+
+        // --- 物販の即売（日別）---
+        // 即売は宿泊予約に紐づかず reservation_charges に行が無いため、
+        // product_sales から別途集計して加算する。
+        // 部屋付け（reservation_id あり）は上のクエリで goods として計上済みなので
+        // ここでは必ず除外すること（二重計上になる）
+        $goodsStmt = $this->db->prepare("
+            SELECT sale_date AS date, SUM(amount) AS immediate_sales
+            FROM product_sales
+            WHERE sale_date BETWEEN :gs_start AND :gs_end
+              AND status = 'active'
+              AND reservation_id IS NULL
+            GROUP BY sale_date
+        ");
+        $goodsStmt->execute(['gs_start' => $startDate, 'gs_end' => $endDate]);
+        $immediateByDate = [];
+        foreach ($goodsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $immediateByDate[$row['date']] = (int) $row['immediate_sales'];
         }
 
         // --- 販売室数（日別） ---
@@ -182,11 +203,16 @@ class IncomeReportService
             $soldRooms = $occByDate[$d] ?? 0;
             $guests = $guestByDate[$d] ?? ['adults' => 0, 'children' => 0];
 
+            // 物販 = 部屋付け（goods明細）+ 即売。売上金額にはこの合計を含める
+            $goodsSales = (int) ($sales['goods_sales'] ?? 0) + ($immediateByDate[$d] ?? 0);
+
             $result[$d] = [
                 'date'        => $d,
                 'sold_rooms'  => $soldRooms,
-                'total_sales' => (int) ($sales['total_sales'] ?? 0),
+                // 即売は reservation_charges に無いのでここで加算する
+                'total_sales' => (int) ($sales['total_sales'] ?? 0) + ($immediateByDate[$d] ?? 0),
                 'room_sales'  => (int) ($sales['room_sales'] ?? 0),
+                'goods_sales' => $goodsSales,
                 'accom_tax'   => (int) ($sales['accom_tax'] ?? 0),
                 'adults'      => (int) $guests['adults'],
                 'children'    => (int) $guests['children'],
@@ -206,6 +232,7 @@ class IncomeReportService
             'sold_rooms'  => 0,
             'total_sales' => 0,
             'room_sales'  => 0,
+            'goods_sales' => 0,
             'accom_tax'   => 0,
             'adults'      => 0,
             'children'    => 0,
@@ -215,6 +242,7 @@ class IncomeReportService
             $totals['sold_rooms']  += $day['sold_rooms'];
             $totals['total_sales'] += $day['total_sales'];
             $totals['room_sales']  += $day['room_sales'];
+            $totals['goods_sales'] += $day['goods_sales'];
             $totals['accom_tax']   += $day['accom_tax'];
             $totals['adults']      += $day['adults'];
             $totals['children']    += $day['children'];
