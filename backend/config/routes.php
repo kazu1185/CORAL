@@ -185,8 +185,5 @@ $router->addRoute('GET',  '/api/v1/tl-import/logs',    'TlImportController@logs'
 // 売上・レポート
 // ============================================================
 $router->addRoute('GET', '/api/v1/reports/daily',     'ReportController@daily',     ['permission' => 'report.view']);
-$router->addRoute('GET', '/api/v1/reports/monthly',   'ReportController@monthly',   ['permission' => 'report.view']);
-$router->addRoute('GET', '/api/v1/reports/occupancy', 'ReportController@occupancy', ['permission' => 'report.view']);
 $router->addRoute('GET', '/api/v1/reports/products',  'ReportController@products',  ['permission' => 'report.view']);
-$router->addRoute('GET', '/api/v1/reports/export',    'ReportController@export',    ['permission' => 'report.export']);
 $router->addRoute('GET', '/api/v1/reports/income-pdf', 'ReportController@incomePdf', ['permission' => 'report.export']);

@@ -12,25 +12,168 @@ use App\Services\IncomeReportPdfService;
  */
 class ReportController
 {
-    /** GET /api/v1/reports/daily */
+    /**
+     * GET /api/v1/reports/daily?date=YYYY-MM-DD
+     * 日計（その日の締め作業用）
+     *
+     * 売上の集計定義は収入実績・予測表（IncomeReportService）と揃えている:
+     *   売上 = reservation_charges の room/addon/discount/goods ＋ 物販の即売
+     *   即売は reservation_charges に行が無いため product_sales から加算する
+     *   （reservation_id IS NULL で絞らないと部屋付けが二重計上になる）
+     *
+     * 入金は「その日に受け取ったお金」なので、予約の入金行に加えて即売分も含める。
+     * 即売はその場で決済が完了しているため
+     */
     public function daily(Request $request): void
     {
-        // TODO: 日計レポート
-        Response::error('未実装です', 501);
-    }
+        $date = $request->query['date'] ?? date('Y-m-d');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            Response::error('date パラメータの形式が不正です（YYYY-MM-DD）', 400);
+        }
 
-    /** GET /api/v1/reports/monthly */
-    public function monthly(Request $request): void
-    {
-        // TODO: 月計レポート
-        Response::error('未実装です', 501);
-    }
+        $db = \App\Core\Database::getInstance();
 
-    /** GET /api/v1/reports/occupancy */
-    public function occupancy(Request $request): void
-    {
-        // TODO: 稼働率レポート
-        Response::error('未実装です', 501);
+        // --- 売上（予約明細）---
+        $stmt = $db->prepare("
+            SELECT
+                COALESCE(SUM(CASE WHEN rc.charge_type = 'room' THEN rc.amount ELSE 0 END), 0) AS room_sales,
+                COALESCE(SUM(CASE WHEN rc.charge_type = 'goods' THEN rc.amount ELSE 0 END), 0) AS goods_charged,
+                COALESCE(SUM(CASE WHEN rc.charge_type IN ('addon','discount') THEN rc.amount ELSE 0 END), 0) AS other_sales,
+                COALESCE(SUM(rc.tax_amount), 0) AS tax_amount,
+                COALESCE(SUM(rc.accommodation_tax), 0) AS accommodation_tax
+            FROM reservation_charges rc
+            JOIN reservations r ON r.id = rc.reservation_id
+            WHERE rc.date = :sales_date
+              AND rc.status = 'active'
+              AND rc.charge_type IN ('room','addon','discount','goods')
+              AND r.status NOT IN ('cancelled','no_show','merged','group_parent')
+        ");
+        $stmt->execute(['sales_date' => $date]);
+        $sales = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        // --- 物販の即売 ---
+        $stmt = $db->prepare("
+            SELECT COALESCE(SUM(amount), 0) AS amount, COALESCE(SUM(tax_amount), 0) AS tax_amount
+            FROM product_sales
+            WHERE sale_date = :imm_date AND status = 'active' AND reservation_id IS NULL
+        ");
+        $stmt->execute(['imm_date' => $date]);
+        $immediate = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        $goodsTotal = (int) $sales['goods_charged'] + (int) $immediate['amount'];
+        $totalSales = (int) $sales['room_sales'] + (int) $sales['other_sales'] + $goodsTotal;
+
+        // --- 入金（予約の入金行。返金はマイナス扱いで別途集計）---
+        $stmt = $db->prepare("
+            SELECT pm.id AS payment_method_id, COALESCE(pm.method_name, '未設定') AS method_name,
+                   SUM(rc.amount) AS amount
+            FROM reservation_charges rc
+            LEFT JOIN payment_methods pm ON pm.id = rc.payment_method_id
+            WHERE rc.date = :pay_date AND rc.status = 'active' AND rc.charge_type = 'payment'
+            GROUP BY pm.id, pm.method_name
+        ");
+        $stmt->execute(['pay_date' => $date]);
+        $paymentRows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // --- 入金（即売。その場で決済済みなので当日の入金に含める）---
+        $stmt = $db->prepare("
+            SELECT pm.id AS payment_method_id, COALESCE(pm.method_name, '未設定') AS method_name,
+                   SUM(ps.amount) AS amount
+            FROM product_sales ps
+            LEFT JOIN payment_methods pm ON pm.id = ps.payment_method_id
+            WHERE ps.sale_date = :ipay_date AND ps.status = 'active' AND ps.reservation_id IS NULL
+            GROUP BY pm.id, pm.method_name
+        ");
+        $stmt->execute(['ipay_date' => $date]);
+
+        // 決済方法ごとに予約分と即売分をまとめる
+        $payments = [];
+        foreach (array_merge($paymentRows, $stmt->fetchAll(\PDO::FETCH_ASSOC)) as $row) {
+            $key = $row['payment_method_id'] ?? 0;
+            if (!isset($payments[$key])) {
+                $payments[$key] = [
+                    'payment_method_id' => $row['payment_method_id'] ? (int) $row['payment_method_id'] : null,
+                    'method_name'       => $row['method_name'],
+                    'amount'            => 0,
+                ];
+            }
+            $payments[$key]['amount'] += (int) $row['amount'];
+        }
+        $payments = array_values($payments);
+        usort($payments, fn($a, $b) => $b['amount'] <=> $a['amount']);
+        $paymentTotal = array_sum(array_column($payments, 'amount'));
+
+        // --- 返金（当日分。入金とは分けて表示する）---
+        $stmt = $db->prepare("
+            SELECT COALESCE(SUM(amount), 0) FROM reservation_charges
+            WHERE date = :ref_date AND status = 'active' AND charge_type = 'refund'
+        ");
+        $stmt->execute(['ref_date' => $date]);
+        $refundTotal = (int) $stmt->fetchColumn();
+
+        // --- CI / CO 件数 ---
+        $stmt = $db->prepare("
+            SELECT
+                (SELECT COUNT(*) FROM reservations WHERE DATE(actual_checkin_at) = :ci_date) AS checkin_count,
+                (SELECT COUNT(*) FROM reservations WHERE DATE(actual_checkout_at) = :co_date) AS checkout_count
+        ");
+        $stmt->execute(['ci_date' => $date, 'co_date' => $date]);
+        $movements = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        // --- 稼働（その日に滞在しているアサイン数）---
+        // 規約 #3: 同名プレースホルダは使えないため別名にする
+        $stmt = $db->prepare("
+            SELECT COUNT(*) FROM room_assignments
+            WHERE status = 'active' AND check_in_date <= :occ_date AND check_out_date > :occ_date2
+        ");
+        $stmt->execute(['occ_date' => $date, 'occ_date2' => $date]);
+        $soldRooms = (int) $stmt->fetchColumn();
+
+        $physicalRooms = (int) $db->query("SELECT COUNT(*) FROM rooms WHERE status = 'available'")->fetchColumn();
+
+        // --- 未収（在室中の予約の売上 − 入金）---
+        // その日の締めで回収漏れを見つけるための指標
+        $stmt = $db->prepare("
+            SELECT COALESCE(SUM(
+                (SELECT COALESCE(SUM(rc.amount), 0) FROM reservation_charges rc
+                  WHERE rc.reservation_id = r.id AND rc.status = 'active'
+                    AND rc.charge_type NOT IN ('payment','refund'))
+              - (SELECT COALESCE(SUM(rc2.amount), 0) FROM reservation_charges rc2
+                  WHERE rc2.reservation_id = r.id AND rc2.status = 'active'
+                    AND rc2.charge_type = 'payment')
+            ), 0)
+            FROM reservations r
+            WHERE r.status = 'checked_in'
+        ");
+        $stmt->execute();
+        $unpaidInHouse = (int) $stmt->fetchColumn();
+
+        Response::json([
+            'date' => $date,
+            'sales' => [
+                'room'              => (int) $sales['room_sales'],
+                'goods'             => $goodsTotal,
+                'goods_charged'     => (int) $sales['goods_charged'],   // 内訳: 部屋付け
+                'goods_immediate'   => (int) $immediate['amount'],      // 内訳: 即売
+                'other'             => (int) $sales['other_sales'],
+                'total'             => $totalSales,
+                'tax_amount'        => (int) $sales['tax_amount'] + (int) $immediate['tax_amount'],
+                'accommodation_tax' => (int) $sales['accommodation_tax'],
+            ],
+            'payments'       => $payments,
+            'payment_total'  => $paymentTotal,
+            'refund_total'   => $refundTotal,
+            'movements'      => [
+                'checkin_count'  => (int) $movements['checkin_count'],
+                'checkout_count' => (int) $movements['checkout_count'],
+            ],
+            'rooms' => [
+                'physical'  => $physicalRooms,
+                'sold'      => $soldRooms,
+                'occupancy' => $physicalRooms > 0 ? round($soldRooms / $physicalRooms * 100, 1) : 0,
+            ],
+            'unpaid_in_house' => $unpaidInHouse,
+        ]);
     }
 
     /**
@@ -130,13 +273,6 @@ class ReportController
             'by_sale_type'      => $byTypeRows,
             'by_payment_method' => $byPayment->fetchAll(\PDO::FETCH_ASSOC),
         ]);
-    }
-
-    /** GET /api/v1/reports/export */
-    public function export(Request $request): void
-    {
-        // TODO: CSVエクスポート
-        Response::error('未実装です', 501);
     }
 
     /**

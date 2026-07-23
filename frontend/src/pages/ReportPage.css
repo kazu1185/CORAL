@@ -246,3 +246,43 @@
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
 }
+
+/* ============================================================
+   日計（ReportPage 内の日計セクション）
+   ============================================================ */
+
+.report-daily__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.report-daily__kpi {
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+.report-daily__kpi-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.report-daily__kpi-value {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.report-daily__kpi-value--strong {
+  font-size: var(--font-size-xl);
+}
+
+/* 未収が残っている場合は締め作業で気づけるように色を変える */
+.report-daily__kpi-value--alert {
+  color: var(--accent-red);
+}

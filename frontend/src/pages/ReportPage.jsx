@@ -74,6 +74,9 @@ export default function ReportPage() {
       </div>
 
       <div className="report-page__content">
+        {/* 日計（その日の締め用。フロント業務で最初に見るので先頭に置く） */}
+        <DailyReport />
+
         {/* 収入実績・予測表 */}
         <div className="report-card">
           <div className="report-card__header">
@@ -127,6 +130,115 @@ export default function ReportPage() {
         </div>
 
         <ProductSalesReport />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 日計（その日の締め作業用）
+ *
+ * 売上・入金・CI/CO・稼働・未収を1画面で確認する。
+ * 売上の集計定義は収入実績・予測表と揃えてある（物販の即売を含む）
+ */
+function DailyReport() {
+  const [date, setDate] = useState(todayStr());
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchReport = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      setData(await api.get(`/reports/daily?date=${date}`));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [date]);
+
+  useEffect(() => { fetchReport(); }, [fetchReport]);
+
+  return (
+    <div className="report-card">
+      <div className="report-card__header">
+        <span className="material-symbols-outlined report-card__icon">today</span>
+        <div>
+          <h2 className="report-card__title">日計</h2>
+          <p className="report-card__desc">その日の売上・入金・稼働の締め用サマリー</p>
+        </div>
+      </div>
+
+      <div className="report-card__form">
+        <div className="report-card__field">
+          <label className="report-card__label" htmlFor="daily-date">対象日</label>
+          <input id="daily-date" type="date" className="report-card__input"
+            value={date} onChange={e => setDate(e.target.value)} />
+        </div>
+      </div>
+
+      {error && (
+        <div className="report-card__error">
+          <span className="material-symbols-outlined">error_outline</span>
+          {error}
+        </div>
+      )}
+
+      {loading && <p className="report-ps__empty">集計中...</p>}
+
+      {!loading && data && (
+        <div className="report-ps">
+          <div className="report-daily__kpis">
+            <Kpi label="売上合計" value={`¥${data.sales.total.toLocaleString()}`} strong />
+            <Kpi label="入金合計" value={`¥${data.payment_total.toLocaleString()}`} />
+            <Kpi label="稼働" value={`${data.rooms.sold} / ${data.rooms.physical} 室（${data.rooms.occupancy}%）`} />
+            <Kpi label="CI / CO" value={`${data.movements.checkin_count} / ${data.movements.checkout_count} 件`} />
+            {/* 在室中の未収は回収漏れの発見用。0でない場合だけ強調する */}
+            <Kpi label="在室中の未収" value={`¥${data.unpaid_in_house.toLocaleString()}`}
+              alert={data.unpaid_in_house > 0} />
+            {data.refund_total !== 0 && (
+              <Kpi label="返金" value={`¥${data.refund_total.toLocaleString()}`} />
+            )}
+          </div>
+
+          <div className="report-ps__grid">
+            <ReportTable
+              title="売上の内訳"
+              head={['項目', '金額']}
+              rows={[
+                ['宿泊', `¥${data.sales.room.toLocaleString()}`],
+                ['物販（部屋付け）', `¥${data.sales.goods_charged.toLocaleString()}`],
+                ['物販（即売）', `¥${data.sales.goods_immediate.toLocaleString()}`],
+                ['その他・割引', `¥${data.sales.other.toLocaleString()}`],
+                ['合計', `¥${data.sales.total.toLocaleString()}`],
+                ['（内消費税）', `¥${data.sales.tax_amount.toLocaleString()}`],
+                ['（内宿泊税）', `¥${data.sales.accommodation_tax.toLocaleString()}`],
+              ]}
+            />
+            <ReportTable
+              title="入金の内訳（決済方法別）"
+              head={['決済方法', '金額']}
+              rows={data.payments.map(p => [
+                // payment_method_id が NULL の入金はOTA事前決済等（決済方法を持たない行）
+                p.payment_method_id ? p.method_name : '未設定（OTA事前決済等）',
+                `¥${Number(p.amount).toLocaleString()}`,
+              ])}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Kpi({ label, value, strong = false, alert = false }) {
+  return (
+    <div className="report-daily__kpi">
+      <div className="report-daily__kpi-label">{label}</div>
+      <div className={`report-daily__kpi-value ${strong ? 'report-daily__kpi-value--strong' : ''} ${alert ? 'report-daily__kpi-value--alert' : ''}`}>
+        {value}
       </div>
     </div>
   );
