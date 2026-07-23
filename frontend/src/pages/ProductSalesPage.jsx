@@ -166,6 +166,13 @@ export default function ProductSalesPage() {
     try {
       await api.put(`/product-sales/${sale.id}/cancel`, {});
       await fetchSales();
+      // 部屋付けの取消は予約の請求額を再計算する（= updated_at が変わる）ため、
+      // 部屋付け確定時と同様に在室予約を取り直す。
+      // 取らないと、取消直後に同じ予約へ再度部屋付けした際に楽観ロックの409になる
+      if (sale.reservation_id) {
+        const res = await api.get('/reservations?status=checked_in&per_page=100');
+        setInHouse(res.data || []);
+      }
     } catch (e) {
       showAlert('取消に失敗しました', e.message);
     }
@@ -301,20 +308,23 @@ function SalesHistory({ sales, onCancel, onReceipt }) {
                       : `即売 / ${s.payment_method_name || '-'}`}
                   </td>
                   <td>{s.staff_name}</td>
-                  <td className="ps-history__actions">
-                    {!cancelled && (
-                      <>
-                        {/* 領収書は即売のみ・会計単位で1枚。部屋付けはCO精算時に宿泊の領収書へ含める */}
-                        {isReceiptAnchor && (
-                          s.receipt_issued
-                            ? <span className="ps-history__issued" title="この会計の領収書は発行済みです">発行済</span>
-                            : <button className="ps-btn ps-btn--sm" onClick={() => onReceipt(group)}>
-                                領収書{group.length > 1 ? `（${group.length}品）` : ''}
-                              </button>
-                        )}
-                        <button className="ps-btn ps-btn--sm" onClick={() => onCancel(s)}>取消</button>
-                      </>
-                    )}
+                  {/* flexは td に直接当てず内側の div に当てる（tdがtable-cellでなくなると行の高さ・縦位置がずれるため） */}
+                  <td>
+                    <div className="ps-history__actions">
+                      {!cancelled && (
+                        <>
+                          {/* 領収書は即売のみ・会計単位で1枚。部屋付けはCO精算時に宿泊の領収書へ含める */}
+                          {isReceiptAnchor && (
+                            s.receipt_issued
+                              ? <span className="ps-history__issued" title="この会計の領収書は発行済みです">発行済</span>
+                              : <button className="ps-btn ps-btn--sm" onClick={() => onReceipt(group)}>
+                                  領収書{group.length > 1 ? `（${group.length}品）` : ''}
+                                </button>
+                          )}
+                          <button className="ps-btn ps-btn--sm" onClick={() => onCancel(s)}>取消</button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

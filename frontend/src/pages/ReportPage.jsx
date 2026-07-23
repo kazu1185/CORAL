@@ -11,9 +11,9 @@ const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1'
  * 収入実績・予測表PDFの出力機能を提供する
  */
 export default function ReportPage() {
-  const today = new Date();
-  const defaultMonth = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
-  const defaultCutoff = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  // todayStr() で共通化（規約#15）。手組みのゼロ埋めは todayStr の重複実装だった
+  const defaultCutoff = todayStr();
+  const defaultMonth = defaultCutoff.slice(0, 7);
 
   const [month, setMonth] = useState(defaultMonth);
   const [cutoff, setCutoff] = useState(defaultCutoff);

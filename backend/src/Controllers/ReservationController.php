@@ -889,10 +889,21 @@ class ReservationController
             $cid = (int) $charge['id'];
 
             // charge の reservation_id を取得して権限チェック（自予約のみ許可）
-            $stmt = $db->prepare("SELECT reservation_id FROM reservation_charges WHERE id = :cid");
+            $stmt = $db->prepare("SELECT reservation_id, charge_type FROM reservation_charges WHERE id = :cid");
             $stmt->execute(['cid' => $cid]);
-            $chargeResId = (int) $stmt->fetchColumn();
+            $chargeRow = $stmt->fetch();
+            if (!$chargeRow) continue;
+            $chargeResId = (int) $chargeRow['reservation_id'];
             if (!in_array($chargeResId, $allowedResIds)) continue;
+
+            // goods（物販）行は product_sales と1対1で対応するため明細側から編集させない。
+            // 逆方向（他種別 → goods への変更）も、対になる product_sales の無い goods 行が
+            // 生まれて売上集計が食い違うため拒否する。UI側でも制御しているが、
+            // API直叩きで整合が壊れるのを防ぐためサーバー側でも弾く
+            if ($chargeRow['charge_type'] === 'goods') continue;
+            if (isset($charge['charge_type']) && $charge['charge_type'] === 'goods') {
+                unset($charge['charge_type']);
+            }
 
             // 更新フィールドを動的に構築
             $sets = ['updated_at = NOW()'];
@@ -944,6 +955,10 @@ class ReservationController
     private function applyChargeAdds(\PDO $db, int $reservationId, array $newCharges, array &$affectedResIds): void
     {
         foreach ($newCharges as $newCharge) {
+            // goods（物販）行の追加は ProductSaleController 経由のみ。
+            // ここから作ると product_sales と対にならない goods 行が生まれるため弾く
+            if (($newCharge['charge_type'] ?? '') === 'goods') continue;
+
             $db->prepare("
                 INSERT INTO reservation_charges
                 (reservation_id, date, charge_type, description, amount, tax_amount, accommodation_tax, payment_method_id, status)

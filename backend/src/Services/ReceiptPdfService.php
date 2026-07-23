@@ -384,6 +384,10 @@ class ReceiptPdfService
         $docTax = (int) $doc['tax_amount'];
 
         // 標準税率（tax_rate が NULL の既存明細）以外の税率ごとに集計
+        // 税額は行ごとの税額（document_items.tax_amount）の合算ではなく、
+        // 税率ごとの対象額合計から1回で計算する（インボイスの端数処理原則）。
+        // DocumentService::calculateTotals / issueSalesReceipt と同じ方式にしており、
+        // 発行時に保存した documents.tax_amount と表示が必ず一致する
         $others = [];   // rate => ['amount' => x, 'tax' => y]
         foreach ($items as $item) {
             $rate = $item['tax_rate'] ?? null;
@@ -391,11 +395,10 @@ class ReceiptPdfService
                 continue;   // 標準税率は残額として後から算出する
             }
             $rate = (int) $rate;
-            if (!isset($others[$rate])) {
-                $others[$rate] = ['amount' => 0, 'tax' => 0];
-            }
-            $others[$rate]['amount'] += (int) $item['amount'];
-            $others[$rate]['tax']    += (int) $item['tax_amount'];
+            $others[$rate]['amount'] = ($others[$rate]['amount'] ?? 0) + (int) $item['amount'];
+        }
+        foreach ($others as $rate => $v) {
+            $others[$rate]['tax'] = TaxCalc::includedTax($v['amount'], $rate);
         }
 
         // 標準税率の対象額・税額は「全体から軽減税率分を引いた残り」とする。

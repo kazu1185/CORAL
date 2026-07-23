@@ -117,8 +117,9 @@
 }
 
 .ps-btn--sm {
-  min-height: 32px;
-  padding: 4px 10px;
+  /* タブレット運用のためタッチターゲット44px基準に合わせる（ProductPicker.css冒頭の宣言と同じ） */
+  min-height: 44px;
+  padding: 8px 14px;
   font-size: var(--font-size-xs);
 }
 
@@ -200,6 +201,8 @@
 .ps-modal__overlay {
   position: fixed;
   inset: 0;
+  /* 純黒でなく墨色（--text-primary #26221B）ベースの半透明。
+     Patinaの他モーダル（ConfirmDialog等）と同じ直書き値。透明度付きのため変数化していない */
   background: rgba(38, 34, 27, 0.35);
   display: flex;
   align-items: center;

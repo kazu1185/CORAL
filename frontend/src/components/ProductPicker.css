@@ -201,8 +201,9 @@
 }
 
 .pp__qty-btn {
-  width: 32px;
-  height: 32px;
+  /* 数量の増減は誤タップが起きやすい操作なので、冒頭で宣言した44pxタッチ基準を守る */
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   background: var(--bg-card);

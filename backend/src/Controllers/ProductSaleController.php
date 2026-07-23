@@ -265,6 +265,19 @@ class ProductSaleController
             Response::error('この販売は既に取消済みです', 422);
         }
 
+        // 領収書発行済みの販売は取消不可。
+        // 取消を許すと「有効な領収書が取消済みの販売を参照する」状態になり、
+        // 書面と売上記録の金額が食い違ってしまうため
+        $stmt = $db->prepare("
+            SELECT COUNT(*) FROM document_items di
+            JOIN documents d ON d.id = di.document_id AND d.status = 'issued'
+            WHERE di.sale_id = :sid
+        ");
+        $stmt->execute(['sid' => $id]);
+        if ((int) $stmt->fetchColumn() > 0) {
+            Response::error('この販売は領収書が発行済みのため取消できません。先に領収書の再発行（旧領収書の無効化）で対応してください', 422);
+        }
+
         $reservationId = $sale['reservation_id'] ? (int) $sale['reservation_id'] : null;
         if ($reservationId) {
             $this->checkOptimisticLock($reservationId, $request->body['updated_at'] ?? null);
@@ -300,13 +313,13 @@ class ProductSaleController
 
     /**
      * 税込金額から内消費税額を求める（円未満切り捨て）
-     *   tax_amount = amount - floor(amount / (1 + rate/100))
+     * 実体は TaxCalc::includedTax に一元化した（領収書側と式を共有するため）。
      * 税率は引数（= DBのスナップショット値）で受け取り、ロジックには埋め込まない。
      * フロント側（utils/tax.js）も同じ式で計算する
      */
     public static function calcTaxAmount(int $amount, int $taxRate): int
     {
-        return $amount - (int) floor($amount / (1 + $taxRate / 100));
+        return \App\Services\TaxCalc::includedTax($amount, $taxRate);
     }
 
     /**

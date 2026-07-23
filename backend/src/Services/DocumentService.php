@@ -312,12 +312,21 @@ class DocumentService
             throw new \RuntimeException('この販売の領収書は既に発行されています');
         }
 
-        // 金額集計（税額は販売時に確定したスナップショットを使う）
+        // 金額集計。
+        // 税額は行ごとのスナップショット（product_sales.tax_amount）を合算せず、
+        // 税率ごとの対象額合計から1回で計算する（インボイスの端数処理原則）。
+        // 即売領収書は物販機能と同時に新設された書式なので、既存領収書との互換を気にせず
+        // 全税率この方式で統一する
         $total = 0;
-        $taxAmount = 0;
+        $amountsByRate = [];
         foreach ($sales as $s) {
             $total += (int) $s['amount'];
-            $taxAmount += (int) $s['tax_amount'];
+            $rate = (int) $s['tax_rate'];
+            $amountsByRate[$rate] = ($amountsByRate[$rate] ?? 0) + (int) $s['amount'];
+        }
+        $taxAmount = 0;
+        foreach ($amountsByRate as $rate => $amount) {
+            $taxAmount += TaxCalc::includedTax($amount, $rate);
         }
         $subtotal = $total - $taxAmount;
 
@@ -514,11 +523,28 @@ class DocumentService
         $total = 0;
         $taxAmount = 0;
         $accommodationTax = 0;
+        $reducedAmounts = [];   // 軽減税率(8%等)の税込対象額を税率ごとに合算
 
         foreach ($charges as $c) {
             $total += (int) $c['amount'];
-            $taxAmount += (int) $c['tax_amount'];
             $accommodationTax += (int) $c['accommodation_tax'];
+
+            // インボイスの端数処理原則（税率ごとに1回）への対応:
+            //   軽減税率の明細は行ごとの税額を合算せず、対象額を税率ごとに集めて後で1回計算する。
+            //   （行ごとに切り捨ててから合算すると税額が数円小さくなり得るため）
+            // 標準税率(tax_rate NULL含む)の明細は従来通り行の税額を合算する。
+            //   宿泊料の税額は既存の計算体系（明細作成時に確定）があり、
+            //   ここで再計算すると物販導入前の領収書と金額が変わってしまうため触らない
+            $rate = isset($c['tax_rate']) && $c['tax_rate'] !== null ? (int) $c['tax_rate'] : null;
+            if ($rate !== null && $rate !== 10) {
+                $reducedAmounts[$rate] = ($reducedAmounts[$rate] ?? 0) + (int) $c['amount'];
+            } else {
+                $taxAmount += (int) $c['tax_amount'];
+            }
+        }
+
+        foreach ($reducedAmounts as $rate => $amount) {
+            $taxAmount += TaxCalc::includedTax($amount, $rate);
         }
 
         // 小計 = 合計 - 消費税 - 宿泊税（税抜金額）

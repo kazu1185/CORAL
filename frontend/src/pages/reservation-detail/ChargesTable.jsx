@@ -198,9 +198,14 @@ export function EditableChargesTable({ charges, reservationId, updatedAt, onSave
                           </div>
                           <div className="rd__edit-card-field">
                             <label className="rd__edit-card-label">種別</label>
+                            {/* 行追加と同じく payment / goods への変更は不可（goods は product_sales と
+                                対で管理するため、明細側から goods 行を作れてはならない）。
+                                現在の種別だけは表示のため選択肢に残す */}
                             <select className="rd__edit-card-input" value={editData.charge_type}
                               onChange={(e) => setEditData(d => ({ ...d, charge_type: e.target.value }))}>
-                              {CHARGE_TYPE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                              {CHARGE_TYPE_OPTIONS
+                                .filter(o => !MANUAL_ADD_EXCLUDED_TYPES.includes(o.value) || o.value === editData.charge_type)
+                                .map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                             </select>
                           </div>
                           <div className="rd__edit-card-field rd__edit-card-field--wide">
