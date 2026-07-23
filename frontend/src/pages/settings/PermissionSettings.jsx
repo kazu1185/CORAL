@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../../api/client';
 import { useConfirm } from '../../components/ConfirmDialog';
 
@@ -109,9 +109,11 @@ export default function PermissionSettings() {
             </tr>
           </thead>
           <tbody>
+            {/* カテゴリ見出し行＋権限行をまとめるため Fragment を使う。
+                <> は key を持てず React の key 警告が出るため React.Fragment で書く */}
             {categories.map(cat => (
-              <>
-                <tr key={`cat-${cat}`}>
+              <React.Fragment key={cat}>
+                <tr>
                   <td colSpan={ROLES.length + 1} style={{
                     background: 'var(--bg-main)',
                     fontWeight: 600,
@@ -152,7 +154,7 @@ export default function PermissionSettings() {
                     })}
                   </tr>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </tbody>
         </table>
