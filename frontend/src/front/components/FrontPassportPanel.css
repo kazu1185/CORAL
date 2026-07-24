@@ -1,0 +1,49 @@
+/* ============================================================
+   パスポート撮影パネル（フロントモード Phase 4）
+   色は Patina トークンのみ（規約 #21）
+   ============================================================ */
+
+.fpp {
+  margin-top: 14px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.fpp__title { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em; }
+
+/* サムネイル一覧 */
+.fpp__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.fpp__item { display: flex; flex-direction: column; gap: 4px; }
+.fpp__thumb {
+  position: relative; aspect-ratio: 3 / 2; border-radius: var(--radius-sm); overflow: hidden;
+  background: var(--bg-inset); border: 1px solid var(--border-default);
+  display: flex; align-items: center; justify-content: center;
+}
+.fpp__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fpp__thumb-ph { color: var(--text-muted); font-size: 18px; }
+.fpp__badge {
+  position: absolute; top: 4px; left: 4px; padding: 1px 6px; border-radius: 99px;
+  font-size: 11px; font-weight: 700; color: var(--text-inverse); background: var(--text-muted);
+}
+.fpp__badge--rep { background: var(--accent-blue); }
+.fpp__del { align-self: center; font-size: 12px; color: var(--accent-red); padding: 2px 6px; }
+
+/* 撮影ボタン */
+.fpp__actions { display: flex; flex-direction: column; gap: 8px; }
+.fpp__btn { width: 100%; }
+.fpp__uploading { font-size: 13px; color: var(--accent-blue); text-align: center; }
+.fpp__hint { font-size: 12px; color: var(--text-muted); text-align: center; }
+
+/* 拡大表示 */
+.fpp__lightbox {
+  position: fixed; inset: 0; z-index: 300; background: rgba(38, 34, 27, 0.88);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px;
+}
+.fpp__lightbox img { max-width: 92vw; max-height: 80vh; border-radius: var(--radius-md); box-shadow: var(--shadow-lg); }
+.fpp__lightbox-close {
+  min-height: 52px; padding: 0 28px; border-radius: var(--radius-md);
+  background: var(--bg-card); color: var(--text-primary); font-size: 16px; font-weight: 600;
+}

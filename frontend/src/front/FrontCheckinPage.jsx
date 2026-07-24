@@ -8,6 +8,7 @@ import OtaBadge from './components/OtaBadge';
 import { FrontButton, FrontBackButton } from './components/FrontButton';
 import SettlementPanel from './components/SettlementPanel';
 import SuccessOverlay from './components/SuccessOverlay';
+import FrontPassportPanel from './components/FrontPassportPanel';
 import './FrontDetail.css';
 
 const MEAL_LABELS = { breakfast: '朝食付', dinner: '夕食付', two_meals: '朝夕食付' };
@@ -210,11 +211,7 @@ export default function FrontCheckinPage() {
             )}
 
             {isForeign && (
-              <div className="fd__passport">
-                <div>パスポート（外国籍ゲスト）</div>
-                <FrontButton variant="secondary" size="lg" disabled>📷 パスポートを撮影</FrontButton>
-                <div className="fd__passport-hint">撮影・アップロードは Phase 4 で実装します</div>
-              </div>
+              <FrontPassportPanel reservationId={Number(id)} passports={data.passports || []} onChanged={load} />
             )}
           </div>
 

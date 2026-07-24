@@ -348,6 +348,25 @@ class ReservationController
         $reservation['is_merged_parent'] = $isMergedParent;
         $reservation['can_split'] = $canSplit;
 
+        // パスポート画像一覧（フロントモードCI画面の撮影パネル用にadditive追加）。
+        // 一覧はこれまで GuestController@show の guest_id 経由でしか取れなかったが、
+        // フロントは予約単位で表示・撮影するため、この予約に紐づく有効な画像を返す。
+        $passportStmt = $db->prepare("
+            SELECT rp.id, rp.is_representative, rp.image_path, rp.scanned_at, s.staff_name AS scanned_by_name
+            FROM reservation_passports rp
+            LEFT JOIN staff s ON s.id = rp.scanned_by
+            WHERE rp.reservation_id = :id AND rp.deleted_at IS NULL
+            ORDER BY rp.is_representative DESC, rp.scanned_at ASC
+        ");
+        $passportStmt->execute(['id' => $id]);
+        $passports = $passportStmt->fetchAll();
+        foreach ($passports as &$p) {
+            $p['id'] = (int) $p['id'];
+            $p['is_representative'] = (bool) $p['is_representative'];
+        }
+        unset($p);
+        $reservation['passports'] = $passports;
+
         // 未処理の merge_alert を構造化して返す
         // 統合予約の場合のみ。処理済みは summary に「対応済み」を含むもの。
         $reservation['pending_merge_alerts'] = [];
