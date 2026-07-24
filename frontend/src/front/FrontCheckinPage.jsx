@@ -6,6 +6,7 @@ import { useFrontData } from './FrontDataContext';
 import { calcMoney, yen } from './money';
 import OtaBadge from './components/OtaBadge';
 import { FrontButton, FrontBackButton } from './components/FrontButton';
+import SettlementPanel from './components/SettlementPanel';
 import SuccessOverlay from './components/SuccessOverlay';
 import './FrontDetail.css';
 
@@ -87,7 +88,11 @@ export default function FrontCheckinPage() {
 
   const doSingleCheckin = async () => {
     if (!roomNumber) return;
-    if (!await showConfirm('チェックイン', `${displayName} 様（${roomNumber}号室）をチェックインしますか？`, { confirmLabel: 'チェックインする' })) return;
+    // Patinaはチェックイン時に精算する運用のため、残額があれば明示的に警告する（ブロックはしない）
+    const msg = money.due > 0
+      ? `残額 ${yen(money.due)} がありますが、${displayName} 様（${roomNumber}号室）をチェックインしますか？`
+      : `${displayName} 様（${roomNumber}号室）をチェックインしますか？`;
+    if (!await showConfirm('チェックイン', msg, { confirmLabel: 'チェックインする', confirmColor: money.due > 0 ? 'orange' : 'blue' })) return;
     setSubmitting(true);
     try {
       await api.post(`/reservations/${id}/checkin`, { updated_at: singleUpdatedAt });
@@ -162,18 +167,7 @@ export default function FrontCheckinPage() {
             <div className="fd__label">チャネル</div>
             <div className="fd__value"><OtaBadge channel={data.channel} /> <span className="fd__value--sub num">{data.reservation_no || ''}</span></div>
           </div>
-          <div className="fd__row">
-            <div className="fd__label">料金合計</div>
-            <div className="fd__value num">{yen(money.total)}</div>
-          </div>
-          <div className="fd__row">
-            <div className="fd__label">入金済み</div>
-            <div className="fd__value num">{yen(money.paid)}</div>
-          </div>
-          <div className="fd__row">
-            <div className="fd__label">残額</div>
-            <div className={`fd__value num ${money.due > 0 ? 'fd__value--due' : 'fd__value--paid'}`}>{yen(money.due)}</div>
-          </div>
+          {/* 料金合計/入金済み/残額は右の精算パネルに集約（Patinaはチェックイン時に精算する） */}
 
           {/* グループ子予約リスト */}
           {isGroup && children.length > 0 && (
@@ -190,37 +184,44 @@ export default function FrontCheckinPage() {
           )}
         </div>
 
-        {/* 右: ゲスト */}
-        <div className="fd__card fd__card--r">
-          <div className="fd__card-title">ゲスト</div>
-          <div className="fd__row">
-            <div className="fd__label">氏名</div>
-            <div className="fd__value">{displayName}{data.name_kana ? `（${data.name_kana}）` : ''}</div>
-          </div>
-          <div className="fd__row">
-            <div className="fd__label">電話</div>
-            <div className="fd__value num">{data.guest_phone || data.guest_mobile || '—'}</div>
-          </div>
-          <div className="fd__row">
-            <div className="fd__label">住所</div>
-            <div className="fd__value fd__value--sub">{address || '—'}</div>
-          </div>
-          <div className="fd__row">
-            <div className="fd__label">利用回数</div>
-            <div className="fd__value">{data.visit_count != null ? `${data.visit_count}回目` : '—'}</div>
-          </div>
-
-          {guestUnconfirmed && (
-            <div className="fd__alert">⚠ ゲストが未確定です。PCの予約詳細で顧客確定を行ってください。</div>
-          )}
-
-          {isForeign && (
-            <div className="fd__passport">
-              <div>パスポート（外国籍ゲスト）</div>
-              <FrontButton variant="secondary" size="lg" disabled>📷 パスポートを撮影</FrontButton>
-              <div className="fd__passport-hint">撮影・アップロードは Phase 4 で実装します</div>
+        {/* 右: ゲスト＋精算（縦積み） */}
+        <div className="fd__rightcol">
+          <div className="fd__card">
+            <div className="fd__card-title">ゲスト</div>
+            <div className="fd__row">
+              <div className="fd__label">氏名</div>
+              <div className="fd__value">{displayName}{data.name_kana ? `（${data.name_kana}）` : ''}</div>
             </div>
-          )}
+            <div className="fd__row">
+              <div className="fd__label">電話</div>
+              <div className="fd__value num">{data.guest_phone || data.guest_mobile || '—'}</div>
+            </div>
+            <div className="fd__row">
+              <div className="fd__label">住所</div>
+              <div className="fd__value fd__value--sub">{address || '—'}</div>
+            </div>
+            <div className="fd__row">
+              <div className="fd__label">利用回数</div>
+              <div className="fd__value">{data.visit_count != null ? `${data.visit_count}回目` : '—'}</div>
+            </div>
+
+            {guestUnconfirmed && (
+              <div className="fd__alert">⚠ ゲストが未確定です。PCの予約詳細で顧客確定を行ってください。</div>
+            )}
+
+            {isForeign && (
+              <div className="fd__passport">
+                <div>パスポート（外国籍ゲスト）</div>
+                <FrontButton variant="secondary" size="lg" disabled>📷 パスポートを撮影</FrontButton>
+                <div className="fd__passport-hint">撮影・アップロードは Phase 4 で実装します</div>
+              </div>
+            )}
+          </div>
+
+          {/* 精算パネル（Patinaはチェックイン時に精算） */}
+          <div className="fd__card">
+            <SettlementPanel data={data} onChanged={load} />
+          </div>
         </div>
       </div>
 

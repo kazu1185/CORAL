@@ -13,6 +13,8 @@
 .fd__card { background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 24px 28px; }
 .fd__card--l { width: 55%; }
 .fd__card--r { width: 45%; }
+/* 右カラム（ゲスト＋精算を縦積みするCI画面用） */
+.fd__rightcol { width: 45%; display: flex; flex-direction: column; gap: 24px; }
 .fd__card-title { font-size: 14px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.06em; margin-bottom: 12px; }
 
 /* ===== 定義リスト行 ===== */
@@ -105,5 +107,5 @@
 /* ===== 縦持ち（〜1080px）: 2ペイン→1カラム ===== */
 @media (max-width: 1080px) {
   .fd__cols { flex-direction: column; }
-  .fd__card--l, .fd__card--r { width: 100%; }
+  .fd__card--l, .fd__card--r, .fd__rightcol { width: 100%; }
 }

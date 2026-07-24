@@ -6,12 +6,12 @@ import { todayStr } from '../utils/date';
 import { useFrontData } from './FrontDataContext';
 import { calcMoney, yen } from './money';
 import { FrontButton, FrontBackButton } from './components/FrontButton';
+import SettlementPanel from './components/SettlementPanel';
 import SuccessOverlay from './components/SuccessOverlay';
-import PdfPreviewOverlay from './components/PdfPreviewOverlay';
 import './FrontDetail.css';
 import './FrontCheckoutPage.css';
 
-// 明細に出す種別（入金・返金は精算サマリー側に集約するので明細行には出さない）
+// 明細に出す種別（入金・返金は精算パネル側に集約するので明細行には出さない）
 const isBillCharge = (c) => c.charge_type !== 'payment' && c.charge_type !== 'refund';
 // 物販(goods)は編集不可（規約 #25）。フロントでは鍵アイコンで示すのみ
 const isLocked = (c) => c.charge_type === 'goods';
@@ -19,13 +19,12 @@ const isLocked = (c) => c.charge_type === 'goods';
 /**
  * チェックアウト精算画面 — 仕様書 §4.4 / mock #view-co-detail
  * フロー: 明細確認 →（不足あれば入金登録）→ 領収書 → CO実行。
- * データ源 GET /reservations/:id。入金は PUT /reservations/:id(add_charges)、
- * 領収書は POST /documents/receipt → アプリ内PDFプレビュー、CO は POST /reservations/:id/checkout。
+ * 精算パネル（入金/領収書）は SettlementPanel を共用（CIと同じ）。
  */
 export default function FrontCheckoutPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { confirm: showConfirm, alert: showAlert, prompt: showPrompt } = useConfirm();
+  const { confirm: showConfirm, alert: showAlert } = useConfirm();
   const { setPollEnabled, refetch } = useFrontData();
 
   const [data, setData] = useState(null);
@@ -34,11 +33,6 @@ export default function FrontCheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [payMethods, setPayMethods] = useState([]);
-  const [selectedPm, setSelectedPm] = useState(null);
-  const [payAmount, setPayAmount] = useState('');
-  const [pdfUrl, setPdfUrl] = useState(null);
-
   // 詳細滞在中はボードのポーリングを止める（仕様書 §7）
   useEffect(() => {
     setPollEnabled(false);
@@ -46,12 +40,9 @@ export default function FrontCheckoutPage() {
   }, [setPollEnabled]);
 
   const load = useCallback(async () => {
-    setLoading(true);
     try {
       const d = await api.get(`/reservations/${id}`);
       setData(d);
-      const money = calcMoney(d.charges);
-      setPayAmount(money.due > 0 ? String(money.due) : '');
       setError('');
     } catch (e) {
       setError(e instanceof ApiError ? e.message : '予約の取得に失敗しました');
@@ -61,20 +52,6 @@ export default function FrontCheckoutPage() {
   }, [id]);
 
   useEffect(() => { load(); }, [load]);
-
-  // 支払方法マスタ（入金登録用ボタン）
-  useEffect(() => {
-    api.get('/master/payment-methods')
-      .then(d => {
-        const list = d.payment_methods || d || [];
-        setPayMethods(list);
-        if (list.length > 0) setSelectedPm(list[0].id);
-      })
-      .catch(() => {});
-  }, []);
-
-  // objectURL の後片付け
-  useEffect(() => () => { if (pdfUrl) URL.revokeObjectURL(pdfUrl); }, [pdfUrl]);
 
   if (loading) return <div className="fd__loading">読み込み中…</div>;
   if (error) return (
@@ -111,53 +88,6 @@ export default function FrontCheckoutPage() {
       await showAlert('処理できません', e instanceof ApiError ? e.message : 'エラーが発生しました');
     }
   }
-
-  // 入金登録（既存 ChargesTable と同じ add_charges パターン）
-  const registerPayment = async () => {
-    const amt = Number(String(payAmount).replace(/[^\d-]/g, ''));
-    if (!amt || amt <= 0) { await showAlert('入金額を確認してください', '1円以上の金額を入力してください'); return; }
-    const pm = payMethods.find(p => p.id === selectedPm);
-    setSubmitting(true);
-    try {
-      await api.put(`/reservations/${id}`, {
-        add_charges: [{
-          date: todayStr(),
-          charge_type: 'payment',
-          description: pm?.method_name || '入金',
-          amount: amt,
-          payment_method_id: selectedPm || null,
-        }],
-        updated_at: data.updated_at,
-      });
-      await load();
-    } catch (e) {
-      await handleApiError(e);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // 領収書発行 → アプリ内PDFプレビュー
-  const issueReceipt = async () => {
-    const addressee = await showPrompt('領収書の宛名', '宛名を入力してください', {
-      defaultValue: displayName, confirmLabel: '発行する',
-    });
-    if (addressee === null) return;
-    setSubmitting(true);
-    try {
-      const res = await api.post('/documents/receipt', {
-        reservation_id: isGroup && parentId ? parentId : Number(id),
-        addressee: addressee.trim() || displayName,
-        group: isGroup,
-      });
-      const blob = await api.fetchBlob(`/documents/${res.document_id}?format=pdf`);
-      setPdfUrl(URL.createObjectURL(blob));
-    } catch (e) {
-      await handleApiError(e);
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   const doSingleCheckout = async () => {
     const warn = money.due > 0
@@ -225,46 +155,9 @@ export default function FrontCheckoutPage() {
           )}
         </div>
 
-        {/* 右: 精算 */}
+        {/* 右: 精算（共通パネル） */}
         <div className="fd__card fd__card--r">
-          <div className="fd__card-title">精算</div>
-          <div className="fco__summary">
-            <div className="fco__summary-row">合計<b className="num">{yen(money.total)}</b></div>
-            <div className="fco__summary-row">入金済み<b className="num">{yen(money.paid)}</b></div>
-            <div className="fco__due">
-              <div className="fco__due-label">残額</div>
-              <div className={`fco__due-amt num ${money.due > 0 ? '' : 'fco__due-amt--paid'}`}>
-                {money.due > 0 ? yen(money.due) : '精算済み'}
-              </div>
-            </div>
-          </div>
-
-          {/* 入金登録（残額>0時のみ） */}
-          {money.due > 0 && (
-            <div className="fco__pay">
-              <div className="fco__paygrid">
-                {payMethods.map(pm => (
-                  <button
-                    key={pm.id}
-                    type="button"
-                    className={`fco__paybtn ${selectedPm === pm.id ? 'is-selected' : ''}`}
-                    onClick={() => setSelectedPm(pm.id)}
-                  >{pm.method_name}</button>
-                ))}
-              </div>
-              <input
-                className="fco__payamount num"
-                inputMode="numeric"
-                value={payAmount}
-                onChange={(e) => setPayAmount(e.target.value.replace(/[^\d]/g, ''))}
-                aria-label="入金額"
-              />
-              <FrontButton variant="secondary" size="lg" className="fco__fullbtn" disabled={submitting} onClick={registerPayment}>入金を登録</FrontButton>
-            </div>
-          )}
-
-          <FrontButton variant="secondary" size="lg" className="fco__fullbtn fco__receipt" disabled={submitting} onClick={issueReceipt}>🧾 領収書を発行</FrontButton>
-
+          <SettlementPanel data={data} onChanged={load} />
           {/* グループ子予約リスト */}
           {isGroup && children.length > 0 && (
             <div className="fd__group">
@@ -302,13 +195,6 @@ export default function FrontCheckoutPage() {
         )}
       </div>
 
-      {pdfUrl && (
-        <PdfPreviewOverlay
-          url={pdfUrl}
-          title="領収書"
-          onClose={() => { URL.revokeObjectURL(pdfUrl); setPdfUrl(null); }}
-        />
-      )}
       <SuccessOverlay show={success} text="チェックアウトが完了しました" onDone={() => { refetch(); goBack(); }} />
     </div>
   );
