@@ -1,0 +1,72 @@
+/* ============================================================
+   部屋状況（フロントモード Phase 4・閲覧専用）
+   仕様書 §4.6 / mock #view-rooms
+   色は Patina トークンのみ（規約 #21）。状態色は mock の配色に一致
+   ============================================================ */
+
+.frm__loading { padding: 60px 0; text-align: center; color: var(--text-muted); font-size: 16px; }
+
+/* ===== 状態サマリー ===== */
+.frm__summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.frm__chip {
+  display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px;
+  background: var(--bg-card); border-radius: 99px; box-shadow: var(--shadow-sm);
+}
+.frm__chip-dot { width: 10px; height: 10px; border-radius: 50%; }
+.frm__chip-count { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.frm__chip-label { font-size: 14px; color: var(--text-secondary); }
+
+/* ===== 凡例 ===== */
+.frm__legend { display: flex; gap: 18px; flex-wrap: wrap; margin-bottom: 22px; font-size: 12px; color: var(--text-secondary); }
+.frm__legend-item { display: flex; align-items: center; gap: 6px; }
+.frm__legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* 状態色ドット（サマリー・凡例共通） */
+.frm__dot--stay    { background: var(--accent-blue); }
+.frm__dot--ready   { background: var(--accent-green); }
+.frm__dot--dirty   { background: var(--accent-yellow); }
+.frm__dot--inspect { background: var(--accent-teal); }
+.frm__dot--arrival { background: transparent; border: 2px solid var(--accent-blue); }
+.frm__dot--overdue { background: var(--accent-red); }
+.frm__dot--ooo     { background: var(--text-muted); }
+
+/* ===== フロア ===== */
+.frm__floor { margin-bottom: 26px; }
+.frm__floor-head {
+  font-size: 16px; font-weight: 700; color: var(--text-primary);
+  padding-bottom: 8px; border-bottom: 1px solid var(--border-default); margin-bottom: 14px;
+  display: flex; align-items: baseline; gap: 10px;
+}
+.frm__floor-label { font-size: 13px; font-weight: 400; color: var(--text-muted); }
+
+.frm__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; }
+.frm__empty-cell { min-height: 88px; }
+
+/* ===== 部屋カード（閲覧専用・タップ不可） ===== */
+.frm__room {
+  min-height: 88px; background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--border-default); padding: 12px 12px 10px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.frm__room-top { display: flex; align-items: center; justify-content: space-between; }
+.frm__room-no { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.frm__room-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent-blue); }
+.frm__room-guest {
+  font-size: 13px; font-weight: 500; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.frm__room-guest--empty { color: var(--text-muted); font-weight: 400; }
+.frm__room-state { font-size: 12px; color: var(--text-secondary); margin-top: auto; }
+.frm__room-nights { color: var(--text-muted); }
+
+/* 状態別の左ボーダー色・背景（mock #view-rooms） */
+.frm__room--stay    { border-left-color: var(--accent-blue); }
+.frm__room--ready   { border-left-color: var(--accent-green); }
+.frm__room--dirty   { border-left-color: var(--accent-yellow); }
+.frm__room--inspect { border-left-color: var(--accent-teal); }
+.frm__room--arrival { border-left-color: var(--accent-blue); }
+.frm__room--overdue { border-left-color: var(--accent-red); }
+.frm__room--ooo {
+  border-left-color: var(--text-muted);
+  background: repeating-linear-gradient(-45deg, var(--bg-card), var(--bg-card) 6px, var(--bg-inset) 6px, var(--bg-inset) 12px);
+}
