@@ -5,6 +5,8 @@ import './Sidebar.css';
 
 const MENU_ITEMS = [
   { path: '/dashboard',      label: 'ダッシュボード',       icon: 'grid_view',     permission: null },
+  // iPad対面カウンター用フロントモードへの入口（PWA/ブックマークで直接 /front 起動も可）
+  { path: '/front',          label: 'フロントモード',       icon: 'tablet_mac',    permission: null },
   { path: '/reservations',   label: '予約一覧',             icon: 'event_note',    permission: 'reservation.view' },
   { path: '/assign-board',   label: 'アサインボード',       icon: 'calendar_month', permission: 'assign.edit' },
   { path: '/room-indicator', label: 'ルームインジケーター', icon: 'door_front',    permission: 'reservation.view' },

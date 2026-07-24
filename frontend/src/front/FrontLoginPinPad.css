@@ -1,0 +1,94 @@
+/* ============================================================
+   フロントモード PINパッドログイン — 仕様書 §4.1 / mock #scr-login
+   色はPatinaトークンのみ（ハードコード禁止 = 規約 #21）
+   ============================================================ */
+
+.fpin {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.fpin__brand { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.fpin__logo { width: 52px; height: 52px; }
+.fpin__title { font-size: 22px; font-weight: 700; letter-spacing: 0.08em; color: var(--text-primary); }
+.fpin__sub { font-size: 13px; color: var(--text-muted); letter-spacing: 0.14em; }
+
+.fpin__card {
+  width: 720px;
+  max-width: calc(100vw - 48px);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  overflow: hidden;
+}
+
+/* 左ペイン: スタッフ選択 */
+.fpin__staffpane { width: 46%; padding: 28px 24px; border-right: 1px solid var(--border-light); }
+.fpin__label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 14px; letter-spacing: 0.05em; }
+.fpin__stafflist { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
+.fpin__staffbtn {
+  width: 100%;
+  height: var(--front-target-lg);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-left: 3px solid transparent;
+  transition: all var(--transition-fast);
+}
+.fpin__staffbtn:active { background: var(--bg-hover); transform: scale(0.98); }
+.fpin__staffbtn.is-selected {
+  background: var(--accent-blue-soft);
+  color: var(--accent-blue);
+  font-weight: 700;
+  border-left-color: var(--accent-blue);
+}
+
+/* 右ペイン: PIN入力 */
+.fpin__pinpane { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; align-items: center; }
+.fpin__dots { display: flex; gap: 16px; margin: 18px 0 6px; }
+.fpin__dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-strong); transition: all var(--transition-fast); }
+.fpin__dot.is-filled { background: var(--accent-blue); border-color: var(--accent-blue); }
+.fpin__dots.is-error .fpin__dot { border-color: var(--accent-red); background: transparent; animation: fpin-shake 0.4s ease; }
+@keyframes fpin-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.fpin__error { font-size: 14px; color: var(--accent-red); height: 20px; margin-bottom: 8px; }
+
+.fpin__pad { display: grid; grid-template-columns: repeat(3, 88px); gap: 12px; }
+.fpin__key {
+  height: 64px;
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 120ms ease;
+}
+.fpin__key:active { background: var(--accent-blue-soft); color: var(--accent-blue); transform: scale(0.96); }
+.fpin__key--ghost { background: transparent; color: var(--text-secondary); }
+.fpin__key--ghost:active { background: var(--bg-hover); color: var(--text-primary); }
+.fpin__key--enter { background: var(--accent-blue); color: var(--text-inverse); font-weight: 700; }
+.fpin__key--enter:active { background: var(--accent-blue-hover); }
+.fpin__key--enter.is-disabled { background: var(--text-muted); color: var(--text-inverse); pointer-events: none; }
+
+/* 縦持ち・小画面: カードを縦積みにする */
+@media (max-width: 760px) {
+  .fpin__card { flex-direction: column; }
+  .fpin__staffpane { width: 100%; border-right: none; border-bottom: 1px solid var(--border-light); }
+}

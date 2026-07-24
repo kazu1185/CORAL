@@ -1,0 +1,119 @@
+/* ============================================================
+   本日ボード（CI/CO） — 仕様書 §4.2 / mock #view-board-ci
+   ============================================================ */
+
+/* ===== サマリー行 ===== */
+.fb__summary { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
+.fb__summary-text { font-size: 16px; color: var(--text-secondary); }
+.fb__summary-text b { font-size: 22px; color: var(--text-primary); font-weight: 700; margin: 0 2px; }
+.fb__summary-bar {
+  flex: 1;
+  max-width: 320px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--border-light);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.fb__summary-fill { height: 100%; border-radius: 99px; background: var(--accent-blue); transition: width var(--transition-normal); }
+
+.fb__search {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 280px;
+  height: 44px;
+  padding: 0 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+}
+.fb__search:focus-within { border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.fb__search-ic { color: var(--text-muted); font-size: 15px; }
+.fb__search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text-primary);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.fb__search-input::placeholder { color: var(--text-muted); }
+.fb__search-input:focus { outline: none; }
+
+/* ===== 予約カード ===== */
+.fb__card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 88px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 14px 20px;
+  margin-bottom: 12px;
+  transition: all var(--transition-fast);
+  position: relative;
+  cursor: pointer;
+}
+.fb__card:active { background: var(--bg-hover); transform: scale(0.985); }
+.fb__card--alert { border-left: 3px solid var(--accent-red); }
+.fb__card--done { opacity: 0.55; }
+
+.fb__room {
+  width: 64px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+/* 未アサインは赤系の淡色面（仕様書 §4.2: rgba(179,54,44,0.08)） */
+.fb__room--none { background: rgba(179, 54, 44, 0.08); color: var(--accent-red); font-size: 16px; }
+
+.fb__main { flex: 1; min-width: 0; }
+.fb__name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.fb__meta { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.fb__alerttext { font-size: 13px; color: var(--accent-red); margin-top: 3px; font-weight: 500; }
+
+.fb__action { font-size: 16px; font-weight: 600; color: var(--accent-blue); white-space: nowrap; }
+.fb__status { flex-shrink: 0; }
+
+/* 未知チャネルのフォールバックOTAバッジ（識別色なし・ニュートラル） */
+.fb__ota--unknown { background: var(--text-muted); }
+
+/* ===== 空状態 ===== */
+.fb__empty { text-align: center; padding: 80px 0; color: var(--text-muted); font-size: 16px; }
+.fb__empty-ic { width: 44px; height: 44px; opacity: 0.35; margin-bottom: 14px; }
+
+/* ===== スケルトン（初回のみ） ===== */
+.fb__skeletons { display: flex; flex-direction: column; gap: 12px; }
+.fb__skeleton {
+  height: 88px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--bg-inset) 25%, var(--bg-hover) 37%, var(--bg-inset) 63%);
+  background-size: 400% 100%;
+  animation: fb-shimmer 1.2s ease-in-out infinite;
+}
+@keyframes fb-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fb__skeleton { animation: none; }
+}

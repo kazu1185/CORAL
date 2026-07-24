@@ -29,6 +29,26 @@ class DashboardController
         ]);
     }
 
+    /**
+     * GET /api/v1/dashboard/front-board
+     * フロントモード（iPad）本日ボード専用。
+     * 既存 index() の CI/CO 一覧は LIMIT 5・メタ無しでフロントの大型カードには不足するため、
+     * 件数制限なし＋カード表示に必要なメタ（泊数・人数・プラン・食事）を返す専用エンドポイント。
+     * 読み取り専用。既存 /dashboard は一切変更しない（PCダッシュボードの挙動は不変）。
+     */
+    public function frontBoard(Request $request): void
+    {
+        $db = Database::getInstance();
+        $today = date('Y-m-d');
+
+        Response::json([
+            // サマリー（件数・完了数）はPCダッシュボードと同じ集計を再利用（数字の定義を揃える）
+            'summary'       => $this->getSummary($db, $today),
+            'checkin_list'  => $this->getFrontCheckinList($db, $today),
+            'checkout_list' => $this->getFrontCheckoutList($db, $today),
+        ]);
+    }
+
     /** GET /api/v1/dashboard/alerts */
     public function alerts(Request $request): void
     {
@@ -360,6 +380,89 @@ class DashboardController
               AND r.status != 'group_parent'
             ORDER BY r.status ASC, r.id
             LIMIT 5
+        ");
+        $stmt->execute(['today' => $today]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * フロントモード本日ボード用CI一覧。
+     * getCheckinList() をベースに (1)LIMITを外し (2)カード用メタ（泊数・人数・プラン・食事・日程）を追加。
+     * 絞り込み条件・並び順は実績あるgetCheckinList()と同一に保つ（挙動を変えない）。
+     * グループの1カード集約はPhase 2（groupCheckin UI）で対応。ここでは個別予約カードを返す。
+     */
+    private function getFrontCheckinList(PDO $db, string $today): array
+    {
+        $stmt = $db->prepare("
+            SELECT
+                r.id AS reservation_id,
+                COALESCE(g.name_kanji, g.name_kana, g.name_romaji,
+                         TRIM(CONCAT(r.tl_last_name, ' ', r.tl_first_name))) AS guest_name,
+                CONCAT(r.tl_last_name, ' ', r.tl_first_name) AS guest_name_romaji,
+                rm.room_number,
+                rt.type_name AS room_type,
+                r.channel,
+                r.status,
+                r.nights,
+                r.adult_count,
+                r.child_count,
+                r.checkin_date,
+                r.checkout_date,
+                p.plan_name,
+                p.meal_type,
+                DATE_FORMAT(r.actual_checkin_at, '%H:%i') AS checkin_at,
+                COALESCE((SELECT SUM(rc.amount) FROM reservation_charges rc WHERE rc.reservation_id = r.id AND rc.status = 'active' AND rc.charge_type NOT IN ('payment','refund')), 0)
+                - COALESCE((SELECT SUM(rc2.amount) FROM reservation_charges rc2 WHERE rc2.reservation_id = r.id AND rc2.status = 'active' AND rc2.charge_type = 'payment'), 0) AS unpaid_amount
+            FROM reservations r
+            LEFT JOIN guests g ON g.id = r.guest_id
+            LEFT JOIN room_assignments ra ON ra.reservation_id = r.id AND ra.status = 'active'
+            LEFT JOIN rooms rm ON rm.id = ra.room_id
+            LEFT JOIN room_types rt ON rt.type_code = r.room_type
+            LEFT JOIN plans p ON p.id = r.plan_id
+            WHERE r.checkin_date = :today
+              AND r.status IN ('confirmed', 'checked_in')
+              AND r.status != 'group_parent'
+            ORDER BY r.status DESC, r.id
+        ");
+        $stmt->execute(['today' => $today]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * フロントモード本日ボード用CO一覧。getCheckoutList() ベース（LIMIT除去＋メタ追加）。
+     */
+    private function getFrontCheckoutList(PDO $db, string $today): array
+    {
+        $stmt = $db->prepare("
+            SELECT
+                r.id AS reservation_id,
+                COALESCE(g.name_kanji, g.name_kana, g.name_romaji,
+                         TRIM(CONCAT(r.tl_last_name, ' ', r.tl_first_name))) AS guest_name,
+                CONCAT(r.tl_last_name, ' ', r.tl_first_name) AS guest_name_romaji,
+                rm.room_number,
+                rt.type_name AS room_type,
+                r.channel,
+                r.status,
+                r.nights,
+                r.adult_count,
+                r.child_count,
+                r.checkin_date,
+                r.checkout_date,
+                p.plan_name,
+                p.meal_type,
+                DATE_FORMAT(r.actual_checkout_at, '%H:%i') AS checkout_at,
+                COALESCE((SELECT SUM(rc.amount) FROM reservation_charges rc WHERE rc.reservation_id = r.id AND rc.status = 'active' AND rc.charge_type NOT IN ('payment','refund')), 0)
+                - COALESCE((SELECT SUM(rc2.amount) FROM reservation_charges rc2 WHERE rc2.reservation_id = r.id AND rc2.status = 'active' AND rc2.charge_type = 'payment'), 0) AS unpaid_amount
+            FROM reservations r
+            LEFT JOIN guests g ON g.id = r.guest_id
+            LEFT JOIN room_assignments ra ON ra.reservation_id = r.id AND ra.status = 'active'
+            LEFT JOIN rooms rm ON rm.id = ra.room_id
+            LEFT JOIN room_types rt ON rt.type_code = r.room_type
+            LEFT JOIN plans p ON p.id = r.plan_id
+            WHERE r.checkout_date = :today
+              AND r.status IN ('checked_in', 'checked_out')
+              AND r.status != 'group_parent'
+            ORDER BY r.status ASC, r.id
         ");
         $stmt->execute(['today' => $today]);
         return $stmt->fetchAll();

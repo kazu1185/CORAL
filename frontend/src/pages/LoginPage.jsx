@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { api, ApiError } from '../api/client';
 import PinChangeDialog from '../components/PinChangeDialog';
+import { isFrontDevice } from '../front/frontDevice';
 import './LoginPage.css';
 
 export default function LoginPage() {
@@ -16,9 +17,9 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [showPinChange, setShowPinChange] = useState(false);
 
-  // 既にログイン済みならダッシュボードへ
+  // 既にログイン済みなら遷移（フロント端末ならフロントモードへ）
   useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard', { replace: true });
+    if (isAuthenticated) navigate(isFrontDevice() ? '/front' : '/dashboard', { replace: true });
   }, [isAuthenticated, navigate]);
 
   // スタッフ一覧取得
@@ -45,7 +46,7 @@ export default function LoginPage() {
       if (data.staff.must_change_pin) {
         setShowPinChange(true);
       } else {
-        navigate('/dashboard', { replace: true });
+        navigate(isFrontDevice() ? '/front' : '/dashboard', { replace: true });
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -61,7 +62,7 @@ export default function LoginPage() {
 
   const handlePinChanged = () => {
     setShowPinChange(false);
-    navigate('/dashboard', { replace: true });
+    navigate(isFrontDevice() ? '/front' : '/dashboard', { replace: true });
   };
 
   return (

@@ -20,6 +20,8 @@ $router->addRoute('GET',  '/api/v1/auth/staff-list',  'AuthController@staffList'
 // ============================================================
 $router->addRoute('GET',  '/api/v1/dashboard',                  'DashboardController@index',           ['permission' => 'reservation.view']);
 $router->addRoute('GET',  '/api/v1/dashboard/alerts',           'DashboardController@alerts',          ['permission' => 'reservation.view']);
+// フロントモード（iPad）本日ボード専用: 件数制限なし＋カード用メタ付き。読み取り専用（既存/dashboardは不変）
+$router->addRoute('GET',  '/api/v1/dashboard/front-board',      'DashboardController@frontBoard',      ['permission' => 'reservation.view']);
 $router->addRoute('POST', '/api/v1/dashboard/resolve-tl-error', 'DashboardController@resolveTlError',  ['permission' => 'reservation.view']);
 $router->addRoute('POST', '/api/v1/dashboard/resolve-tl-errors','DashboardController@resolveTlErrors', ['permission' => 'reservation.view']);
 

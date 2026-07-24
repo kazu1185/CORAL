@@ -93,4 +93,19 @@
   /* トランジション */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+
+  /* ============================================================
+     フロントモード（iPad 13インチ・タブレット）追加トークン
+     既存画面に影響させないため --front-* プレフィックスで分離する。
+     値は docs/UI仕様_フロントモード.md §2 と一致させること。
+     ============================================================ */
+  --front-header-h: 56px;      /* ヘッダー高 */
+  --front-tabbar-h: 64px;      /* タブバー高 */
+  --front-target-min: 44px;    /* 最小タップターゲット(Apple HIG) */
+  --front-target-lg: 56px;     /* 主要ボタン高 */
+  --front-target-xl: 64px;     /* 最重要CTA高(CI実行/CO実行/会計) */
+  --front-font-body: 16px;     /* 本文(iOS入力ズーム回避を兼ねる) */
+  --front-font-title: 20px;    /* カード見出し・画面タイトル */
+  --front-font-hero: 40px;     /* 残額・合計などの最大表示 */
+  --front-gap: 16px;           /* 基本余白(8pxグリッド) */
 }

@@ -1,0 +1,139 @@
+/* ============================================================
+   フロントモード骨格レイアウト — 仕様書 §3 / mock #scr-app
+   ============================================================ */
+
+.fl {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-main);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ===== ヘッダー（56px・固定） ===== */
+.fl__header {
+  height: calc(var(--front-header-h) + env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.fl__brand { display: flex; align-items: center; gap: 10px; }
+.fl__coral { width: 26px; height: 26px; }
+.fl__brandname { font-weight: 700; font-size: 17px; letter-spacing: 0.04em; color: var(--text-primary); }
+.fl__clock { flex: 1; text-align: center; font-size: 16px; color: var(--text-secondary); font-weight: 500; }
+
+.fl__staffwrap { position: relative; }
+.fl__staff {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--front-target-min);
+  padding: 0 16px;
+  border-radius: 99px;
+  background: var(--bg-inset);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all var(--transition-fast);
+}
+.fl__staff:active { background: var(--bg-hover); transform: scale(0.98); }
+.fl__staff-ic { font-size: 15px; }
+.fl__menu {
+  position: absolute;
+  top: calc(var(--front-target-min) + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 6px;
+  z-index: 60;
+}
+.fl__menu-item {
+  width: 100%;
+  height: var(--front-target-min);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  text-align: left;
+  font-size: 15px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+}
+.fl__menu-item:active { background: var(--bg-hover); }
+
+.fl__admin {
+  font-size: 14px;
+  color: var(--text-secondary);
+  padding: 12px 4px;
+  white-space: nowrap;
+}
+.fl__admin:active { color: var(--text-primary); }
+
+/* ===== タブバー（64px・固定） ===== */
+.fl__tabbar {
+  height: var(--front-tabbar-h);
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: stretch;
+  padding: 0 12px;
+  gap: 4px;
+  overflow-x: auto;
+}
+.fl__tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 3px solid transparent;
+  border-top: 3px solid transparent; /* 上下対称にしてラベルを縦中央に保つ */
+  white-space: nowrap;
+  transition: background var(--transition-fast);
+}
+.fl__tab:active { background: var(--bg-hover); }
+.fl__tab.is-active {
+  color: var(--accent-blue);
+  font-weight: 700;
+  border-bottom-color: var(--accent-blue);
+  background: var(--accent-blue-soft);
+}
+.fl__tab-ic { font-size: 19px; }
+.fl__tab-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 99px;
+  background: var(--accent-red);
+  color: var(--text-inverse);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== コンテンツ（スクロール領域） ===== */
+.fl__content {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fl__inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+}

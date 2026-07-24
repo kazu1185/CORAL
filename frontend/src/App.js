@@ -15,6 +15,7 @@ import SettingsPage from './pages/settings/SettingsPage';
 import ReportPage from './pages/ReportPage';
 import ReservationCreatePage from './pages/ReservationCreatePage';
 import ProductSalesPage from './pages/ProductSalesPage';
+import FrontApp from './front/FrontApp';
 import { ConfirmProvider } from './components/ConfirmDialog';
 import './styles/variables.css';
 import './styles/ota-badge.css';
@@ -29,6 +30,11 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+
+          {/* フロントモード（iPad対面カウンター）: 既存の Layout/Sidebar とは分離した専用シェル。
+              認証ガードは FrontApp 内で行い、未認証時は大型PINパッドを表示する。
+              汎用ルートより前に置いてフロント配下を優先マッチさせる（規約 #24）。 */}
+          <Route path="/front/*" element={<FrontApp />} />
 
           {/* 認証保護エリア */}
           <Route path="/*" element={

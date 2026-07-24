@@ -1,0 +1,52 @@
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import PinChangeDialog from '../components/PinChangeDialog';
+import { FrontDataProvider } from './FrontDataContext';
+import FrontLayout from './FrontLayout';
+import TodayBoardPage from './TodayBoardPage';
+import FrontLoginPinPad from './FrontLoginPinPad';
+import FrontPlaceholder from './FrontPlaceholder';
+
+/**
+ * フロントモードのエントリ（/front 配下）。
+ * - 未認証: 大型PINパッドログイン（既存のスタッフ+PIN認証を使用）
+ * - 認証済み: FrontLayout（ヘッダー/タブ）＋各タブ
+ *
+ * 既存の PC 用 Layout/Sidebar/ProtectedRoute とは分離した専用シェル。
+ */
+export default function FrontApp() {
+  const { isAuthenticated, staff, logout } = useAuth();
+
+  if (!isAuthenticated) {
+    return <FrontLoginPinPad />;
+  }
+
+  // 初回PIN変更が必要なスタッフはボードに入れず、変更を強制する。
+  // 変更後は新PINで入り直させる（AuthContextのstaffは再ログインで最新化される）。
+  if (staff?.must_change_pin) {
+    return (
+      <div className="fpin">
+        <PinChangeDialog onComplete={logout} onCancel={logout} />
+      </div>
+    );
+  }
+
+  return (
+    <FrontDataProvider>
+      <Routes>
+        <Route element={<FrontLayout />}>
+          <Route index element={<Navigate to="checkin" replace />} />
+          <Route path="checkin" element={<TodayBoardPage mode="checkin" />} />
+          <Route path="checkout" element={<TodayBoardPage mode="checkout" />} />
+          {/* 詳細画面は Phase 2/3 で実装（現状プレースホルダ） */}
+          <Route path="checkin/:id" element={<FrontPlaceholder title="チェックイン確認" phase={2} back="/front/checkin" />} />
+          <Route path="checkout/:id" element={<FrontPlaceholder title="チェックアウト精算" phase={3} back="/front/checkout" />} />
+          {/* 追加機能タブは Phase 4 で実装 */}
+          <Route path="pos" element={<FrontPlaceholder title="物販（即売POS）" phase={4} />} />
+          <Route path="rooms" element={<FrontPlaceholder title="部屋状況" phase={4} />} />
+          <Route path="*" element={<Navigate to="/front/checkin" replace />} />
+        </Route>
+      </Routes>
+    </FrontDataProvider>
+  );
+}
