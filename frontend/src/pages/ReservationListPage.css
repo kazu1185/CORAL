@@ -449,7 +449,9 @@
   right: 0;
   width: 480px;
   max-width: 90vw;
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   height: 100vh;
+  height: 100dvh;
   background: var(--bg-card);
   box-shadow: -4px 0 20px rgba(38, 34, 27, 0.12); /* 影も墨色ベースの暖色に統一 */
   z-index: 201;

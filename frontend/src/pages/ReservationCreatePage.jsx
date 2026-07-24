@@ -90,8 +90,9 @@ export default function ReservationCreatePage() {
         setShowGuestDropdown(false);
       }
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    // pointerdown: マウス/タッチ両対応。iPadでの外側タップでも確実に閉じる
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, []);
 
   // === CI日+泊数変更時にCO日を自動計算し、料金明細を更新 ===

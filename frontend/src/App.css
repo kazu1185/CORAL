@@ -15,7 +15,9 @@
 
 .App-header {
   background-color: #282c34;
+  /* iPadのアドレスバー伸縮で下端が見切れないよう dvh を併用（100vhはフォールバック） */
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;

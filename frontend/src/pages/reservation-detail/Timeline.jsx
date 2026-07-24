@@ -37,8 +37,9 @@ export function TimelineDetailPopover({ ev }) {
     const handler = (e) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    // pointerdown: マウス/タッチ両対応。iPadでの外側タップでも確実に閉じる
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, [open]);
 
   return (

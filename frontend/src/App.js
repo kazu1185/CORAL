@@ -20,6 +20,7 @@ import './styles/variables.css';
 import './styles/ota-badge.css';
 import './styles/status-badge.css';
 import './styles/theme.css';
+import './styles/touch.css';
 
 function App() {
   return (

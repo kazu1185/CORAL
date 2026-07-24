@@ -135,8 +135,9 @@ export function CountryPicker({ guestId, currentCode, onSaved }) {
   useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    // pointerdown: マウス/タッチ両対応。iPadでの外側タップでも確実に閉じる
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, [open]);
 
   const select = async (code) => {

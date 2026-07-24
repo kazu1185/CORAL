@@ -5,7 +5,9 @@
  */
 .sidebar {
   width: var(--sidebar-width);
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-default);
   display: flex;

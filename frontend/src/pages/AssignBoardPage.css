@@ -1,4 +1,5 @@
-.ab { display: flex; flex-direction: column; gap: 12px; height: calc(100vh - var(--header-height) - 40px); }
+/* iPadの動的ビューポート対応（100vhはフォールバック。dvhを後勝ちで併記） */
+.ab { display: flex; flex-direction: column; gap: 12px; height: calc(100vh - var(--header-height) - 40px); height: calc(100dvh - var(--header-height) - 40px); }
 .ab__loading { text-align: center; padding: 40px; color: var(--text-muted); }
 
 /* ナビ */

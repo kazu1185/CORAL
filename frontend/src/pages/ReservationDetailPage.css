@@ -780,7 +780,9 @@
   top: var(--header-height);
   right: 0;
   width: 420px;
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   height: calc(100vh - var(--header-height));
+  height: calc(100dvh - var(--header-height));
   background: var(--bg-card);
   border-left: 1px solid var(--border-default);
   box-shadow: -4px 0 16px rgba(38, 34, 27, 0.10); /* 影も墨色ベースの暖色系に */

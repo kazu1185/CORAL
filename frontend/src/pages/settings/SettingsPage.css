@@ -2,7 +2,9 @@
   display: flex;
   gap: 0;
   height: 100%;
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   min-height: calc(100vh - var(--header-height));
+  min-height: calc(100dvh - var(--header-height));
 }
 
 /* 左メニュー */

@@ -1,6 +1,8 @@
 .layout {
   display: flex;
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 

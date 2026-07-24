@@ -1,0 +1,28 @@
+/* ============================================================
+   touch.css — タッチ端末（iPad等）向けの全アプリ共通調整
+   Phase 0（iPad対応_タブレットUI計画_2026-07.md）で新設。
+   PCの見た目・挙動は変えず、タッチ環境のみを補正する方針。
+   ============================================================ */
+
+/* タップ時の灰色ハイライトを消す（iOS Safari）。全端末で無害 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ルートのバウンス/オーバースクロールを抑制。既存 index.css の body には未設定のため補う */
+html,
+body {
+  overscroll-behavior: none;
+}
+
+/* 入力ズーム対策:
+   iOS/iPadOS Safari は input フォーカス時、font-size が 16px 未満だと画面を勝手にズームする。
+   PCの見た目を変えないよう pointer: coarse（タッチ主入力の端末）に限定して 16px に引き上げる。
+   ズーム自体がタッチ操作時のみ発火するため、この限定で機能面も十分。 */
+@media (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

@@ -2,7 +2,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  /* iPadの動的ビューポート対応（100vhはフォールバック） */
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-main);
 }
 
