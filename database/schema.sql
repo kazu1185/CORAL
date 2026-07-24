@@ -103,6 +103,7 @@ CREATE TABLE payment_methods (
     method_code VARCHAR(20) NOT NULL UNIQUE,
     sort_order INT NOT NULL DEFAULT 0,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
+    front_visible TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'フロントモード(iPad)精算パネルに表示するか',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -526,14 +527,14 @@ INSERT INTO system_settings (setting_key, setting_value) VALUES
 ('login_fail_lock_count', '5'),
 ('login_fail_lock_minutes', '15');
 
--- 決済方法の初期値
-INSERT INTO payment_methods (method_code, method_name, sort_order) VALUES
-('cash', '現金', 1),
-('credit_card', 'クレジットカード', 2),
-('e_money', '電子マネー', 3),
-('qr_pay', 'QRコード決済', 4),
-('ota_prepaid', 'OTA事前決済', 5),
-('corporate', '法人売掛', 6);
+-- 決済方法の初期値（front_visible: カウンターで受ける決済のみフロント表示。OTA事前決済/法人売掛は非表示）
+INSERT INTO payment_methods (method_code, method_name, sort_order, front_visible) VALUES
+('cash', '現金', 1, 1),
+('credit_card', 'クレジットカード', 2, 1),
+('e_money', '電子マネー', 3, 1),
+('qr_pay', 'QRコード決済', 4, 1),
+('ota_prepaid', 'OTA事前決済', 5, 0),
+('corporate', '法人売掛', 6, 0);
 
 -- 権限マスタの初期値
 INSERT INTO permissions (permission_key, permission_name, category, sort_order) VALUES

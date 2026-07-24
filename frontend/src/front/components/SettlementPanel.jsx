@@ -31,9 +31,9 @@ export default function SettlementPanel({ data, onChanged }) {
   const parentId = data.is_multi_room_child ? data.parent_reservation?.id : (data.status === 'group_parent' ? data.id : null);
   const displayName = data.guest_name || `${data.tl_last_name || ''} ${data.tl_first_name || ''}`.trim();
 
-  // 支払方法マスタ（入金登録ボタン）
+  // 支払方法マスタ（入金登録ボタン）。front=1 でフロント表示ONの決済方法だけ取得（PC設定で選択）
   useEffect(() => {
-    api.get('/master/payment-methods')
+    api.get('/master/payment-methods?front=1')
       .then(d => {
         const list = d.payment_methods || d || [];
         setPayMethods(list);

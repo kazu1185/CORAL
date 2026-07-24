@@ -708,9 +708,13 @@ class MasterController
         // all=1 パラメータで非アクティブも返す（設定画面用）
         // 通常のAPI呼び出し（予約詳細等）ではアクティブのみ
         $includeAll = ($request->query['all'] ?? '') === '1';
+        // front=1 でフロントモード（iPad精算パネル）表示対象のみに絞る
+        $frontOnly = ($request->query['front'] ?? '') === '1';
 
-        $sql = "SELECT id, method_code, method_name, sort_order, is_active FROM payment_methods";
-        if (!$includeAll) {
+        $sql = "SELECT id, method_code, method_name, sort_order, is_active, front_visible FROM payment_methods";
+        if ($frontOnly) {
+            $sql .= " WHERE is_active = 1 AND front_visible = 1";
+        } elseif (!$includeAll) {
             $sql .= " WHERE is_active = 1";
         }
         $sql .= " ORDER BY sort_order";
@@ -753,7 +757,8 @@ class MasterController
         $body = $request->body;
 
         // method_code は変更不可（他テーブルからの参照があるためホワイトリストに含めない）
-        $this->updateMaster('payment_methods', $id, ['method_name', 'sort_order', 'is_active'], $body, '決済方法が見つかりません');
+        // front_visible はフロントモード表示のON/OFF（PC設定のトグル）
+        $this->updateMaster('payment_methods', $id, ['method_name', 'sort_order', 'is_active', 'front_visible'], $body, '決済方法が見つかりません');
     }
 
     /**

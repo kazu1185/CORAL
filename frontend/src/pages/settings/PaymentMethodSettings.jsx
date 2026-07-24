@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { api } from '../../api/client';
 import { useMasterCrud } from '../../hooks/useMasterCrud';
 import { useDragReorder } from '../../hooks/useDragReorder';
 
@@ -16,6 +17,17 @@ export default function PaymentMethodSettings() {
     query: 'all=1',
     labelOf: (m) => m.method_name,
   });
+
+  // フロントモード（iPad精算パネル）に表示するかのトグル。
+  // 有効/無効(is_active)とは別軸なので確認ダイアログなしで即時切替（表示の見せ方だけの変更のため）
+  const handleToggleFront = async (m) => {
+    try {
+      await api.put(`/master/payment-methods/${m.id}`, { front_visible: m.front_visible ? 0 : 1 });
+      fetchData();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
 
   const { dragId, dragOverId, handleDragStart, handleDragEnd, handleDragOver } = useDragReorder({
     items: methods,
@@ -46,6 +58,7 @@ export default function PaymentMethodSettings() {
               <th style={{ width: 36 }}></th>
               <th>決済方法名</th>
               <th>コード</th>
+              <th style={{ width: 96 }}>フロント表示</th>
               <th style={{ width: 80 }}>有効</th>
               <th style={{ width: 60 }}></th>
             </tr>
@@ -67,6 +80,13 @@ export default function PaymentMethodSettings() {
                 </td>
                 <td>{m.method_name}</td>
                 <td style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{m.method_code}</td>
+                <td>
+                  {/* フロント（iPad）の精算パネルに表示するか。カウンターで受けない決済はOFFに */}
+                  <label className="settings-toggle">
+                    <input type="checkbox" checked={!!m.front_visible} onChange={() => handleToggleFront(m)} />
+                    <span className="settings-toggle__slider" />
+                  </label>
+                </td>
                 <td>
                   <label className="settings-toggle">
                     <input type="checkbox" checked={!!m.is_active} onChange={() => handleToggleActive(m)} />
