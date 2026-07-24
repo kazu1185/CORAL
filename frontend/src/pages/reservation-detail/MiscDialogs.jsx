@@ -53,9 +53,18 @@ export function LinkGuestDialog({ reservation, onLinked, onCancel }) {
   const [autoSearched, setAutoSearched] = useState(false);
   // 新規ゲスト登録モード
   const [showNewForm, setShowNewForm] = useState(false);
+  // 新規登録フォームはTL予約通知から届いた情報（取込時に仮ゲストへ保存済み）をプリフィルする。
+  // 空のフォームに手入力し直すのは二度手間なため（2026-07-25 ユーザー要望）。
+  // 仮ゲスト未作成（guest_id NULL）の場合はTL原本名でフォールバックし、
+  // 英数字のみならローマ字欄・それ以外は漢字欄へ入れる（TlImportServiceの振り分けと同じ発想）
+  const tlName = [reservation.tl_last_name, reservation.tl_first_name].filter(Boolean).join(' ').trim();
+  const tlNameIsAscii = /^[\x20-\x7E]*$/.test(tlName);
   const [newGuest, setNewGuest] = useState({
-    name_kanji: '', name_kana: '', name_romaji: '',
-    phone: '', email: '',
+    name_kanji: reservation.name_kanji || (!tlNameIsAscii ? tlName : ''),
+    name_kana: reservation.name_kana || '',
+    name_romaji: reservation.name_romaji || (tlNameIsAscii ? tlName : ''),
+    phone: reservation.guest_phone || '',
+    email: reservation.guest_email || '',
   });
   const [creating, setCreating] = useState(false);
 
