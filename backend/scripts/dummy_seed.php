@@ -341,11 +341,17 @@ try {
         $gapNight = $res1co;                                 // 7/27 = 穴（部屋hold）
         $res2ci = $addDays($D[1], 3); $res2co = $addDays($D[1], 5); // 7/28,7/29 泊
         $groupSeq++; $guuid = 'DMYG-T' . $groupSeq;
-        // res1: アサインは gap を含めて 7/25-7/28（穴の間も部屋を確保＝room_blocked）
+        // アサイン期間は必ず予約期間と一致させる（7/25-7/27）。
+        // 実システムはアサイン期間=予約期間でしか生成せず、穴の夜まで伸ばすと
+        // アサインボードの泊数表示（アサイン起点で計算）と予約詳細（2泊）が食い違い、
+        // バーが見た目連続になって統合を誘発する（2026-07-25 実際に発生）。
+        // 穴の夜の「部屋ブロック」(gap_handling=room_blocked) はスキーマのみの将来機能なので、
+        // DBにはアサインを作らず、シーダー内の占有カレンダーだけ塞いで他予約の混入を防ぐ。
         $r1 = $mkReservation(['guest_id' => $tgid, 'tll' => $tl, 'tlf' => $tf, 'channel' => 'rakuten', 'plan_id' => 1,
             'adults' => 2, 'children' => 0, 'type_code' => $roomById[$tobiRoom]['type_code'], 'ci' => $res1ci, 'co' => $res1co,
             'status' => $statusFor($res1ci, $res1co), 'reservation_no' => 'DMY-TOBI' . $groupSeq . 'a',
-            'assignments' => [[$tobiRoom, $res1ci, $res2ci, 'active']]]); // 7/25→7/28 hold
+            'assignments' => [[$tobiRoom, $res1ci, $res1co, 'active']]]);
+        $markOcc($tobiRoom, $gapNight, $res2ci); // 穴の夜(7/27)は空室のまま一般予約を入れない
         $r2 = $mkReservation(['guest_id' => $tgid, 'tll' => $tl, 'tlf' => $tf, 'channel' => 'rakuten', 'plan_id' => 1,
             'adults' => 2, 'children' => 0, 'type_code' => $roomById[$tobiRoom]['type_code'], 'ci' => $res2ci, 'co' => $res2co,
             'status' => $statusFor($res2ci, $res2co), 'reservation_no' => 'DMY-TOBI' . $groupSeq . 'b',
