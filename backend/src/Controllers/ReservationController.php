@@ -293,6 +293,10 @@ class ReservationController
             Response::error('予約が見つかりません', 404);
         }
 
+        // is_vip はbool化する（一覧系APIと同じ規約）。intのまま返すとフロントの
+        // {is_vip && <VIPバッジ>} が非VIP時に「0」を描画してしまう（2026-07-25 アサインボード詳細モーダルで発生）
+        $reservation['is_vip'] = (bool) $reservation['is_vip'];
+
         // アサイン情報
         $stmt = $db->prepare("
             SELECT ra.id, ra.room_id, rm.room_number, ra.check_in_date, ra.check_out_date, ra.status
