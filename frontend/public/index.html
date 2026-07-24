@@ -15,7 +15,10 @@
       name="description"
       content="CORAL PMS - HOTEL PATINA ISHIGAKIJIMA 宿泊管理システム"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <!-- iOSホーム画面アイコンはmanifestのlogo192(透過)ではなく専用の不透明PNGを使う。
+         透過だとiPadのホーム画面で角が黒く塗られるため、アイボリー地に焼き込んだ180px版を指定。
+         Cloudflareエッジキャッシュ対策(規約#23)でdeploy.shがpublic/直下を自動パージする -->
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png?v=1" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
