@@ -90,6 +90,8 @@
 }
 .fb__meta { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
 .fb__alerttext { font-size: 13px; color: var(--accent-red); margin-top: 3px; font-weight: 500; }
+/* グループ集約カードの部分完了表示（例: 3室中1室CI済）。残室があることを控えめに示す */
+.fb__groupprogress { font-size: 13px; color: var(--text-muted); margin-top: 3px; font-weight: 500; }
 
 .fb__action { font-size: 16px; font-weight: 600; color: var(--accent-blue); white-space: nowrap; }
 .fb__status { flex-shrink: 0; }
