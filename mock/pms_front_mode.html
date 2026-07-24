@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>CORAL PMS — フロントモード モック（iPad 13インチ）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   CORAL PMS フロントモード モック — Patinaデザイン言語準拠
+   正式仕様: docs/UI仕様_フロントモード.md
+   トークン値は frontend/src/styles/variables.css と同一
+   ============================================================ */
+:root {
+  --text-primary: #26221B; --text-secondary: #6F6858; --text-muted: #A79E8C; --text-inverse: #FFF;
+  --bg-main: #F4F2ED; --bg-card: #FFFFFF; --bg-hover: #F8F6F1; --bg-inset: #FAF8F4;
+  --border-default: #E6E1D6; --border-light: #F0ECE3; --border-strong: #D4CDBD;
+  --accent-blue: #8A7440; --accent-blue-hover: #6F5C31;
+  --accent-blue-soft: rgba(138,116,64,.10); --accent-blue-ring: rgba(138,116,64,.28);
+  --accent-green: #3E7C4F; --accent-yellow: #B08A1E; --accent-red: #B3362C; --accent-teal: #2E7D74;
+  --ota-jalan:#DC2626; --ota-rakuten:#991B1B; --ota-booking:#1E3A5F; --ota-direct:#16A34A;
+  --ota-phone:#EA580C; --ota-agoda:#7C3AED; --ota-expedia:#CA8A04;
+  --status-confirmed-bg:#E8EDF4; --status-confirmed-text:#3D5A80;
+  --status-checkedin-bg:#E4EFE6; --status-checkedin-text:#3E7C4F;
+  --status-checkedout-bg:#EBE8F3; --status-checkedout-text:#6D5F9E;
+  --shadow-sm: 0 1px 2px rgba(38,34,27,.04), 0 0 0 1px rgba(38,34,27,.03);
+  --shadow-md: 0 2px 8px rgba(38,34,27,.06), 0 8px 24px rgba(38,34,27,.06);
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  /* フロントモード追加トークン */
+  --front-header-h: 56px; --front-tabbar-h: 64px;
+  --front-target-min: 44px; --front-target-lg: 56px; --front-target-xl: 64px;
+  --front-font-body: 16px; --front-font-title: 20px; --front-font-hero: 40px;
+  --front-gap: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Noto Sans JP','Hiragino Kaku Gothic ProN',sans-serif;
+  background: var(--bg-main); color: var(--text-primary);
+  font-size: var(--front-font-body);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+button { font-family: inherit; border: none; background: none; cursor: pointer; color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ===== アプリ骨格 ===== */
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.header {
+  height: var(--front-header-h); flex-shrink: 0;
+  padding-top: env(safe-area-inset-top);
+  background: var(--bg-card); border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: center; gap: 20px; padding-left: 24px; padding-right: 24px;
+}
+.header__brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .04em; }
+.header__coral { width: 26px; height: 26px; color: var(--accent-blue); }
+.header__clock { flex: 1; text-align: center; font-size: 16px; color: var(--text-secondary); font-weight: 500; }
+.header__staff {
+  display: flex; align-items: center; gap: 8px; height: var(--front-target-min);
+  padding: 0 16px; border-radius: 99px; background: var(--bg-inset); font-size: 15px; font-weight: 500;
+  transition: background 150ms ease, transform 150ms ease;
+}
+.header__staff:active { background: var(--bg-hover); transform: scale(.98); }
+.header__admin { font-size: 14px; color: var(--text-secondary); text-decoration: none; padding: 12px 4px; }
+
+/* ===== タブバー ===== */
+.tabbar {
+  height: var(--front-tabbar-h); flex-shrink: 0; background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
+  display: flex; align-items: stretch; padding: 0 12px; gap: 4px;
+}
+.tab {
+  display: flex; align-items: center; gap: 10px; padding: 0 24px;
+  font-size: 16px; font-weight: 500; color: var(--text-secondary);
+  border-bottom: 3px solid transparent; border-top: 3px solid transparent;
+  transition: background 150ms ease;
+}
+.tab:active { background: var(--bg-hover); }
+.tab.active { color: var(--accent-blue); font-weight: 700; border-bottom-color: var(--accent-blue); background: var(--accent-blue-soft); }
+.tab__icon { font-size: 19px; }
+.tab__badge {
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px;
+  background: var(--accent-red); color: #fff; font-size: 13px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ===== コンテンツ ===== */
+.content { flex: 1; overflow-y: auto; }
+.content__inner { max-width: 1280px; margin: 0 auto; padding: 24px 24px calc(24px + env(safe-area-inset-bottom)); }
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ===== バッジ（既存 ota-badge / status-badge 相当） ===== */
+.ota-badge {
+  display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 5px;
+  font-size: 11px; font-weight: 700; color: #fff; letter-spacing: .02em; flex-shrink: 0;
+}
+.ota-jalan{background:var(--ota-jalan)} .ota-rakuten{background:var(--ota-rakuten)}
+.ota-booking{background:var(--ota-booking)} .ota-direct{background:var(--ota-direct)}
+.ota-phone{background:var(--ota-phone)} .ota-agoda{background:var(--ota-agoda)} .ota-expedia{background:var(--ota-expedia)}
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 99px;
+  font-size: 12px; font-weight: 600;
+}
+.status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.st-checkedin { background: var(--status-checkedin-bg); color: var(--status-checkedin-text); }
+.st-checkedout { background: var(--status-checkedout-bg); color: var(--status-checkedout-text); }
+
+/* ===== ボタン ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  border-radius: var(--radius-md); font-weight: 700; transition: all 150ms ease; flex-shrink: 0;
+}
+.btn:active { transform: scale(.98); }
+.btn--primary { background: var(--accent-blue); color: #fff; }
+.btn--primary:active { background: var(--accent-blue-hover); }
+.btn--secondary { background: var(--bg-card); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+.btn--secondary:active { background: var(--accent-blue-soft); }
+.btn--lg { height: var(--front-target-lg); padding: 0 28px; font-size: 16px; }
+.btn--xl { height: var(--front-target-xl); padding: 0 40px; font-size: 18px; min-width: 320px; }
+.btn--disabled { background: var(--text-muted) !important; color: #fff !important; pointer-events: none; }
+.btn-back {
+  width: 44px; height: 44px; border-radius: 50%; background: var(--bg-inset);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 20px;
+  transition: all 150ms ease;
+}
+.btn-back:active { background: var(--bg-hover); transform: scale(.94); }
+
+/* ===== ログイン画面 ===== */
+.login { min-height: calc(100dvh - 60px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+.login__brand { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.login__brand svg { width: 52px; height: 52px; color: var(--accent-blue); }
+.login__title { font-size: 22px; font-weight: 700; letter-spacing: .08em; }
+.login__sub { font-size: 13px; color: var(--text-muted); letter-spacing: .14em; }
+.login__card {
+  width: 720px; max-width: calc(100vw - 48px); background: var(--bg-card);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+  display: flex; overflow: hidden;
+}
+.login__staffpane { width: 46%; padding: 28px 24px; border-right: 1px solid var(--border-light); }
+.login__label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 14px; letter-spacing: .05em; }
+.staff-btn {
+  width: 100%; height: var(--front-target-lg); border-radius: var(--radius-md);
+  display: flex; align-items: center; padding: 0 18px; font-size: 16px; font-weight: 500;
+  border-left: 3px solid transparent; margin-bottom: 8px; transition: all 150ms ease;
+}
+.staff-btn:active { background: var(--bg-hover); transform: scale(.98); }
+.staff-btn.selected { background: var(--accent-blue-soft); color: var(--accent-blue); font-weight: 700; border-left-color: var(--accent-blue); }
+.login__pinpane { flex: 1; padding: 28px 32px; display: flex; flex-direction: column; align-items: center; }
+.pin-dots { display: flex; gap: 16px; margin: 18px 0 26px; }
+.pin-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-strong); transition: all 150ms ease; }
+.pin-dot.filled { background: var(--accent-blue); border-color: var(--accent-blue); }
+.pin-dots.error .pin-dot { border-color: var(--accent-red); background: transparent; animation: shake .4s ease; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.pin-error { font-size: 14px; color: var(--accent-red); height: 20px; margin-bottom: 8px; }
+.pinpad { display: grid; grid-template-columns: repeat(3, 88px); gap: 12px; }
+.pinkey {
+  height: 64px; border-radius: var(--radius-md); background: var(--bg-inset);
+  font-size: 20px; font-weight: 500; transition: all 120ms ease;
+}
+.pinkey:active { background: var(--accent-blue-soft); color: var(--accent-blue); transform: scale(.96); }
+.pinkey--ghost { background: transparent; }
+.pinkey--ghost:active { background: var(--bg-hover); }
+
+/* ===== 本日ボード ===== */
+.board-summary { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 20px; }
+.board-summary__text { font-size: 16px; color: var(--text-secondary); }
+.board-summary__text b { font-size: 22px; color: var(--text-primary); font-weight: 700; margin: 0 2px; }
+.board-summary__bar { flex: 1; max-width: 320px; height: 4px; border-radius: 99px; background: var(--border-light); margin-bottom: 8px; overflow: hidden; }
+.board-summary__fill { height: 100%; border-radius: 99px; background: var(--accent-blue); }
+.board-search {
+  margin-left: auto; display: flex; align-items: center; gap: 10px;
+  width: 280px; height: 44px; padding: 0 16px;
+  background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  color: var(--text-muted); font-size: 16px;
+}
+.res-card {
+  display: flex; align-items: center; gap: 20px; min-height: 88px;
+  background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  padding: 14px 20px; margin-bottom: 12px; transition: all 150ms ease; position: relative;
+}
+.res-card:active { background: var(--bg-hover); transform: scale(.985); }
+.res-card--alert { border-left: 3px solid var(--accent-red); }
+.res-card--done { opacity: .55; }
+.res-card__room {
+  width: 64px; height: 56px; border-radius: var(--radius-sm); background: var(--bg-inset);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; flex-shrink: 0;
+}
+.res-card__room--none { background: rgba(179,54,44,.08); color: var(--accent-red); font-size: 16px; }
+.res-card__main { flex: 1; min-width: 0; }
+.res-card__name { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+.res-card__meta { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+.res-card__alerttext { font-size: 13px; color: var(--accent-red); margin-top: 3px; font-weight: 500; }
+.res-card__action { font-size: 16px; font-weight: 600; color: var(--accent-blue); white-space: nowrap; }
+.board-empty { text-align: center; padding: 80px 0; color: var(--text-muted); }
+.board-empty svg { width: 44px; height: 44px; opacity: .4; margin-bottom: 14px; color: var(--accent-blue); }
+
+/* ===== 詳細画面共通（CI/CO） ===== */
+.detail-head { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.detail-head__title { font-size: 20px; font-weight: 700; }
+.detail-head__guest { margin-left: auto; font-size: 20px; font-weight: 600; color: var(--text-secondary); }
+.detail-cols { display: flex; gap: 24px; align-items: flex-start; padding-bottom: 110px; }
+.dcard { background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 24px 28px; }
+.dcard--l { width: 55%; } .dcard--r { width: 45%; }
+.dcard__title { font-size: 14px; font-weight: 700; color: var(--text-muted); letter-spacing: .06em; margin-bottom: 12px; }
+.drow { display: flex; align-items: center; min-height: 44px; border-bottom: 1px solid var(--border-light); gap: 16px; }
+.drow:last-child { border-bottom: none; }
+.drow__label { width: 110px; flex-shrink: 0; font-size: 13px; color: var(--text-muted); }
+.drow__value { font-size: 16px; }
+.drow__value--big { font-size: 20px; font-weight: 700; }
+.drow__value--due { color: var(--accent-red); font-weight: 700; }
+.passport-box {
+  margin-top: 14px; border: 2px dashed var(--border-strong); border-radius: var(--radius-md);
+  padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  color: var(--text-muted); font-size: 14px;
+}
+.actionbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+  height: calc(88px + env(safe-area-inset-bottom)); padding: 0 24px env(safe-area-inset-bottom);
+  background: var(--bg-card); border-top: 1px solid var(--border-default);
+  display: none; align-items: center; gap: 20px;
+}
+.actionbar.active { display: flex; }
+.actionbar__note { font-size: 16px; color: var(--accent-red); font-weight: 500; }
+.actionbar__spacer { flex: 1; }
+
+/* ===== CO精算 ===== */
+.charge-row { display: flex; align-items: center; min-height: 48px; border-bottom: 1px solid var(--border-light); gap: 14px; }
+.charge-row:last-child { border-bottom: none; }
+.charge-row__date { width: 64px; font-size: 13px; color: var(--text-muted); flex-shrink: 0; }
+.charge-row__desc { flex: 1; font-size: 16px; }
+.charge-row__lock { font-size: 12px; color: var(--text-muted); }
+.charge-row__amt { font-size: 16px; font-weight: 500; }
+.dcard__foot { font-size: 13px; color: var(--text-muted); margin-top: 12px; }
+.pay-summary { background: var(--bg-inset); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px; }
+.pay-summary__row { display: flex; justify-content: space-between; font-size: 16px; padding: 5px 0; color: var(--text-secondary); }
+.pay-summary__row b { color: var(--text-primary); font-weight: 500; }
+.pay-summary__due { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--border-default); margin-top: 10px; padding-top: 12px; }
+.pay-summary__due-label { font-size: 15px; font-weight: 600; }
+.pay-summary__due-amt { font-size: 40px; font-weight: 700; letter-spacing: -.01em; }
+.paygrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.pay-btn {
+  height: var(--front-target-lg); border-radius: var(--radius-md); background: var(--bg-inset);
+  font-size: 16px; font-weight: 500; border: 1px solid transparent; transition: all 150ms ease;
+}
+.pay-btn:active { transform: scale(.98); }
+.pay-btn.selected { background: var(--accent-blue-soft); border-color: var(--accent-blue); color: var(--accent-blue); font-weight: 700; }
+.pay-amount {
+  width: 100%; height: var(--front-target-lg); border: 1px solid var(--border-strong); border-radius: var(--radius-md);
+  font-size: 20px; text-align: right; padding: 0 18px; font-family: inherit; margin-bottom: 14px;
+  font-variant-numeric: tabular-nums; color: var(--text-primary); background: var(--bg-card);
+}
+.pay-amount:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px var(--accent-blue-ring); }
+.paystack { display: flex; flex-direction: column; gap: 12px; }
+.paystack .btn { width: 100%; }
+
+/* ===== POS ===== */
+.pos { display: flex; gap: 24px; align-items: flex-start; }
+.pos__catalog { flex: 1; }
+.pos__cats { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
+.pos-cat {
+  height: 44px; padding: 0 20px; border-radius: 99px; background: var(--bg-card);
+  font-size: 15px; font-weight: 500; color: var(--text-secondary); box-shadow: var(--shadow-sm);
+  flex-shrink: 0; transition: all 150ms ease;
+}
+.pos-cat.active { background: var(--accent-blue); color: #fff; font-weight: 700; }
+.pos__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.prod {
+  height: 112px; background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  padding: 14px 16px; display: flex; flex-direction: column; justify-content: space-between;
+  text-align: left; transition: all 150ms ease;
+}
+.prod:active { background: var(--bg-hover); transform: scale(.97); }
+.prod__name { font-size: 16px; font-weight: 500; line-height: 1.35; }
+.prod__price { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+.cart { width: 360px; flex-shrink: 0; background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 20px 20px 24px; position: sticky; top: 0; }
+.cart__title { font-size: 14px; font-weight: 700; color: var(--text-muted); letter-spacing: .06em; margin-bottom: 8px; }
+.cart__empty { padding: 36px 0; text-align: center; color: var(--text-muted); font-size: 15px; }
+.cart-item { display: flex; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid var(--border-light); }
+.cart-item__name { flex: 1; font-size: 15px; }
+.stepper { display: flex; align-items: center; gap: 2px; }
+.step-btn {
+  width: 44px; height: 44px; border-radius: var(--radius-sm); font-size: 20px; color: var(--accent-blue);
+  display: inline-flex; align-items: center; justify-content: center; transition: all 120ms ease;
+}
+.step-btn:active { background: var(--accent-blue-soft); transform: scale(.94); }
+.stepper__qty { width: 32px; text-align: center; font-size: 18px; font-weight: 600; }
+.cart-item__amt { width: 72px; text-align: right; font-size: 15px; font-weight: 500; }
+.cart__total { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 0 14px; }
+.cart__total-label { font-size: 15px; font-weight: 600; }
+.cart__total-amt { font-size: 26px; font-weight: 700; }
+
+/* ===== 部屋状況 ===== */
+.legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; font-size: 12px; color: var(--text-secondary); }
+.legend__item { display: flex; align-items: center; gap: 6px; }
+.legend__dot { width: 8px; height: 8px; border-radius: 50%; }
+.floor { margin-bottom: 26px; }
+.floor__head { font-size: 16px; font-weight: 700; padding-bottom: 8px; border-bottom: 1px solid var(--border-default); margin-bottom: 14px; }
+.floor__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; }
+.room {
+  height: 88px; background: var(--bg-card); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  border-left: 3px solid var(--border-default); padding: 12px 12px 10px;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.room__no { font-size: 18px; font-weight: 700; }
+.room__state { font-size: 12px; color: var(--text-secondary); }
+.room__guest { font-size: 12px; color: var(--text-primary); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.room--stay { border-left-color: var(--accent-blue); }
+.room--ready { border-left-color: var(--accent-green); }
+.room--dirty { border-left-color: var(--accent-yellow); }
+.room--inspect { border-left-color: var(--accent-teal); }
+.room--ooo { border-left-color: var(--text-muted); background: repeating-linear-gradient(-45deg, var(--bg-card), var(--bg-card) 6px, var(--bg-inset) 6px, var(--bg-inset) 12px); }
+.room--arrival { border-left-color: var(--border-default); }
+.room__dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--accent-blue); align-self: flex-end; }
+
+/* ===== 成功オーバーレイ ===== */
+.success-ov {
+  position: fixed; inset: 0; z-index: 200; background: rgba(244,242,237,.92);
+  display: none; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+}
+.success-ov.active { display: flex; }
+.success-ov__mark {
+  width: 96px; height: 96px; border-radius: 50%; background: var(--accent-green); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 44px;
+  animation: pop .35s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-ov__text { font-size: 18px; font-weight: 600; }
+
+/* ===== モック用スイッチャー（実装対象外） ===== */
+.mockbar {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 300; opacity: .85;
+  display: flex; gap: 6px; background: rgba(38,34,27,.82); border-radius: 99px; padding: 6px 8px;
+}
+.mockbar button { color: #E6E1D6; font-size: 11px; padding: 6px 10px; border-radius: 99px; }
+.mockbar button.on { background: rgba(255,255,255,.18); color: #fff; font-weight: 700; }
+
+/* ===== 縦持ち（〜1080px）: 2ペイン→1カラム ===== */
+@media (max-width: 1080px) {
+  .detail-cols { flex-direction: column; }
+  .dcard--l, .dcard--r { width: 100%; }
+  .pos { flex-direction: column; }
+  .cart { width: 100%; position: static; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ ログイン（PINパッド） ============ -->
+<div id="scr-login" class="app" style="display:none">
+  <div class="content"><div class="login">
+    <div class="login__brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 21v-8m0 0C9 13 7 10.5 7 7.5M12 13c3 0 5-2.5 5-5.5M7 7.5C7 5 8.5 3 10 3m-3 4.5C5.5 8 4 7 4 5m13 2.5C17 5 15.5 3 14 3m3 4.5C18.5 8 20 7 20 5M9 21h6"/></svg>
+      <div class="login__title">CORAL PMS</div>
+      <div class="login__sub">HOTEL PATINA ISHIGAKIJIMA</div>
+    </div>
+    <div class="login__card">
+      <div class="login__staffpane">
+        <div class="login__label">スタッフを選択</div>
+        <button class="staff-btn selected">山田 花子</button>
+        <button class="staff-btn">金城 一正</button>
+        <button class="staff-btn">比嘉 直樹</button>
+        <button class="staff-btn">新垣 美咲</button>
+        <button class="staff-btn">上原 健</button>
+      </div>
+      <div class="login__pinpane">
+        <div class="login__label">PINを入力</div>
+        <div class="pin-dots" id="pindots">
+          <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        </div>
+        <div class="pin-error" id="pinerror"></div>
+        <div class="pinpad">
+          <button class="pinkey" onclick="pin(1)">1</button><button class="pinkey" onclick="pin(2)">2</button><button class="pinkey" onclick="pin(3)">3</button>
+          <button class="pinkey" onclick="pin(4)">4</button><button class="pinkey" onclick="pin(5)">5</button><button class="pinkey" onclick="pin(6)">6</button>
+          <button class="pinkey" onclick="pin(7)">7</button><button class="pinkey" onclick="pin(8)">8</button><button class="pinkey" onclick="pin(9)">9</button>
+          <button class="pinkey pinkey--ghost"></button><button class="pinkey" onclick="pin(0)">0</button><button class="pinkey pinkey--ghost" onclick="pinDel()">⌫</button>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ フロントモード本体 ============ -->
+<div id="scr-app" class="app">
+  <header class="header">
+    <div class="header__brand">
+      <svg class="header__coral" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M12 21v-8m0 0C9 13 7 10.5 7 7.5M12 13c3 0 5-2.5 5-5.5M7 7.5C7 5 8.5 3 10 3m-3 4.5C5.5 8 4 7 4 5m13 2.5C17 5 15.5 3 14 3m3 4.5C18.5 8 20 7 20 5M9 21h6"/></svg>
+      CORAL PMS
+    </div>
+    <div class="header__clock">7月24日（金） 14:32</div>
+    <button class="header__staff">👤 山田 花子</button>
+    <a class="header__admin" href="#">管理画面 ↗</a>
+  </header>
+
+  <nav class="tabbar">
+    <button class="tab active" data-view="board-ci" onclick="go('board-ci', this)"><span class="tab__icon">🔑</span>本日のチェックイン<span class="tab__badge">5</span></button>
+    <button class="tab" data-view="board-co" onclick="go('board-co', this)"><span class="tab__icon">🧳</span>本日のチェックアウト<span class="tab__badge">1</span></button>
+    <button class="tab" data-view="pos" onclick="go('pos', this)"><span class="tab__icon">🛍</span>物販</button>
+    <button class="tab" data-view="rooms" onclick="go('rooms', this)"><span class="tab__icon">🚪</span>部屋状況</button>
+  </nav>
+
+  <main class="content"><div class="content__inner">
+
+    <!-- ===== 本日のチェックイン ===== -->
+    <section class="screen active" id="view-board-ci">
+      <div class="board-summary">
+        <div class="board-summary__text">本日のチェックイン <b>8</b>件 ・ 完了 <b>3</b>件</div>
+        <div class="board-summary__bar"><div class="board-summary__fill" style="width:37.5%"></div></div>
+        <div class="board-search">🔍 ゲスト名で検索</div>
+      </div>
+
+      <div class="res-card" onclick="go('ci-detail')">
+        <div class="res-card__room">305</div>
+        <div class="res-card__main">
+          <div class="res-card__name">田中 太郎<span class="ota-badge ota-jalan">じゃらん</span></div>
+          <div class="res-card__meta">2名 ・ 3泊 ・ オーシャンツイン ・ 朝食付</div>
+        </div>
+        <div class="res-card__action">チェックイン →</div>
+      </div>
+
+      <div class="res-card" onclick="go('ci-detail')">
+        <div class="res-card__room">402</div>
+        <div class="res-card__main">
+          <div class="res-card__name">Emma Wilson<span class="ota-badge ota-booking">Booking</span></div>
+          <div class="res-card__meta">2名 ・ 2泊 ・ デラックスダブル ・ 素泊まり</div>
+        </div>
+        <div class="res-card__action">チェックイン →</div>
+      </div>
+
+      <div class="res-card res-card--alert" onclick="go('ci-detail')">
+        <div class="res-card__room res-card__room--none">未</div>
+        <div class="res-card__main">
+          <div class="res-card__name">佐藤 めぐみ<span class="ota-badge ota-rakuten">楽天</span></div>
+          <div class="res-card__meta">3名 ・ 1泊 ・ トリプル ・ 朝食付</div>
+          <div class="res-card__alerttext">⚠ 部屋未アサイン — PCで割り当てが必要です</div>
+        </div>
+        <div class="res-card__action">チェックイン →</div>
+      </div>
+
+      <div class="res-card" onclick="go('ci-detail')">
+        <div class="res-card__room">203</div>
+        <div class="res-card__main">
+          <div class="res-card__name">宮里 洋一（グループ 3室）<span class="ota-badge ota-direct">直販</span></div>
+          <div class="res-card__meta">6名 ・ 2泊 ・ 203 / 204 / 205</div>
+        </div>
+        <div class="res-card__action">チェックイン →</div>
+      </div>
+
+      <div class="res-card" onclick="go('ci-detail')">
+        <div class="res-card__room">501</div>
+        <div class="res-card__main">
+          <div class="res-card__name">Chen Wei<span class="ota-badge ota-agoda">Agoda</span></div>
+          <div class="res-card__meta">2名 ・ 4泊 ・ スイート ・ 朝食付</div>
+        </div>
+        <div class="res-card__action">チェックイン →</div>
+      </div>
+
+      <div class="res-card res-card--done">
+        <div class="res-card__room">306</div>
+        <div class="res-card__main">
+          <div class="res-card__name">高橋 健二<span class="ota-badge ota-jalan">じゃらん</span></div>
+          <div class="res-card__meta">2名 ・ 1泊 ・ オーシャンツイン</div>
+        </div>
+        <span class="status-badge st-checkedin">CI済 14:05</span>
+      </div>
+
+      <div class="res-card res-card--done">
+        <div class="res-card__room">201</div>
+        <div class="res-card__main">
+          <div class="res-card__name">大城 春菜<span class="ota-badge ota-phone">電話</span></div>
+          <div class="res-card__meta">1名 ・ 2泊 ・ シングル</div>
+        </div>
+        <span class="status-badge st-checkedin">CI済 13:22</span>
+      </div>
+    </section>
+
+    <!-- ===== 本日のチェックアウト ===== -->
+    <section class="screen" id="view-board-co">
+      <div class="board-summary">
+        <div class="board-summary__text">本日のチェックアウト <b>6</b>件 ・ 完了 <b>5</b>件</div>
+        <div class="board-summary__bar"><div class="board-summary__fill" style="width:83%"></div></div>
+        <div class="board-search">🔍 ゲスト名で検索</div>
+      </div>
+
+      <div class="res-card" onclick="go('co-detail')">
+        <div class="res-card__room">404</div>
+        <div class="res-card__main">
+          <div class="res-card__name">島袋 直人<span class="ota-badge ota-expedia">Expedia</span></div>
+          <div class="res-card__meta">2名 ・ 3泊 ・ デラックスダブル ・ 残額あり</div>
+        </div>
+        <div class="res-card__action">チェックアウト →</div>
+      </div>
+
+      <div class="res-card res-card--done">
+        <div class="res-card__room">302</div>
+        <div class="res-card__main">
+          <div class="res-card__name">Sarah Johnson<span class="ota-badge ota-booking">Booking</span></div>
+          <div class="res-card__meta">2名 ・ 5泊 ・ オーシャンツイン</div>
+        </div>
+        <span class="status-badge st-checkedout">CO済 10:44</span>
+      </div>
+      <div class="res-card res-card--done">
+        <div class="res-card__room">205</div>
+        <div class="res-card__main">
+          <div class="res-card__name">中村 亮<span class="ota-badge ota-rakuten">楽天</span></div>
+          <div class="res-card__meta">4名 ・ 2泊 ・ ファミリー</div>
+        </div>
+        <span class="status-badge st-checkedout">CO済 10:12</span>
+      </div>
+    </section>
+
+    <!-- ===== チェックイン確認 ===== -->
+    <section class="screen" id="view-ci-detail">
+      <div class="detail-head">
+        <button class="btn-back" onclick="go('board-ci')">←</button>
+        <div class="detail-head__title">チェックイン</div>
+        <div class="detail-head__guest">田中 太郎 様</div>
+      </div>
+      <div class="detail-cols">
+        <div class="dcard dcard--l">
+          <div class="dcard__title">予約内容</div>
+          <div class="drow"><div class="drow__label">日程</div><div class="drow__value">7/24（金）IN → 7/27（月）OUT ・ 3泊</div></div>
+          <div class="drow"><div class="drow__label">部屋</div><div class="drow__value drow__value--big">305 <span style="font-size:14px;font-weight:400;color:var(--text-secondary)">オーシャンツイン</span></div></div>
+          <div class="drow"><div class="drow__label">プラン</div><div class="drow__value">【朝食付】美ら海ステイプラン</div></div>
+          <div class="drow"><div class="drow__label">人数</div><div class="drow__value">大人2名</div></div>
+          <div class="drow"><div class="drow__label">チャネル</div><div class="drow__value"><span class="ota-badge ota-jalan">じゃらん</span>&nbsp; <span style="font-size:14px;color:var(--text-secondary)" class="num">JL8842-3391</span></div></div>
+          <div class="drow"><div class="drow__label">料金合計</div><div class="drow__value num">¥58,300</div></div>
+          <div class="drow"><div class="drow__label">入金済み</div><div class="drow__value num">¥58,300（OTA事前決済）</div></div>
+          <div class="drow"><div class="drow__label">残額</div><div class="drow__value num" style="color:var(--accent-green);font-weight:700">¥0</div></div>
+        </div>
+        <div class="dcard dcard--r">
+          <div class="dcard__title">ゲスト</div>
+          <div class="drow"><div class="drow__label">氏名</div><div class="drow__value">田中 太郎（タナカ タロウ）</div></div>
+          <div class="drow"><div class="drow__label">電話</div><div class="drow__value num">090-1234-5678</div></div>
+          <div class="drow"><div class="drow__label">住所</div><div class="drow__value" style="font-size:14px">東京都世田谷区北沢2-XX-X</div></div>
+          <div class="drow"><div class="drow__label">利用回数</div><div class="drow__value">3回目 ・ 前回 2026/02</div></div>
+          <div class="passport-box">
+            <div>パスポート（外国籍ゲストのみ）</div>
+            <button class="btn btn--secondary btn--lg">📷 パスポートを撮影</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== チェックアウト精算 ===== -->
+    <section class="screen" id="view-co-detail">
+      <div class="detail-head">
+        <button class="btn-back" onclick="go('board-co')">←</button>
+        <div class="detail-head__title">チェックアウト</div>
+        <div class="detail-head__guest">島袋 直人 様 ・ 404</div>
+      </div>
+      <div class="detail-cols">
+        <div class="dcard dcard--l">
+          <div class="dcard__title">利用明細</div>
+          <div class="charge-row"><div class="charge-row__date num">7/21</div><div class="charge-row__desc">宿泊（デラックスダブル）</div><div class="charge-row__amt num">¥19,800</div></div>
+          <div class="charge-row"><div class="charge-row__date num">7/22</div><div class="charge-row__desc">宿泊（デラックスダブル）</div><div class="charge-row__amt num">¥19,800</div></div>
+          <div class="charge-row"><div class="charge-row__date num">7/23</div><div class="charge-row__desc">宿泊（デラックスダブル）</div><div class="charge-row__amt num">¥19,800</div></div>
+          <div class="charge-row"><div class="charge-row__date num">7/22</div><div class="charge-row__desc">オリオンビール ×2 <span class="charge-row__lock">🔒物販</span></div><div class="charge-row__amt num">¥1,100</div></div>
+          <div class="charge-row"><div class="charge-row__date num">7/23</div><div class="charge-row__desc">ミンサー織コースター <span class="charge-row__lock">🔒物販</span></div><div class="charge-row__amt num">¥1,650</div></div>
+          <div class="charge-row"><div class="charge-row__date num">—</div><div class="charge-row__desc">宿泊税</div><div class="charge-row__amt num">¥1,200</div></div>
+          <div class="dcard__foot">明細の修正はPCの予約詳細から行ってください</div>
+        </div>
+        <div class="dcard dcard--r">
+          <div class="dcard__title">精算</div>
+          <div class="pay-summary">
+            <div class="pay-summary__row">合計<b class="num">¥63,350</b></div>
+            <div class="pay-summary__row">入金済み<b class="num">¥51,010</b></div>
+            <div class="pay-summary__due">
+              <div class="pay-summary__due-label">残額</div>
+              <div class="pay-summary__due-amt num">¥12,340</div>
+            </div>
+          </div>
+          <div class="paygrid">
+            <button class="pay-btn selected" onclick="selPay(this)">現金</button>
+            <button class="pay-btn" onclick="selPay(this)">クレジットカード</button>
+            <button class="pay-btn" onclick="selPay(this)">QR決済</button>
+            <button class="pay-btn" onclick="selPay(this)">その他</button>
+          </div>
+          <input class="pay-amount" value="12,340" inputmode="numeric">
+          <div class="paystack">
+            <button class="btn btn--secondary btn--lg" onclick="success('入金を登録しました')">入金を登録</button>
+            <button class="btn btn--secondary btn--lg">🧾 領収書を発行</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 物販POS ===== -->
+    <section class="screen" id="view-pos">
+      <div class="pos">
+        <div class="pos__catalog">
+          <div class="pos__cats">
+            <button class="pos-cat active">すべて</button>
+            <button class="pos-cat">ドリンク</button>
+            <button class="pos-cat">お土産</button>
+            <button class="pos-cat">アメニティ</button>
+            <button class="pos-cat">その他</button>
+          </div>
+          <div class="pos__grid">
+            <button class="prod" onclick="addCart('オリオンビール', 550)"><span class="prod__name">オリオンビール</span><span class="prod__price num">¥550</span></button>
+            <button class="prod" onclick="addCart('さんぴん茶', 180)"><span class="prod__name">さんぴん茶</span><span class="prod__price num">¥180</span></button>
+            <button class="prod" onclick="addCart('ミンサー織コースター', 1650)"><span class="prod__name">ミンサー織コースター</span><span class="prod__price num">¥1,650</span></button>
+            <button class="prod" onclick="addCart('黒糖ちんすこう', 860)"><span class="prod__name">黒糖ちんすこう（12個入）</span><span class="prod__price num">¥860</span></button>
+            <button class="prod" onclick="addCart('泡盛ミニボトル', 1200)"><span class="prod__name">泡盛ミニボトル 請福</span><span class="prod__price num">¥1,200</span></button>
+            <button class="prod" onclick="addCart('島ぞうり', 980)"><span class="prod__name">島ぞうり</span><span class="prod__price num">¥980</span></button>
+            <button class="prod" onclick="addCart('日焼け止め', 1430)"><span class="prod__name">日焼け止め SPF50</span><span class="prod__price num">¥1,430</span></button>
+            <button class="prod" onclick="addCart('歯ブラシセット', 220)"><span class="prod__name">歯ブラシセット</span><span class="prod__price num">¥220</span></button>
+          </div>
+        </div>
+        <div class="cart">
+          <div class="cart__title">カート（即売）</div>
+          <div id="cart-items"><div class="cart__empty">商品をタップして追加</div></div>
+          <div class="cart__total"><div class="cart__total-label">合計</div><div class="cart__total-amt num" id="cart-total">¥0</div></div>
+          <div class="paygrid">
+            <button class="pay-btn selected" onclick="selPay(this)">現金</button>
+            <button class="pay-btn" onclick="selPay(this)">カード</button>
+          </div>
+          <button class="btn btn--primary btn--xl" style="width:100%;min-width:0" onclick="success('会計が完了しました')">会計する</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 部屋状況（閲覧専用） ===== -->
+    <section class="screen" id="view-rooms">
+      <div class="legend">
+        <span class="legend__item"><span class="legend__dot" style="background:var(--accent-blue)"></span>在室</span>
+        <span class="legend__item"><span class="legend__dot" style="background:var(--accent-green)"></span>空室・清掃済</span>
+        <span class="legend__item"><span class="legend__dot" style="background:var(--accent-yellow)"></span>清掃中・未清掃</span>
+        <span class="legend__item"><span class="legend__dot" style="background:var(--accent-teal)"></span>点検中</span>
+        <span class="legend__item"><span class="legend__dot" style="border:2px solid var(--accent-blue);background:transparent"></span>本日CI予定</span>
+        <span class="legend__item"><span class="legend__dot" style="background:var(--text-muted)"></span>売止</span>
+      </div>
+      <div class="floor">
+        <div class="floor__head">5F</div>
+        <div class="floor__grid">
+          <div class="room room--arrival"><div class="room__no">501</div><div class="room__dot"></div><div class="room__state">本日CI予定</div></div>
+          <div class="room room--stay"><div class="room__no">502</div><div class="room__guest">Wilson様</div><div class="room__state">在室 〜7/26</div></div>
+          <div class="room room--ready"><div class="room__no">503</div><div class="room__state">空室・清掃済</div></div>
+          <div class="room room--ooo"><div class="room__no">505</div><div class="room__state">売止</div></div>
+        </div>
+      </div>
+      <div class="floor">
+        <div class="floor__head">4F</div>
+        <div class="floor__grid">
+          <div class="room room--stay"><div class="room__no">401</div><div class="room__guest">比嘉様</div><div class="room__state">在室 〜7/25</div></div>
+          <div class="room room--stay"><div class="room__no">402</div><div class="room__guest">Chen様</div><div class="room__state">在室 〜7/28</div></div>
+          <div class="room room--dirty"><div class="room__no">403</div><div class="room__state">清掃中</div></div>
+          <div class="room room--dirty"><div class="room__no">404</div><div class="room__state">未清掃</div></div>
+          <div class="room room--inspect"><div class="room__no">405</div><div class="room__state">点検中</div></div>
+        </div>
+      </div>
+      <div class="floor">
+        <div class="floor__head">3F</div>
+        <div class="floor__grid">
+          <div class="room room--ready"><div class="room__no">301</div><div class="room__state">空室・清掃済</div></div>
+          <div class="room room--stay"><div class="room__no">302</div><div class="room__guest">高橋様</div><div class="room__state">在室 〜7/25</div></div>
+          <div class="room room--ready"><div class="room__no">303</div><div class="room__state">空室・清掃済</div></div>
+          <div class="room room--arrival"><div class="room__no">305</div><div class="room__dot"></div><div class="room__state">本日CI予定</div></div>
+          <div class="room room--dirty"><div class="room__no">306</div><div class="room__state">未清掃</div></div>
+        </div>
+      </div>
+      <div class="floor">
+        <div class="floor__head">2F</div>
+        <div class="floor__grid">
+          <div class="room room--stay"><div class="room__no">201</div><div class="room__guest">大城様</div><div class="room__state">在室 〜7/26</div></div>
+          <div class="room room--ready"><div class="room__no">203</div><div class="room__state">空室・清掃済</div></div>
+          <div class="room room--ready"><div class="room__no">204</div><div class="room__state">空室・清掃済</div></div>
+          <div class="room room--ready"><div class="room__no">205</div><div class="room__state">空室・清掃済</div></div>
+        </div>
+      </div>
+    </section>
+
+  </div></main>
+
+  <!-- 下部固定アクションバー（CI） -->
+  <div class="actionbar" id="bar-ci-detail">
+    <div class="actionbar__spacer"></div>
+    <button class="btn btn--primary btn--xl" onclick="success('チェックインが完了しました')">チェックインする</button>
+  </div>
+  <!-- 下部固定アクションバー（CO） -->
+  <div class="actionbar" id="bar-co-detail">
+    <div class="actionbar__note">⚠ 残額 ¥12,340 があります</div>
+    <div class="actionbar__spacer"></div>
+    <button class="btn btn--primary btn--xl" onclick="success('チェックアウトが完了しました')">チェックアウトする</button>
+  </div>
+</div>
+
+<!-- 成功オーバーレイ -->
+<div class="success-ov" id="successov">
+  <div class="success-ov__mark">✓</div>
+  <div class="success-ov__text" id="successtext">チェックインが完了しました</div>
+</div>
+
+<!-- モック用画面スイッチャー（実装対象外） -->
+<div class="mockbar">
+  <button onclick="mockView('login')" id="mk-login">ログイン</button>
+  <button onclick="mockView('app')" id="mk-app" class="on">フロントモード</button>
+</div>
+
+<script>
+/* ---- モック動作用の最小JS（実装ロジックではない） ---- */
+function mockView(v) {
+  document.getElementById('scr-login').style.display = v === 'login' ? 'flex' : 'none';
+  document.getElementById('scr-app').style.display = v === 'app' ? 'flex' : 'none';
+  document.getElementById('mk-login').classList.toggle('on', v === 'login');
+  document.getElementById('mk-app').classList.toggle('on', v === 'app');
+}
+function go(view, tabEl) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.actionbar').forEach(b => b.classList.remove('active'));
+  const bar = document.getElementById('bar-' + view);
+  if (bar) bar.classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  const tab = tabEl || document.querySelector('.tab[data-view="' + view + '"]');
+  if (tab) tab.classList.add('active');
+  document.querySelector('.content').scrollTop = 0;
+}
+/* スタッフ選択 */
+document.querySelectorAll('.staff-btn').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.staff-btn').forEach(x => x.classList.remove('selected'));
+  b.classList.add('selected');
+}));
+/* PINパッド: 4桁で自動送信（モックでは 1111 以外エラー表示のデモ） */
+let pinBuf = '';
+function pin(n) {
+  if (pinBuf.length >= 4) return;
+  pinBuf += n;
+  renderPin();
+  if (pinBuf.length === 4) setTimeout(() => {
+    if (pinBuf === '1111') { pinBuf=''; renderPin(); mockView('app'); }
+    else {
+      const dots = document.getElementById('pindots');
+      dots.classList.add('error');
+      document.getElementById('pinerror').textContent = 'PINが違います';
+      setTimeout(() => { dots.classList.remove('error'); pinBuf=''; renderPin(); }, 700);
+    }
+  }, 150);
+}
+function pinDel() { pinBuf = pinBuf.slice(0, -1); renderPin(); document.getElementById('pinerror').textContent=''; }
+function renderPin() {
+  document.querySelectorAll('#pindots .pin-dot').forEach((d, i) => d.classList.toggle('filled', i < pinBuf.length));
+}
+/* 支払方法選択 */
+function selPay(el) {
+  el.parentElement.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+/* POSカート */
+const cart = {};
+function addCart(name, price) {
+  cart[name] = cart[name] || { price, qty: 0 };
+  cart[name].qty++;
+  renderCart();
+}
+function chgQty(name, d) {
+  cart[name].qty += d;
+  if (cart[name].qty <= 0) delete cart[name];
+  renderCart();
+}
+function renderCart() {
+  const box = document.getElementById('cart-items');
+  const keys = Object.keys(cart);
+  if (!keys.length) { box.innerHTML = '<div class="cart__empty">商品をタップして追加</div>'; document.getElementById('cart-total').textContent = '¥0'; return; }
+  let total = 0;
+  box.innerHTML = keys.map(k => {
+    const it = cart[k]; total += it.price * it.qty;
+    return `<div class="cart-item"><div class="cart-item__name">${k}</div>
+      <div class="stepper"><button class="step-btn" onclick="chgQty('${k}',-1)">−</button>
+      <span class="stepper__qty num">${it.qty}</span>
+      <button class="step-btn" onclick="chgQty('${k}',1)">＋</button></div>
+      <div class="cart-item__amt num">¥${(it.price*it.qty).toLocaleString()}</div></div>`;
+  }).join('');
+  document.getElementById('cart-total').textContent = '¥' + total.toLocaleString();
+}
+/* 成功演出（800msで自動クローズ） */
+function success(text) {
+  document.getElementById('successtext').textContent = text;
+  const ov = document.getElementById('successov');
+  ov.classList.add('active');
+  setTimeout(() => { ov.classList.remove('active'); go('board-ci'); }, 800);
+}
+/* 時計 */
+setInterval(() => {
+  const d = new Date();
+  const w = ['日','月','火','水','木','金','土'][d.getDay()];
+  document.querySelector('.header__clock').textContent =
+    `${d.getMonth()+1}月${d.getDate()}日（${w}） ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}, 1000);
+</script>
+</body>
+</html>
