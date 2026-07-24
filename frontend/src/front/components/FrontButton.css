@@ -1,0 +1,46 @@
+/* フロントモード共通ボタン — 仕様書 §5 / mock .btn */
+.fbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+.fbtn:active { transform: scale(0.98); }
+
+.fbtn--primary { background: var(--accent-blue); color: var(--text-inverse); }
+.fbtn--primary:active { background: var(--accent-blue-hover); }
+.fbtn--secondary { background: var(--bg-card); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+.fbtn--secondary:active { background: var(--accent-blue-soft); }
+.fbtn--danger { background: var(--accent-red); color: var(--text-inverse); }
+
+.fbtn--lg { height: var(--front-target-lg); padding: 0 28px; font-size: 16px; }
+.fbtn--xl { height: var(--front-target-xl); padding: 0 40px; font-size: 18px; min-width: 320px; }
+
+/* 無効時は muted 地（仕様書 §4.3 のブロック状態） */
+.fbtn--disabled {
+  background: var(--text-muted) !important;
+  color: var(--text-inverse) !important;
+  border-color: transparent !important;
+  pointer-events: none;
+}
+
+/* 戻るボタン（44×44円形） */
+.fbtn-back {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-inset);
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+.fbtn-back:active { background: var(--bg-hover); transform: scale(0.94); }

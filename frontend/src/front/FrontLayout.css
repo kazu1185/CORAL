@@ -137,3 +137,9 @@
   margin: 0 auto;
   padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
 }
+
+/* ===== フロントモード時の共通ダイアログ拡大（仕様書 §5: 幅480px・ボタン52px） =====
+   ConfirmDialog はアプリ直下に描画されるが、CSSはグローバルなので body スコープで上書きできる。 */
+body.front-mode .cd__dialog { width: 480px; }
+body.front-mode .cd__btn { min-height: 52px; font-size: 16px; }
+

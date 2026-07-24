@@ -1,22 +1,11 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { OTA_LABELS } from '../utils/constants';
+import OtaBadge from './components/OtaBadge';
 import { useFrontData } from './FrontDataContext';
 import './TodayBoardPage.css';
 
 // 食事区分ラベル（このページ専用なのでローカル定義でよい = 規約 #15 の但し書き）
 const MEAL_LABELS = { breakfast: '朝食付', dinner: '夕食付', two_meals: '朝夕食付' };
-
-// 既存 ota-badge.css に無いチャネルはニュートラルなバッジ＋チャネル名でフォールバック表示する
-// （実データに ikyu 等が存在するため。識別色は既存9チャネルのみ）
-const KNOWN_OTA = new Set(['jalan', 'rakuten', 'booking', 'agoda', 'expedia', 'direct', 'phone', 'walkin', 'corporate']);
-
-function OtaBadge({ channel }) {
-  if (!channel) return null;
-  const label = OTA_LABELS[channel] || channel;
-  const cls = KNOWN_OTA.has(channel) ? `ota-badge ota-${channel}` : 'ota-badge fb__ota--unknown';
-  return <span className={cls}>{label}</span>;
-}
 
 /** 予約カードのメタ行「2名 ・ 3泊 ・ ツイン ・ 朝食付」を組み立てる */
 function metaLine(r, extra) {

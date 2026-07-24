@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import PinChangeDialog from '../components/PinChangeDialog';
 import { FrontDataProvider } from './FrontDataContext';
 import FrontLayout from './FrontLayout';
 import TodayBoardPage from './TodayBoardPage';
+import FrontCheckinPage from './FrontCheckinPage';
 import FrontLoginPinPad from './FrontLoginPinPad';
 import FrontPlaceholder from './FrontPlaceholder';
 
@@ -16,6 +18,12 @@ import FrontPlaceholder from './FrontPlaceholder';
  */
 export default function FrontApp() {
   const { isAuthenticated, staff, logout } = useAuth();
+
+  // フロントモード表示中は body にクラスを付け、共通ダイアログをタブレット用に拡大する（仕様書 §5）
+  useEffect(() => {
+    document.body.classList.add('front-mode');
+    return () => document.body.classList.remove('front-mode');
+  }, []);
 
   if (!isAuthenticated) {
     return <FrontLoginPinPad />;
@@ -38,8 +46,8 @@ export default function FrontApp() {
           <Route index element={<Navigate to="checkin" replace />} />
           <Route path="checkin" element={<TodayBoardPage mode="checkin" />} />
           <Route path="checkout" element={<TodayBoardPage mode="checkout" />} />
-          {/* 詳細画面は Phase 2/3 で実装（現状プレースホルダ） */}
-          <Route path="checkin/:id" element={<FrontPlaceholder title="チェックイン確認" phase={2} back="/front/checkin" />} />
+          {/* CI確認は Phase 2 で実装済み。CO精算は Phase 3。 */}
+          <Route path="checkin/:id" element={<FrontCheckinPage />} />
           <Route path="checkout/:id" element={<FrontPlaceholder title="チェックアウト精算" phase={3} back="/front/checkout" />} />
           {/* 追加機能タブは Phase 4 で実装 */}
           <Route path="pos" element={<FrontPlaceholder title="物販（即売POS）" phase={4} />} />

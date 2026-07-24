@@ -94,9 +94,6 @@
 .fb__action { font-size: 16px; font-weight: 600; color: var(--accent-blue); white-space: nowrap; }
 .fb__status { flex-shrink: 0; }
 
-/* 未知チャネルのフォールバックOTAバッジ（識別色なし・ニュートラル） */
-.fb__ota--unknown { background: var(--text-muted); }
-
 /* ===== 空状態 ===== */
 .fb__empty { text-align: center; padding: 80px 0; color: var(--text-muted); font-size: 16px; }
 .fb__empty-ic { width: 44px; height: 44px; opacity: 0.35; margin-bottom: 14px; }

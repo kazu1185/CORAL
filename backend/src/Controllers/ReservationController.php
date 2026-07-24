@@ -265,19 +265,25 @@ class ReservationController
         $id = (int) $request->params['id'];
 
         // ゲスト名はguestsテーブルから取得し、なければTL原本名をフォールバックとして使用
+        // フロントモードCI/CO確認画面がプラン名・食事区分・ゲスト住所を表示するため、
+        // plans を JOIN し住所カラムも返す（いずれもフィールド追加のみ。PC画面には無害な後方互換拡張）
         $stmt = $db->prepare("
             SELECT
                 r.*,
                 COALESCE(g.name_kanji, g.name_kana, g.name_romaji,
                          TRIM(CONCAT(r.tl_last_name, ' ', r.tl_first_name))) AS guest_name,
                 rt.type_name AS room_type_name,
+                p.plan_name, p.meal_type,
                 g.name_kanji, g.name_kana, g.name_romaji,
                 g.guest_code,
-                g.email AS guest_email, g.phone AS guest_phone,
+                g.email AS guest_email, g.phone AS guest_phone, g.mobile_phone AS guest_mobile,
+                g.postal_code AS guest_postal_code, g.prefecture AS guest_prefecture,
+                g.address_line AS guest_address_line,
                 g.guest_notes, g.visit_count, g.is_vip, g.country_code
             FROM reservations r
             LEFT JOIN guests g ON g.id = r.guest_id
             LEFT JOIN room_types rt ON rt.type_code = r.room_type
+            LEFT JOIN plans p ON p.id = r.plan_id
             WHERE r.id = :id
         ");
         $stmt->execute(['id' => $id]);

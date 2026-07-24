@@ -1,0 +1,2 @@
+/* 未知チャネルのフォールバックOTAバッジ（識別色なし・ニュートラル） */
+.fota--unknown { background: var(--text-muted); }
