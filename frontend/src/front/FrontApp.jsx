@@ -6,6 +6,7 @@ import { FrontDataProvider } from './FrontDataContext';
 import FrontLayout from './FrontLayout';
 import TodayBoardPage from './TodayBoardPage';
 import FrontCheckinPage from './FrontCheckinPage';
+import FrontCheckoutPage from './FrontCheckoutPage';
 import FrontLoginPinPad from './FrontLoginPinPad';
 import FrontPlaceholder from './FrontPlaceholder';
 
@@ -46,9 +47,9 @@ export default function FrontApp() {
           <Route index element={<Navigate to="checkin" replace />} />
           <Route path="checkin" element={<TodayBoardPage mode="checkin" />} />
           <Route path="checkout" element={<TodayBoardPage mode="checkout" />} />
-          {/* CI確認は Phase 2 で実装済み。CO精算は Phase 3。 */}
+          {/* CI確認(Phase 2)・CO精算(Phase 3)。 */}
           <Route path="checkin/:id" element={<FrontCheckinPage />} />
-          <Route path="checkout/:id" element={<FrontPlaceholder title="チェックアウト精算" phase={3} back="/front/checkout" />} />
+          <Route path="checkout/:id" element={<FrontCheckoutPage />} />
           {/* 追加機能タブは Phase 4 で実装 */}
           <Route path="pos" element={<FrontPlaceholder title="物販（即売POS）" phase={4} />} />
           <Route path="rooms" element={<FrontPlaceholder title="部屋状況" phase={4} />} />

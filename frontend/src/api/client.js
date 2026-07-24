@@ -132,6 +132,32 @@ export async function apiDownload(path, filename) {
   URL.revokeObjectURL(url);
 }
 
+/**
+ * PDFなどのバイナリを Blob として取得する（ダウンロードは発火しない）。
+ * フロントモードのアプリ内PDFプレビュー（iframe表示＋印刷）で使用する。
+ * iPad standalone PWA では <a download> がトラップになりやすいため、
+ * 呼び出し側で objectURL を作って画面内の iframe に表示する用途。
+ * objectURL の解放（URL.revokeObjectURL）は呼び出し側の責務。
+ */
+export async function apiFetchBlob(path) {
+  const token = localStorage.getItem('pms_token');
+  const response = await fetch(`${API_BASE}${path}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+
+  if (response.status === 401) {
+    localStorage.removeItem('pms_token');
+    localStorage.removeItem('pms_staff');
+    if (logoutCallback) logoutCallback();
+    throw new ApiError('セッションが切れました。再ログインしてください', 401);
+  }
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(data.error || 'ファイルの取得に失敗しました', response.status);
+  }
+  return response.blob();
+}
+
 // 便利メソッド
 export const api = {
   get: (path) => apiRequest(path),
@@ -141,4 +167,5 @@ export const api = {
   delete: (path) => apiRequest(path, { method: 'DELETE' }),
   upload: (path, formData) => apiUpload(path, formData),
   download: (path, filename) => apiDownload(path, filename),
+  fetchBlob: (path) => apiFetchBlob(path),
 };

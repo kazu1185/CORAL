@@ -1,0 +1,88 @@
+/* ============================================================
+   チェックアウト精算 — 仕様書 §4.4 / mock #view-co-detail
+   （2ペイン骨格は FrontDetail.css を共用。ここは精算固有のみ）
+   ============================================================ */
+
+/* ===== 明細行 ===== */
+.fco__row {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 14px;
+}
+.fco__row:last-of-type { border-bottom: none; }
+.fco__date { width: 52px; flex-shrink: 0; font-size: 13px; color: var(--text-muted); }
+.fco__desc { flex: 1; font-size: 16px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.fco__lock { font-size: 12px; color: var(--text-muted); }
+.fco__amt { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+
+.fd__card-foot { font-size: 13px; color: var(--text-muted); margin-top: 12px; }
+
+/* ===== 精算サマリー ===== */
+.fco__summary {
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.fco__summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  padding: 5px 0;
+  color: var(--text-secondary);
+}
+.fco__summary-row b { color: var(--text-primary); font-weight: 500; }
+.fco__due {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-top: 1px solid var(--border-default);
+  margin-top: 10px;
+  padding-top: 12px;
+}
+.fco__due-label { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+.fco__due-amt { font-size: var(--front-font-hero); font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
+.fco__due-amt--paid { color: var(--accent-green); font-size: 24px; }
+
+/* ===== 入金登録 ===== */
+.fco__pay { margin-bottom: 14px; }
+.fco__paygrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.fco__paybtn {
+  height: var(--front-target-lg);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+.fco__paybtn:active { transform: scale(0.98); }
+.fco__paybtn.is-selected {
+  background: var(--accent-blue-soft);
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
+  font-weight: 700;
+}
+.fco__payamount {
+  width: 100%;
+  height: var(--front-target-lg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-size: 20px;
+  text-align: right;
+  padding: 0 18px;
+  margin-bottom: 14px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+.fco__payamount:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-ring);
+}
+
+.fco__fullbtn { width: 100%; }
+.fco__receipt { margin-top: 4px; }

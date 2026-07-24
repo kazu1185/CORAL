@@ -3,24 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api, ApiError } from '../api/client';
 import { useConfirm } from '../components/ConfirmDialog';
 import { useFrontData } from './FrontDataContext';
+import { calcMoney, yen } from './money';
 import OtaBadge from './components/OtaBadge';
 import { FrontButton, FrontBackButton } from './components/FrontButton';
 import SuccessOverlay from './components/SuccessOverlay';
 import './FrontDetail.css';
 
 const MEAL_LABELS = { breakfast: '朝食付', dinner: '夕食付', two_meals: '朝夕食付' };
-const yen = (n) => `¥${Number(n || 0).toLocaleString()}`;
-
-// 明細から 合計/入金済み/残額 を算出（front-board の unpaid_amount と同じ定義）
-function calcMoney(charges = []) {
-  let total = 0, paid = 0;
-  for (const c of charges) {
-    if (c.status !== 'active') continue;
-    if (c.charge_type === 'payment') paid += Number(c.amount) || 0;
-    else if (c.charge_type !== 'refund') total += Number(c.amount) || 0;
-  }
-  return { total, paid, due: total - paid };
-}
 
 /**
  * チェックイン確認画面 — 仕様書 §4.3 / mock #view-ci-detail

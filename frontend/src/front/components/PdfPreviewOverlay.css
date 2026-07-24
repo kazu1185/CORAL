@@ -1,0 +1,29 @@
+/* アプリ内PDFプレビュー — 仕様書 §4.4 */
+.fpdf {
+  position: fixed;
+  inset: 0;
+  z-index: 210;
+  background: var(--bg-main);
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.fpdf__bar {
+  height: 64px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+}
+.fpdf__title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.fpdf__spacer { flex: 1; }
+.fpdf__frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: var(--bg-inset);
+}
